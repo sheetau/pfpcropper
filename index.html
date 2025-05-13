@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Square Image Cropper</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Arial", "Helvetica", "Meiryo", sans-serif;
+        background-color: black;
+        color: white;
+        padding: 2rem;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      main {
+        width: 52rem;
+      }
+      h1 {
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      h1:hover {
+        opacity: 0.75;
+      }
+      .byline {
+        margin-bottom: 3rem;
+        opacity: 0.5;
+      }
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      .cropper-area {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        border: 2px dashed rgba(255, 255, 255, 0.25);
+        border-radius: 0;
+        overflow: hidden;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border 0.2s;
+      }
+      .cropper-area.has-image {
+        cursor: move;
+      }
+      .side {
+        border-left: 1px solid rgba(255, 255, 255, 0.25);
+        padding-left: 1.25rem;
+        margin-left: 1.25rem;
+        flex: 1;
+        width: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        opacity: 1;
+        opacity: 0.1;
+        pointer-events: none;
+      }
+      #upload-prompt {
+        text-align: center;
+      }
+      #preview-image {
+        position: absolute;
+        display: none;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+      .info {
+        width: 100%;
+      }
+      #file-name {
+        font-size: 1rem;
+        width: 100%;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        word-break: break-all;
+        margin-bottom: 1rem;
+      }
+      #description {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1rem;
+      }
+      #description p {
+        border-bottom: solid 1px rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .social-icons {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+      }
+
+      .discord {
+        width: 4.25rem;
+        height: 4.25rem;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.1);
+        position: relative;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .online {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: calc(4.25rem / (10 / 3));
+        height: calc(4.25rem / (10 / 3));
+        border-radius: 50%;
+        background-color: rgb(67, 162, 90);
+        box-shadow: 0 0 0 0.4rem black;
+      }
+      .discord-server {
+        width: 4.25rem;
+        height: 4.25rem;
+        border-radius: 20%;
+        background-color: rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .insta-ring {
+        margin-top: -0.375rem;
+        width: 5rem;
+        height: 5rem;
+        padding: 0.2rem;
+        background: conic-gradient(#d300c5, #ffca00, #d300c5);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: rotate(45deg);
+      }
+
+      .insta-ring > .inner {
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .insta {
+        width: 4.25rem;
+        height: 4.25rem;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: rotate(-45deg);
+        transition: opacity 0.2s;
+        cursor: pointer;
+      }
+      .discord-message {
+        display: flex;
+        font-size: 0.9rem;
+      }
+      .discord2 {
+        width: 2.8rem;
+        height: 2.8rem;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .discord:hover,
+      .discord2:hover,
+      .discord-server:hover,
+      .insta:hover {
+        opacity: 0.75;
+      }
+      .message {
+        padding: 0 0 0 1rem;
+        line-height: 1.4rem;
+      }
+      .discord-name {
+        font-weight: bold;
+      }
+      .discord-time {
+        opacity: 0.5;
+        font-size: 0.7rem;
+        margin-left: 0.5rem;
+      }
+
+      .control {
+        margin-bottom: 0.5rem;
+        width: 100%;
+        font-size: 0.9rem;
+        -webkit-user-select: none; /* Safari */
+        -ms-user-select: none; /* IE 10 and IE 11 */
+        user-select: none; /* Standard syntax */
+      }
+      label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.1rem;
+      }
+      .zoom-percent,
+      .prev-percent {
+        opacity: 0.25;
+      }
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        background: linear-gradient(
+          to right,
+          rgba(255, 255, 255, 0.25) 0%,
+          rgba(255, 255, 255, 0.25) 0%,
+          rgba(255, 255, 255, 0.1) 0%,
+          rgba(255, 255, 255, 0.1) 100%
+        );
+        height: 0.5rem;
+        outline: none;
+        border-radius: 0.25rem;
+        margin-bottom: 1rem;
+        cursor: pointer;
+      }
+
+      /* WebKit (Chrome, Safari) */
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 1rem;
+        height: 0.5rem;
+        border-top-left-radius: 25% 50%;
+        border-top-right-radius: 25% 50%;
+        border-bottom-right-radius: 25% 50%;
+        border-bottom-left-radius: 25% 50%;
+        background: white;
+      }
+
+      /* Firefox */
+      input[type="range"]::-moz-range-thumb {
+        width: 1rem;
+        height: 0.5rem;
+        border-radius: 25% / 50%;
+        background: white;
+        border: none;
+      }
+      @supports (-moz-appearance: none) {
+        input[type="range"] {
+          margin-top: 0.3rem;
+          margin-bottom: 0.75rem;
+        }
+        #download-btn {
+          width: 72% !important;
+        }
+        #new-file-btn {
+          width: 25% !important;
+        }
+      }
+
+      .buttons {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+      }
+      #download-btn {
+        background-color: white;
+        width: 70%;
+        height: 2.3rem;
+        color: black;
+        border: none;
+        padding-left: 0.8rem;
+        justify-content: center;
+        font-size: 0.9rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        transition: opacity 0.3s;
+        text-align: left;
+      }
+      #new-file-btn {
+        color: white;
+        width: 27%;
+        height: 2.3rem;
+        background-color: black;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        padding-left: 0.8rem;
+        justify-content: center;
+        font-size: 0.9rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        text-align: left;
+      }
+      button:hover {
+        opacity: 0.5;
+      }
+      #file-input {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1 id="page-title">Square Image Cropper for Social Media Profile Icon</h1>
+      <p class="byline">by sheeta</p>
+
+      <div class="container">
+        <div id="cropper" class="cropper-area">
+          <p id="upload-prompt">Drop or click to upload image</p>
+          <img id="preview-image" alt="Preview" />
+        </div>
+
+        <div class="side">
+          <div class="info">
+            <p id="file-name">...</p>
+            <div id="description">
+              <p><span>Dimensions</span><span id="dimensions"></span></p>
+              <p><span>Size</span><span id="size"></span></p>
+              <p><span>Crop dimensions</span><span id="c-dimensions"></span></p>
+              <p><span>Crop position</span><span id="c-position"></span></p>
+              <p><span>Crop size</span><span id="c-size"></span></p>
+            </div>
+          </div>
+
+          <div class="icon-preview">
+            <div class="social-icons">
+              <div class="discord"><div class="online"></div></div>
+              <div class="discord-server"></div>
+              <div class="insta-ring">
+                <div class="inner"><div class="insta"></div></div>
+              </div>
+            </div>
+            <div class="discord-message">
+              <div class="discord2"></div>
+              <div class="message">
+                <span class="discord-name">Phibi</span><span class="discord-time">Today at 05:15 PM</span>
+                <p>Waiting for the day when</p>
+                <p>Compact mode would be turned on</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="control">
+              <label for="zoom-range"><span>Zoom</span><span class="zoom-percent"></span></label>
+              <input type="range" id="zoom-range" min="100" max="1000" value="100" disabled />
+              <label for="prev-radius"><span>Preview radius</span><span class="prev-percent"></span></label>
+              <input type="range" id="prev-radius" min="0" max="50" value="50" disabled />
+            </div>
+
+            <div class="buttons">
+              <button id="download-btn" disabled>Download</button>
+              <button id="new-file-btn">New file</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <input type="file" id="file-input" accept="image/*" />
+
+    <script>
+      const cropperArea = document.getElementById("cropper");
+      const previewImage = document.getElementById("preview-image");
+      const uploadPrompt = document.getElementById("upload-prompt");
+      const fileInput = document.getElementById("file-input");
+      const fileName = document.getElementById("file-name");
+      const zoomRange = document.getElementById("zoom-range");
+      const prevRange = document.getElementById("prev-radius");
+      const downloadBtn = document.getElementById("download-btn");
+      const newFileBtn = document.getElementById("new-file-btn");
+      const sideEl = document.querySelector(".side");
+      const zoomPer = document.querySelector(".zoom-percent");
+      const prevPer = document.querySelector(".prev-percent");
+      const dimentsions = document.getElementById("dimensions");
+      const size = document.getElementById("size");
+      const cDimentsions = document.getElementById("c-dimensions");
+      const cPosition = document.getElementById("c-position");
+      const cSize = document.getElementById("c-size");
+
+      const discord = document.querySelector(".discord");
+      const discord2 = document.querySelector(".discord2");
+      const discordServer = document.querySelector(".discord-server");
+      const insta = document.querySelector(".insta");
+
+      let savedRadius = localStorage.getItem("cropperRadius") || "50";
+      prevPer.textContent = `${savedRadius}%`;
+      prevRange.value = savedRadius;
+
+      let imageName = "";
+      zoomPer.textContent = `${zoomRange.value}%`;
+      prevPer.textContent = `${prevRange.value}%`;
+
+      let isDragging = false;
+      let startX, startY, startLeft, startTop;
+      let currentImage = null;
+
+      zoomRange.oninput = function () {
+        var value = ((this.value - this.min) / (this.max - this.min)) * 100;
+        this.style.background =
+          "linear-gradient(to right, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.25) " +
+          value +
+          "%, rgba(255, 255, 255, 0.1) " +
+          value +
+          "%, rgba(255, 255, 255, 0.1) 100%)";
+      };
+      prevRange.oninput = function () {
+        var value = ((this.value - this.min) / (this.max - this.min)) * 100;
+        this.style.background =
+          "linear-gradient(to right, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.25) " +
+          value +
+          "%, rgba(255, 255, 255, 0.1) " +
+          value +
+          "%, rgba(255, 255, 255, 0.1) 100%)";
+      };
+      prevRange.oninput();
+
+      // ドラッグ&ドロップ処理
+      cropperArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        cropperArea.style.border = "2px dashed rgba(255, 255, 255, 1)";
+      });
+
+      cropperArea.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (cropperArea.classList.contains("has-image")) {
+          cropperArea.style.border = "2px dashed rgba(255, 255, 255, 0)";
+        } else {
+          cropperArea.style.border = "2px dashed rgba(255, 255, 255, 0.25)";
+        }
+      });
+
+      cropperArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (cropperArea.classList.contains("has-image")) {
+          cropperArea.style.border = "2px dashed rgba(255, 255, 255, 0)";
+        } else {
+          cropperArea.style.border = "2px dashed rgba(255, 255, 255, 0.25)";
+        }
+
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      // クリックでファイル選択
+      cropperArea.addEventListener("click", (e) => {
+        if (!cropperArea.classList.contains("has-image")) {
+          fileInput.click();
+        }
+      });
+
+      fileInput.addEventListener("change", (e) => {
+        if (fileInput.files && fileInput.files[0]) {
+          handleFile(fileInput.files[0]);
+        }
+      });
+
+      // Image drag handling
+      cropperArea.addEventListener("mousedown", (e) => {
+        if (!cropperArea.classList.contains("has-image")) return;
+
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = parseInt(window.getComputedStyle(previewImage).left);
+        startTop = parseInt(window.getComputedStyle(previewImage).top);
+
+        e.preventDefault();
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        const newLeft = startLeft + deltaX;
+        const newTop = startTop + deltaY;
+
+        // Ensure the image always covers the cropper area
+        const currentZoom = parseInt(zoomRange.value) / 100;
+        const imageWidth = parseFloat(previewImage.style.width);
+        const imageHeight = parseFloat(previewImage.style.height);
+
+        // Calculate boundaries to ensure the image always covers the cropper
+        const minLeft = Math.min(0, cropperArea.offsetWidth - imageWidth);
+        const maxLeft = 0;
+        const minTop = Math.min(0, cropperArea.offsetHeight - imageHeight);
+        const maxTop = 0;
+
+        const boundedLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
+        const boundedTop = Math.max(minTop, Math.min(maxTop, newTop));
+
+        previewImage.style.left = boundedLeft + "px";
+        previewImage.style.top = boundedTop + "px";
+
+        syncPreviews();
+      });
+
+      document.addEventListener("mouseup", () => {
+        isDragging = false;
+      });
+
+      // Wheel zoom
+      cropperArea.addEventListener("wheel", (e) => {
+        if (!cropperArea.classList.contains("has-image")) return;
+
+        e.preventDefault();
+
+        // Calculate zoom change
+        const delta = e.deltaY > 0 ? -20 : 20;
+        const newZoom = Math.max(100, Math.min(1000, parseInt(zoomRange.value) + delta));
+        zoomRange.value = newZoom;
+
+        // Get mouse position relative to the cropper
+        const rect = cropperArea.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        // Update zoom with cursor as center point
+        updateZoom(mouseX, mouseY);
+        syncPreviews();
+        zoomPer.textContent = `${zoomRange.value}%`;
+        zoomRange.oninput();
+      });
+
+      // Zoom slider
+      zoomRange.addEventListener("input", () => {
+        // Use the center of the cropper as the zoom point
+        updateZoom(cropperArea.offsetWidth / 2, cropperArea.offsetHeight / 2);
+        syncPreviews();
+        zoomPer.textContent = `${zoomRange.value}%`;
+      });
+      prevRange.addEventListener("input", () => {
+        cropperArea.style.borderRadius = `${prevRange.value}%`;
+        prevPer.textContent = `${prevRange.value}%`;
+        savedRadius = prevRange.value;
+        localStorage.setItem("cropperRadius", prevRange.value);
+      });
+
+      // title click
+      document.getElementById("page-title").addEventListener("click", () => {
+        location.reload();
+      });
+
+      // icon clicks
+      function setCropperRadius(element, radius) {
+        element.addEventListener("click", () => {
+          cropperArea.style.borderRadius = `${radius}%`;
+          prevPer.textContent = `${radius}%`;
+          prevRange.value = radius;
+          prevRange.oninput();
+          savedRadius = prevRange.value;
+          localStorage.setItem("cropperRadius", radius);
+        });
+      }
+      setCropperRadius(discordServer, 20);
+      setCropperRadius(discord, 50);
+      setCropperRadius(discord2, 50);
+      setCropperRadius(insta, 50);
+
+      // new file button
+      newFileBtn.addEventListener("click", () => {
+        fileInput.click();
+      });
+
+      // Download button
+      downloadBtn.addEventListener("click", () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Get the current view state
+        const displayedWidth = parseFloat(previewImage.style.width);
+        const displayedHeight = parseFloat(previewImage.style.height);
+        const left = parseFloat(previewImage.style.left);
+        const top = parseFloat(previewImage.style.top);
+
+        // Calculate the scale between original image and displayed image
+        const scaleX = currentImage.width / displayedWidth;
+        const scaleY = currentImage.height / displayedHeight;
+
+        // Cropper area size (in CSS pixels)
+        const cropperWidth = cropperArea.offsetWidth;
+        const cropperHeight = cropperArea.offsetHeight;
+
+        // Calculate source rectangle (area in the original image)
+        const sourceX = -left * scaleX;
+        const sourceY = -top * scaleY;
+        const sourceWidth = cropperWidth * scaleX;
+        const sourceHeight = cropperHeight * scaleY;
+
+        // ✅ Set canvas size to match source area in original image resolution
+        canvas.width = Math.round(sourceWidth);
+        canvas.height = Math.round(sourceHeight);
+
+        // ✅ Draw with 1:1 scale (original resolution)
+        ctx.drawImage(currentImage, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+
+        // Download
+        const link = document.createElement("a");
+        const now = new Date();
+        const timestamp = `${now.getFullYear().toString().slice(2)}${(now.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}${now.getDate().toString().padStart(2, "0")}${now
+          .getHours()
+          .toString()
+          .padStart(2, "0")}${now.getMinutes().toString().padStart(2, "0")}${now
+          .getSeconds()
+          .toString()
+          .padStart(2, "0")}`;
+
+        const isPNG = currentImage.src.startsWith("data:image/png");
+        const extension = isPNG ? "png" : "jpg";
+        const mimeType = isPNG ? "image/png" : "image/jpeg";
+
+        link.download = `${imageName.replace(/\.[^/.]+$/, "")}-cropped-${timestamp}.${extension}`;
+        link.href = canvas.toDataURL(mimeType);
+        link.click();
+      });
+
+      function handleFile(file) {
+        if (!file.type.match("image.*")) {
+          alert("please select image file.");
+          return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            currentImage = img;
+            displayImage(img);
+          };
+          img.src = e.target.result;
+        };
+
+        reader.readAsDataURL(file);
+        fileName.textContent = file.name;
+        imageName = file.name;
+        if (file.size >= 1024 * 1024) {
+          size.textContent = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+        } else {
+          size.textContent = `${(file.size / 1024).toFixed(2)} KB`;
+        }
+      }
+
+      function displayImage(img) {
+        // クロッパーエリアの状態を更新
+        uploadPrompt.style.display = "none";
+        cropperArea.classList.add("has-image");
+        cropperArea.style.border = "2px dashed rgba(255, 255, 255, 0)";
+        previewImage.style.display = "block";
+        sideEl.style.opacity = "1";
+        sideEl.style.pointerEvents = "auto";
+        dimentsions.textContent = `${img.width} × ${img.height}`;
+
+        prevPer.textContent = `${savedRadius}%`;
+        cropperArea.style.borderRadius = `${savedRadius}%`;
+        prevRange.value = savedRadius;
+
+        // ボタンとスライダーを有効化
+        downloadBtn.disabled = false;
+        zoomRange.disabled = false;
+        prevRange.disabled = false;
+
+        // 画像のサイズ計算（cover効果）
+        const containerRatio = cropperArea.offsetWidth / cropperArea.offsetHeight;
+        const imageRatio = img.width / img.height;
+
+        let width, height;
+
+        if (imageRatio > containerRatio) {
+          // 横長画像
+          height = cropperArea.offsetHeight;
+          width = height * imageRatio;
+        } else {
+          // 縦長画像
+          width = cropperArea.offsetWidth;
+          height = width / imageRatio;
+        }
+
+        // 初期表示位置（中央）
+        const left = (cropperArea.offsetWidth - width) / 2;
+        const top = (cropperArea.offsetHeight - height) / 2;
+
+        previewImage.style.width = width + "px";
+        previewImage.style.height = height + "px";
+        previewImage.style.left = left + "px";
+        previewImage.style.top = top + "px";
+        previewImage.src = img.src;
+
+        // ズームをリセット
+        zoomRange.value = 100;
+        zoomPer.textContent = `${zoomRange.value}%`;
+        zoomRange.oninput();
+
+        updateZoom(cropperArea.offsetWidth / 2, cropperArea.offsetHeight / 2);
+        syncPreviews();
+      }
+
+      function updateZoom(centerX, centerY) {
+        if (!currentImage) return;
+
+        const zoom = parseInt(zoomRange.value) / 100;
+
+        // Calculate base size (cover effect)
+        const containerRatio = cropperArea.offsetWidth / cropperArea.offsetHeight;
+        const imageRatio = currentImage.width / currentImage.height;
+
+        let baseWidth, baseHeight;
+
+        if (imageRatio > containerRatio) {
+          baseHeight = cropperArea.offsetHeight;
+          baseWidth = baseHeight * imageRatio;
+        } else {
+          baseWidth = cropperArea.offsetWidth;
+          baseHeight = baseWidth / imageRatio;
+        }
+
+        // Calculate new size
+        const newWidth = baseWidth * zoom;
+        const newHeight = baseHeight * zoom;
+
+        // Get current image position and dimensions
+        const oldWidth = parseFloat(previewImage.style.width);
+        const oldHeight = parseFloat(previewImage.style.height);
+        const oldLeft = parseFloat(previewImage.style.left);
+        const oldTop = parseFloat(previewImage.style.top);
+
+        let newLeft, newTop;
+
+        if (centerX !== undefined && centerY !== undefined) {
+          // Calculate zoom from the specified center point
+          const relativeX = (centerX - oldLeft) / oldWidth;
+          const relativeY = (centerY - oldTop) / oldHeight;
+
+          newLeft = centerX - relativeX * newWidth;
+          newTop = centerY - relativeY * newHeight;
+        } else {
+          // Default: maintain the center of the image
+          const centerPointX = oldLeft + oldWidth / 2;
+          const centerPointY = oldTop + oldHeight / 2;
+
+          newLeft = centerPointX - newWidth / 2;
+          newTop = centerPointY - newHeight / 2;
+        }
+
+        // Apply constraints to ensure the image always covers the cropper
+        const minLeft = Math.min(0, cropperArea.offsetWidth - newWidth);
+        const maxLeft = 0;
+        const minTop = Math.min(0, cropperArea.offsetHeight - newHeight);
+        const maxTop = 0;
+
+        const boundedLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
+        const boundedTop = Math.max(minTop, Math.min(maxTop, newTop));
+
+        // Apply changes
+        previewImage.style.width = newWidth + "px";
+        previewImage.style.height = newHeight + "px";
+        previewImage.style.left = boundedLeft + "px";
+        previewImage.style.top = boundedTop + "px";
+
+        const visibleWidth = cropperArea.offsetWidth * (currentImage.width / newWidth);
+        const visibleHeight = cropperArea.offsetHeight * (currentImage.height / newHeight);
+        cDimentsions.textContent = `${Math.round(visibleWidth)} × ${Math.round(visibleHeight)}`;
+
+        // Blob サイズを計算して表示
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // 現在の表示領域のスケールで描画サイズを設定
+        canvas.width = Math.round(currentImage.width * (cropperArea.offsetWidth / newWidth));
+        canvas.height = Math.round(currentImage.height * (cropperArea.offsetHeight / newHeight));
+
+        const sx = -parseFloat(previewImage.style.left) * (currentImage.width / newWidth);
+        const sy = -parseFloat(previewImage.style.top) * (currentImage.height / newHeight);
+        const sw = canvas.width;
+        const sh = canvas.height;
+
+        ctx.drawImage(currentImage, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              requestAnimationFrame(() => {
+                const sizeInBytes = blob.size;
+                const sizeText =
+                  sizeInBytes >= 1024 * 1024
+                    ? `${(sizeInBytes / (1024 * 1024)).toFixed(2)} MB`
+                    : `${(sizeInBytes / 1024).toFixed(2)} KB`;
+                cSize.textContent = sizeText;
+              });
+            } else {
+              cSize.textContent = "N/A";
+            }
+          },
+          currentImage.src.startsWith("data:image/png") ? "image/png" : "image/jpeg"
+        );
+      }
+
+      let syncRequested = false;
+
+      function syncPreviews() {
+        if (syncRequested) return;
+        syncRequested = true;
+
+        requestAnimationFrame(() => {
+          syncRequested = false;
+
+          const displayedWidth = parseFloat(previewImage.style.width);
+          const displayedHeight = parseFloat(previewImage.style.height);
+          const left = parseFloat(previewImage.style.left);
+          const top = parseFloat(previewImage.style.top);
+
+          const cropperAreaRect = cropperArea.getBoundingClientRect();
+          const cropperWidth = cropperAreaRect.width;
+          const cropperHeight = cropperAreaRect.height;
+
+          const previewTargets = [discord, discord2, discordServer, insta];
+
+          for (let i = 0; i < previewTargets.length; i++) {
+            const target = previewTargets[i];
+
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            const fixedResolution = 300;
+            canvas.width = fixedResolution;
+            canvas.height = fixedResolution;
+
+            const targetRect = target.getBoundingClientRect();
+
+            const scaleX = targetRect.width / cropperWidth;
+            const scaleY = targetRect.height / cropperHeight;
+            const scale = Math.min(scaleX, scaleY);
+
+            const scaledWidth = displayedWidth * scale;
+            const scaledHeight = displayedHeight * scale;
+            const scaledLeft = left * scale;
+            const scaledTop = top * scale;
+
+            // 計算上のスケールで表示する位置・サイズを固定解像度内に再描画
+            ctx.drawImage(
+              currentImage,
+              // ソース画像のどこから切り取るか（表示範囲に合わせる）
+              (left / displayedWidth) * currentImage.naturalWidth * -1,
+              (top / displayedHeight) * currentImage.naturalHeight * -1,
+              (cropperWidth / displayedWidth) * currentImage.naturalWidth,
+              (cropperHeight / displayedHeight) * currentImage.naturalHeight,
+              // 描画先：固定解像度での全体表示
+              0,
+              0,
+              fixedResolution,
+              fixedResolution
+            );
+
+            // canvas から dataURL を取得して背景に設定
+            target.style.backgroundImage = `url(${canvas.toDataURL()})`;
+            target.style.backgroundSize = `100% 100%`;
+            target.style.backgroundPosition = `center`;
+            target.style.backgroundRepeat = "no-repeat";
+          }
+
+          cPosition.textContent = `${Math.round(Math.abs((left / displayedWidth) * currentImage.width))}, ${Math.round(
+            Math.abs((top / displayedHeight) * currentImage.height)
+          )}`;
+        });
+      }
+    </script>
+  </body>
+</html>
