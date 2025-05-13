@@ -322,6 +322,7 @@
         main {
           max-width: 300px;
           width: 100%;
+          margin-bottom: 3rem;
         }
         .container {
           flex-direction: column;
@@ -569,6 +570,102 @@
 
       document.addEventListener("mouseup", () => {
         isDragging = false;
+      });
+
+      let lastTouchDistance = null;
+
+      // Touch start: drag or pinch
+      cropperArea.addEventListener(
+        "touchstart",
+        (e) => {
+          if (!cropperArea.contains(e.target)) return;
+          if (!cropperArea.classList.contains("has-image")) return;
+
+          if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            isDragging = true;
+            startX = touch.clientX;
+            startY = touch.clientY;
+            startLeft = parseInt(window.getComputedStyle(previewImage).left);
+            startTop = parseInt(window.getComputedStyle(previewImage).top);
+          } else if (e.touches.length === 2) {
+            lastTouchDistance = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+          }
+
+          e.preventDefault();
+        },
+        { passive: false }
+      );
+
+      // Touch move: drag or pinch zoom
+      document.addEventListener(
+        "touchmove",
+        (e) => {
+          if (!cropperArea.contains(e.target)) return;
+          if (!cropperArea.classList.contains("has-image")) return;
+
+          if (e.touches.length === 1 && isDragging) {
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - startX;
+            const deltaY = touch.clientY - startY;
+
+            const newLeft = startLeft + deltaX;
+            const newTop = startTop + deltaY;
+
+            const imageWidth = parseFloat(previewImage.style.width);
+            const imageHeight = parseFloat(previewImage.style.height);
+
+            const minLeft = Math.min(0, cropperArea.offsetWidth - imageWidth);
+            const maxLeft = 0;
+            const minTop = Math.min(0, cropperArea.offsetHeight - imageHeight);
+            const maxTop = 0;
+
+            const boundedLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
+            const boundedTop = Math.max(minTop, Math.min(maxTop, newTop));
+
+            previewImage.style.left = boundedLeft + "px";
+            previewImage.style.top = boundedTop + "px";
+
+            syncPreviews();
+          } else if (e.touches.length === 2) {
+            const currentDistance = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+
+            if (lastTouchDistance !== null) {
+              const delta = currentDistance - lastTouchDistance;
+
+              if (Math.abs(delta) > 2) {
+                const rect = cropperArea.getBoundingClientRect();
+                const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+                const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+
+                const currentZoom = parseInt(zoomRange.value);
+                const newZoom = Math.max(100, Math.min(1000, currentZoom + delta));
+                zoomRange.value = newZoom;
+
+                updateZoom(centerX, centerY);
+                syncPreviews();
+                zoomPer.textContent = `${zoomRange.value}%`;
+                zoomRange.oninput();
+              }
+            }
+
+            lastTouchDistance = currentDistance;
+          }
+
+          e.preventDefault();
+        },
+        { passive: false }
+      );
+
+      document.addEventListener("touchend", () => {
+        isDragging = false;
+        lastTouchDistance = null;
       });
 
       // Wheel zoom
