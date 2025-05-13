@@ -1,3 +1,5 @@
+![preview.png](preview.png)
+
 # Square Image Cropper for Social Media Profile Icon
 This website is designed for cropping images into a square for social media profile icons. While there are several websites that allow you to crop images into a square, I created this site because I wanted to see how the icon would actually look when set as a profile picture after cropping.
 You can adjust the position and zoom level by dragging and using the mouse wheel while checking the icon preview on the right side. The preview icons are for Discord (with online indicator), Discord server, Instagram, and Discord message.
