@@ -38,6 +38,10 @@
       }
       .byline a {
         color: white;
+        transition: opacity 0.2s;
+      }
+      .byline a:hover {
+        opacity: 0.75;
       }
       .container {
         display: flex;
@@ -390,11 +394,13 @@
       const cPosition = document.getElementById("c-position");
       const cSize = document.getElementById("c-size");
 
+      // preview icons
       const discord = document.querySelector(".discord");
       const discord2 = document.querySelector(".discord2");
       const discordServer = document.querySelector(".discord-server");
       const insta = document.querySelector(".insta");
 
+      // cropperArea border radius
       let savedRadius = localStorage.getItem("cropperRadius") || "50";
       prevPer.textContent = `${savedRadius}%`;
       prevRange.value = savedRadius;
@@ -407,6 +413,7 @@
       let startX, startY, startLeft, startTop;
       let currentImage = null;
 
+      // slider background color style
       zoomRange.oninput = function () {
         var value = ((this.value - this.min) / (this.max - this.min)) * 100;
         this.style.background =
@@ -427,13 +434,14 @@
       };
       prevRange.oninput();
 
-      // ドラッグ&ドロップ処理
+      // cropperArea drag over
       cropperArea.addEventListener("dragover", (e) => {
         e.preventDefault();
         e.stopPropagation();
         cropperArea.style.border = "2px dashed rgba(255, 255, 255, 1)";
       });
 
+      // cropperArea drag leave
       cropperArea.addEventListener("dragleave", (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -444,6 +452,7 @@
         }
       });
 
+      // cropperArea drop
       cropperArea.addEventListener("drop", (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -458,7 +467,7 @@
         }
       });
 
-      // クリックでファイル選択
+      // cropperArea click
       cropperArea.addEventListener("click", (e) => {
         if (!cropperArea.classList.contains("has-image")) {
           fileInput.click();
@@ -605,11 +614,11 @@
         const sourceWidth = cropperWidth * scaleX;
         const sourceHeight = cropperHeight * scaleY;
 
-        // ✅ Set canvas size to match source area in original image resolution
+        // Set canvas size to match source area in original image resolution
         canvas.width = Math.round(sourceWidth);
         canvas.height = Math.round(sourceHeight);
 
-        // ✅ Draw with 1:1 scale (original resolution)
+        // Draw with 1:1 scale (original resolution)
         ctx.drawImage(currentImage, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
 
         // Download
@@ -662,7 +671,7 @@
       }
 
       function displayImage(img) {
-        // クロッパーエリアの状態を更新
+        // update style
         uploadPrompt.style.display = "none";
         cropperArea.classList.add("has-image");
         cropperArea.style.border = "2px dashed rgba(255, 255, 255, 0)";
@@ -675,28 +684,28 @@
         cropperArea.style.borderRadius = `${savedRadius}%`;
         prevRange.value = savedRadius;
 
-        // ボタンとスライダーを有効化
+        // enable download button and slider
         downloadBtn.disabled = false;
         zoomRange.disabled = false;
         prevRange.disabled = false;
 
-        // 画像のサイズ計算（cover効果）
+        // calculate image ratio
         const containerRatio = cropperArea.offsetWidth / cropperArea.offsetHeight;
         const imageRatio = img.width / img.height;
 
         let width, height;
 
         if (imageRatio > containerRatio) {
-          // 横長画像
+          // landscape
           height = cropperArea.offsetHeight;
           width = height * imageRatio;
         } else {
-          // 縦長画像
+          // portrait
           width = cropperArea.offsetWidth;
           height = width / imageRatio;
         }
 
-        // 初期表示位置（中央）
+        // default position to center
         const left = (cropperArea.offsetWidth - width) / 2;
         const top = (cropperArea.offsetHeight - height) / 2;
 
@@ -706,7 +715,7 @@
         previewImage.style.top = top + "px";
         previewImage.src = img.src;
 
-        // ズームをリセット
+        // reset zoom to 100
         zoomRange.value = 100;
         zoomPer.textContent = `${zoomRange.value}%`;
         zoomRange.oninput();
@@ -781,11 +790,10 @@
         const visibleHeight = cropperArea.offsetHeight * (currentImage.height / newHeight);
         cDimentsions.textContent = `${Math.round(visibleWidth)} × ${Math.round(visibleHeight)}`;
 
-        // Blob サイズを計算して表示
+        // calculate crop image data size
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
 
-        // 現在の表示領域のスケールで描画サイズを設定
         canvas.width = Math.round(currentImage.width * (cropperArea.offsetWidth / newWidth));
         canvas.height = Math.round(currentImage.height * (cropperArea.offsetHeight / newHeight));
 
@@ -816,7 +824,6 @@
       }
 
       let syncRequested = false;
-
       function syncPreviews() {
         if (syncRequested) return;
         syncRequested = true;
@@ -856,22 +863,22 @@
             const scaledLeft = left * scale;
             const scaledTop = top * scale;
 
-            // 計算上のスケールで表示する位置・サイズを固定解像度内に再描画
+            // render image size and position whithin fixed resolution
             ctx.drawImage(
               currentImage,
-              // ソース画像のどこから切り取るか（表示範囲に合わせる）
+              // where to crop source image
               (left / displayedWidth) * currentImage.naturalWidth * -1,
               (top / displayedHeight) * currentImage.naturalHeight * -1,
               (cropperWidth / displayedWidth) * currentImage.naturalWidth,
               (cropperHeight / displayedHeight) * currentImage.naturalHeight,
-              // 描画先：固定解像度での全体表示
+              // fixed resolution
               0,
               0,
               fixedResolution,
               fixedResolution
             );
 
-            // canvas から dataURL を取得して背景に設定
+            // get dataURL from canvas and apply to background
             target.style.backgroundImage = `url(${canvas.toDataURL()})`;
             target.style.backgroundSize = `100% 100%`;
             target.style.backgroundPosition = `center`;
