@@ -300,8 +300,11 @@
         height: 2.3rem;
         background-color: black;
         border: 1px solid rgba(255, 255, 255, 0.5);
-        padding-left: 0.8rem;
+        /* padding-left: 0.8rem; */
+        display: flex;
+        flex-direction: column;
         justify-content: center;
+        align-items: center;
         font-size: 0.9rem;
         border-radius: 0.25rem;
         cursor: pointer;
@@ -313,6 +316,47 @@
       }
       #file-input {
         display: none;
+      }
+
+      @media (max-width: 900px) {
+        main {
+          max-width: 300px;
+          width: 100%;
+        }
+        .container {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .side {
+          max-width: 100% !important;
+          height: 500px;
+          margin-left: 0;
+          padding-left: 0;
+          border-left: none;
+        }
+
+        .cropper-area {
+          max-width: 300px;
+          width: 100%;
+          height: auto;
+          aspect-ratio: 1 / 1;
+          margin-bottom: 1rem;
+        }
+        .icon-preview {
+          margin: 2rem 0;
+        }
+        .discord2 {
+          width: 2.8rem;
+          height: 2.8rem;
+          aspect-ratio: 1 / 1;
+        }
+        #new-file-btn {
+          min-width: 27%;
+        }
+        .byline {
+          margin-bottom: 1rem;
+        }
       }
     </style>
   </head>
