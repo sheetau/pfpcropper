@@ -3,16 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Square Image Cropper</title>
+    <title>Free Square Image Cropper for Profile Pictures & Icons</title>
     <link rel="icon" href="cropicon.png" type="image/x-icon" />
     <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
       body {
-        font-family: "Arial", "Helvetica", "Meiryo", sans-serif;
+        font-family: "Inter", "Noto Sans JP", sans-serif;
         background-color: black;
         color: white;
         padding: 2rem;
@@ -29,15 +30,30 @@
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        margin-bottom: 3rem;
+        margin-bottom: 2.5rem;
       }
       h1 {
-        flex: 1 1 auto;
-        font-size: 1.65rem;
-        cursor: pointer;
+        width: auto;
+        font-size: 1.5rem;
+        line-height: 1.5;
+      }
+      h1 a {
+        color: white;
+        opacity: 0.5;
+        text-decoration: none;
         transition: opacity 0.2s;
       }
-      h1:hover {
+      h1 a:hover {
+        opacity: 0.25;
+      }
+      .mobile-break {
+        display: none;
+      }
+      #page-title {
+        transition: opacity 0.2s;
+        cursor: pointer;
+      }
+      #page-title:hover {
         opacity: 0.75;
       }
       .byline {
@@ -52,7 +68,6 @@
         margin-left: 0.25rem;
         padding: 0 0.5em;
         background-color: rgba(255, 255, 255, 0.1);
-        text-decoration: none;
         border: solid 1px rgba(255, 255, 255, 0);
         align-items: center;
         justify-content: center;
@@ -198,7 +213,7 @@
       }
       .discord-message {
         display: flex;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
       }
       .discord2 {
         width: 2.8rem;
@@ -340,11 +355,16 @@
 
       @media (max-width: 900px) {
         .header-row {
-          margin-bottom: 0.5rem;
+          margin-bottom: 2rem;
         }
         h1 {
-          font-size: 1.5rem;
-          margin-bottom: 0.5rem;
+          font-size: 0.75rem;
+        }
+        #page-title {
+          font-size: 1.2rem;
+        }
+        .mobile-break {
+          display: inline;
         }
         main {
           max-width: 300px;
@@ -391,10 +411,17 @@
   <body>
     <main>
       <div class="header-row">
-        <h1 id="page-title">Square Image Cropper for Social Media Profile Icon</h1>
-        <p class="byline">
+        <h1>
+          <a href="https://linktr.ee/sheetau" target="_blank" rel="noopener noreferrer">Sheeta</a
+          ><span style="font-weight: 100; opacity: 0.25"> / </span><br class="mobile-break" /><span
+            id="page-title"
+            onclick="location.reload()"
+            >Square Image Cropper for PFP</span
+          >
+        </h1>
+        <!-- <p class="byline">
           by
-          <a href="https://linktr.ee/sheetavn" target="_blank" rel="noopener noreferrer">
+          <a href="https://linktr.ee/sheetau" target="_blank" rel="noopener noreferrer">
             sheeta
             <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -405,7 +432,7 @@
               ></path>
             </svg>
           </a>
-        </p>
+        </p> -->
       </div>
 
       <div class="container">
@@ -747,11 +774,6 @@
         prevPer.textContent = `${prevRange.value}%`;
         savedRadius = prevRange.value;
         localStorage.setItem("cropperRadius", prevRange.value);
-      });
-
-      // title click
-      document.getElementById("page-title").addEventListener("click", () => {
-        location.reload();
       });
 
       // icon clicks
