@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
@@ -177,6 +177,15 @@
         background-color: rgb(67, 162, 90);
         box-shadow: 0 0 0 0.4rem black;
       }
+      .frame {
+        position: absolute;
+        width: 120%;
+        height: 120%;
+        top: -10%;
+        left: -10%;
+        background: none;
+        background-size: contain;
+      }
       .discord-server {
         width: 4.25rem;
         height: 4.25rem;
@@ -225,6 +234,7 @@
         height: 2.8rem;
         border-radius: 50%;
         background-color: rgba(255, 255, 255, 0.1);
+        position: relative;
         cursor: pointer;
         transition: opacity 0.2s;
       }
@@ -245,6 +255,32 @@
         opacity: 0.5;
         font-size: 0.7rem;
         margin-left: 0.5rem;
+      }
+
+      .input {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+      }
+      .url-input {
+        flex: 1;
+        min-width: 0;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.7);
+        border: none;
+        border-radius: 0.25rem;
+        padding: 4px 6px;
+        transition: background-color 0.2s;
+      }
+      .url-input:focus,
+      .url-input:hover {
+        background-color: rgba(255, 255, 255, 0.25);
+      }
+      .url-input::placeholder {
+        color: rgba(255, 255, 255, 0.1);
       }
 
       .control {
@@ -460,14 +496,17 @@
 
           <div class="icon-preview">
             <div class="social-icons">
-              <div class="discord"><div class="online"></div></div>
+              <div class="discord">
+                <div class="online"></div>
+                <div class="frame"></div>
+              </div>
               <div class="discord-server"></div>
               <div class="insta-ring">
                 <div class="inner"><div class="insta"></div></div>
               </div>
             </div>
             <div class="discord-message">
-              <div class="discord2"></div>
+              <div class="discord2"><div class="frame"></div></div>
               <div class="message">
                 <span class="discord-name">Phibi</span><span class="discord-time">Today at 05:15 PM</span>
                 <p>Waiting for the day when</p>
@@ -477,6 +516,15 @@
           </div>
 
           <div>
+            <div class="input">
+              <span>Frame</span>
+              <input
+                type="url"
+                class="url-input"
+                id="frameUrl"
+                placeholder="cdn.discordapp.com/avatar-decoration-presets/....png"
+              />
+            </div>
             <div class="control">
               <!-- <label for="rotation"><span>Rotation</span><span class="rotate-degree"></span></label>
               <input type="range" id="rotation" min="0" max="360" value="0" disabled /> -->
@@ -534,6 +582,25 @@
       let isDragging = false;
       let startX, startY, startLeft, startTop;
       let currentImage = null;
+
+      // discord avatar frame preview
+      const input = document.getElementById("frameUrl");
+      const frames = document.querySelectorAll(".frame");
+      const savedUrl = localStorage.getItem("frameUrl") || "";
+      input.value = savedUrl;
+      if (savedUrl) {
+        frames.forEach((frame) => {
+          frame.style.backgroundImage = `url("${savedUrl}")`;
+        });
+      }
+
+      input.addEventListener("input", () => {
+        const url = input.value.trim().split("?")[0];
+        localStorage.setItem("frameUrl", url);
+        frames.forEach((frame) => {
+          frame.style.backgroundImage = url ? `url("${url}")` : "none";
+        });
+      });
 
       // slider background color style
       zoomRange.oninput = function () {
@@ -667,13 +734,13 @@
           } else if (e.touches.length === 2) {
             lastTouchDistance = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
-              e.touches[0].clientY - e.touches[1].clientY
+              e.touches[0].clientY - e.touches[1].clientY,
             );
           }
 
           e.preventDefault();
         },
-        { passive: false }
+        { passive: false },
       );
 
       // Touch move: drag or pinch zoom
@@ -709,7 +776,7 @@
           } else if (e.touches.length === 2) {
             const currentDistance = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
-              e.touches[0].clientY - e.touches[1].clientY
+              e.touches[0].clientY - e.touches[1].clientY,
             );
 
             if (lastTouchDistance !== null) {
@@ -736,7 +803,7 @@
 
           e.preventDefault();
         },
-        { passive: false }
+        { passive: false },
       );
 
       document.addEventListener("touchend", () => {
@@ -1032,7 +1099,7 @@
               cSize.textContent = "N/A";
             }
           },
-          currentImage.src.startsWith("data:image/png") ? "image/png" : "image/jpeg"
+          currentImage.src.startsWith("data:image/png") ? "image/png" : "image/jpeg",
         );
       }
 
@@ -1088,7 +1155,7 @@
               0,
               0,
               fixedResolution,
-              fixedResolution
+              fixedResolution,
             );
 
             // get dataURL from canvas and apply to background
@@ -1099,7 +1166,7 @@
           }
 
           cPosition.textContent = `${Math.round(Math.abs((left / displayedWidth) * currentImage.width))}, ${Math.round(
-            Math.abs((top / displayedHeight) * currentImage.height)
+            Math.abs((top / displayedHeight) * currentImage.height),
           )}`;
         });
       }
