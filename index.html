@@ -189,10 +189,16 @@
       .discord-server {
         width: 4.25rem;
         height: 4.25rem;
-        border-radius: 20%;
         background-color: rgba(255, 255, 255, 0.1);
         cursor: pointer;
         transition: opacity 0.2s;
+
+        mask: url(#blobMask);
+        -webkit-mask: url(#blobMask); /* Chrome/Safari */
+        mask-size: 100% 100%;
+        -webkit-mask-size: 100% 100%;
+        mask-repeat: no-repeat;
+        -webkit-mask-repeat: no-repeat;
       }
       .insta-ring {
         margin-top: -0.375rem;
@@ -545,6 +551,17 @@
 
     <input type="file" id="file-input" accept="image/*" />
 
+    <svg width="0" height="0">
+      <defs>
+        <mask id="blobMask" maskContentUnits="objectBoundingBox">
+          <path
+            d="M0 0.436 C0 0.284 0 0.207 0.03 0.149 C0.056 0.098 0.098 0.056 0.149 0.03 C0.207 0 0.284 0 0.436 0 H0.564 C0.716 0 0.793 0 0.851 0.03 C0.902 0.056 0.944 0.098 0.97 0.149 C1 0.207 1 0.284 1 0.436 V0.564 C1 0.716 1 0.793 0.97 0.851 C0.944 0.902 0.902 0.944 0.851 0.97 C0.793 1 0.716 1 0.564 1 H0.436 C0.284 1 0.207 1 0.149 0.97 C0.098 0.944 0.056 0.902 0.03 0.851 C0 0.793 0 0.716 0 0.564 V0.436 Z"
+            fill="white"
+          />
+        </mask>
+      </defs>
+    </svg>
+
     <script>
       const cropperArea = document.getElementById("cropper");
       const previewImage = document.getElementById("preview-image");
@@ -859,7 +876,7 @@
           localStorage.setItem("cropperRadius", radius);
         });
       }
-      setCropperRadius(discordServer, 20);
+      setCropperRadius(discordServer, 27);
       setCropperRadius(discord, 50);
       setCropperRadius(discord2, 50);
       setCropperRadius(insta, 50);
