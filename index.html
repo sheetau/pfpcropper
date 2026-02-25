@@ -124,7 +124,7 @@
         position: relative;
         width: 500px;
         height: 500px;
-        border: 2px dashed rgba(255, 255, 255, 0.25);
+        border: 1px dashed rgba(255, 255, 255, 0.25);
         border-radius: 0;
         overflow: hidden;
         cursor: pointer;
@@ -134,10 +134,31 @@
         transition: border 0.2s;
       }
       .cropper-area:not(.has-image):hover {
-        border: 2px dashed rgba(255, 255, 255, 0.75);
+        border: 1px dashed rgba(255, 255, 255, 0.75);
       }
       .cropper-area.has-image {
         cursor: move;
+      }
+      #placeholder {
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        pointer-events: none;
+        background:
+          linear-gradient(
+            to top right,
+            transparent calc(50% - 0.5px),
+            rgba(255, 255, 255, 0.25) 50%,
+            transparent calc(50% + 0.5px)
+          ),
+          linear-gradient(
+            to bottom right,
+            transparent calc(50% - 0.5px),
+            rgba(255, 255, 255, 0.25) 50%,
+            transparent calc(50% + 0.5px)
+          );
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
       }
       .side {
         border-left: 1px solid rgba(255, 255, 255, 0.25);
@@ -466,7 +487,8 @@
           border-left: none;
         }
 
-        .cropper-area {
+        .cropper-area,
+        #placeholder {
           max-width: 300px;
           width: 100%;
           height: auto;
@@ -515,6 +537,7 @@
       </div>
 
       <div class="container">
+        <div id="placeholder"></div>
         <div id="cropper" class="cropper-area">
           <p id="upload-prompt">Drop or click to upload image</p>
           <img id="preview-image" alt="Preview" />
@@ -676,7 +699,7 @@
       cropperArea.addEventListener("dragover", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        cropperArea.style.border = "2px dashed rgba(255, 255, 255, 1)";
+        cropperArea.style.border = "1px dashed rgba(255, 255, 255, 1)";
       });
 
       // cropperArea drag leave
@@ -684,9 +707,9 @@
         e.preventDefault();
         e.stopPropagation();
         if (cropperArea.classList.contains("has-image")) {
-          cropperArea.style.border = "2px dashed rgba(255, 255, 255, 0)";
+          cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0)";
         } else {
-          cropperArea.style.border = "2px dashed rgba(255, 255, 255, 0.25)";
+          cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0.25)";
         }
       });
 
@@ -695,9 +718,9 @@
         e.preventDefault();
         e.stopPropagation();
         if (cropperArea.classList.contains("has-image")) {
-          cropperArea.style.border = "2px dashed rgba(255, 255, 255, 0)";
+          cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0)";
         } else {
-          cropperArea.style.border = "2px dashed rgba(255, 255, 255, 0.25)";
+          cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0.25)";
         }
 
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
@@ -1003,7 +1026,7 @@
         // update style
         uploadPrompt.style.display = "none";
         cropperArea.classList.add("has-image");
-        cropperArea.style.border = "2px dashed rgba(255, 255, 255, 0)";
+        cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0)";
         previewImage.style.display = "block";
         sideEl.style.opacity = "1";
         sideEl.style.pointerEvents = "auto";
