@@ -181,6 +181,7 @@
         display: none;
         user-select: none;
         -webkit-user-drag: none;
+        transition: opacity 0.2s;
       }
       .info {
         width: 100%;
@@ -700,6 +701,7 @@
         e.preventDefault();
         e.stopPropagation();
         cropperArea.style.border = "1px dashed rgba(255, 255, 255, 1)";
+        previewImage.style.opacity = "0.5";
       });
 
       // cropperArea drag leave
@@ -711,6 +713,7 @@
         } else {
           cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0.25)";
         }
+        previewImage.style.opacity = "";
       });
 
       // cropperArea drop
@@ -722,6 +725,7 @@
         } else {
           cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0.25)";
         }
+        previewImage.style.opacity = "";
 
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
           handleFile(e.dataTransfer.files[0]);
