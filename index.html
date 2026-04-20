@@ -744,6 +744,7 @@
       const insta = document.querySelector(".insta");
       const previewTargets = [discord, discord2, discordServer, insta];
       const previewSurfaceState = new Map();
+      const PREVIEW_RENDER_SCALE = 2;
       const EVEN_ROTATION_STEP = 2;
       const ROTATION_SNAP_INTERVAL = 45;
       const ROTATION_SNAP_THRESHOLD = 5;
@@ -1100,8 +1101,9 @@
       }
 
       function resizePreviewSurface(surfaceState, target) {
-        const targetWidth = Math.max(1, Math.round(target.clientWidth * window.devicePixelRatio));
-        const targetHeight = Math.max(1, Math.round(target.clientHeight * window.devicePixelRatio));
+        const renderScale = window.devicePixelRatio * PREVIEW_RENDER_SCALE;
+        const targetWidth = Math.max(1, Math.round(target.clientWidth * renderScale));
+        const targetHeight = Math.max(1, Math.round(target.clientHeight * renderScale));
 
         if (surfaceState.width === targetWidth && surfaceState.height === targetHeight) {
           return;
