@@ -10,6 +10,8 @@ There are several websites let you crop images into a square, and you can even s
 
 1. Go to [this website](https://sheetau.github.io/cropimage.github.io/).
 2. Drag and drop or click to select and upload the image you want to crop.
-3. Drag image to adjust crop position. use mouse wheel on image or use zoom slider to adjust crop size.
-4. Use preview radius slider or click preview icons on right side to adjust corner radius of preview.
-5. Click download. (PNG images are saved as PNG, and all others are saved as JPG. Please note that cropping does not include the preview radius.)
+3. Drag image to adjust position. Use mouse wheel or the zoom slider to adjust crop size.
+4. Use the rotation slider or Shift + Mouse Wheel to rotate the image.
+5. Use flip buttons to toggle horizontal or vertical orientation.
+6. Use preview radius slider or click preview icons on right side to adjust corner radius.
+7. Click download. (PNG images are saved as PNG, others as JPG. Cropping does not include preview radius.)
