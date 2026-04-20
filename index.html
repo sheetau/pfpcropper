@@ -166,6 +166,7 @@
         margin-left: 1.25rem;
         flex: 1;
         width: auto;
+        min-width: 0;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -183,7 +184,9 @@
         -webkit-user-drag: none;
         transition: opacity 0.2s;
       }
-      .info {
+      .info,
+      .icon-preview,
+      .controls {
         width: 100%;
       }
       #file-name {
@@ -196,7 +199,7 @@
         text-overflow: ellipsis;
         white-space: normal;
         word-break: break-all;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
       }
       #description {
         font-size: 0.7rem;
@@ -212,7 +215,7 @@
       .social-icons {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.5rem;
       }
 
       .discord {
@@ -246,7 +249,9 @@
       .discord-server {
         width: 4.25rem;
         height: 4.25rem;
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: black;
+        position: relative;
+        overflow: hidden;
         cursor: pointer;
         transition: opacity 0.2s;
 
@@ -284,9 +289,25 @@
         height: 4.25rem;
         border-radius: 50%;
         background-color: rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
         transform: rotate(-45deg);
         transition: opacity 0.2s;
         cursor: pointer;
+      }
+      .preview-surface {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        border-radius: inherit;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .online,
+      .frame {
+        z-index: 1;
       }
       .discord-message {
         display: flex;
@@ -325,17 +346,19 @@
         align-items: center;
         gap: 0.5rem;
         width: 100%;
+        height: 1.5rem;
         margin-bottom: 0.5rem;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
       }
       .url-input {
         flex: 1;
         min-width: 0;
+        height: 100%;
         background-color: rgba(255, 255, 255, 0.1);
         color: rgba(255, 255, 255, 0.7);
         border: none;
         border-radius: 0.25rem;
-        padding: 0.25rem 0.4rem;
+        padding: 0.3rem 0.4rem;
         transition: background-color 0.2s;
       }
       .url-input:focus,
@@ -346,10 +369,42 @@
         color: rgba(255, 255, 255, 0.1);
       }
 
+      .divider {
+        width: 1px;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.25);
+      }
+
+      .flip-buttons {
+        display: flex;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 0.25rem;
+        overflow: hidden;
+      }
+      .icon-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        padding: 0.2rem;
+        background: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        transition: background 0.2s;
+        outline: none;
+      }
+      .icon-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .icon-btn.is-active {
+        background: rgba(255, 255, 255, 0.25);
+      }
+
       .control {
         margin-bottom: 0.5rem;
         width: 100%;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         -webkit-user-select: none; /* Safari */
         -ms-user-select: none; /* IE 10 and IE 11 */
         user-select: none; /* Standard syntax */
@@ -357,10 +412,10 @@
       label {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 0.1rem;
       }
       .zoom-percent,
-      .prev-percent {
+      .prev-percent,
+      .rotate-degree {
         opacity: 0.25;
       }
       input[type="range"] {
@@ -377,7 +432,7 @@
         height: 0.5rem;
         outline: none;
         border-radius: 0.25rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
         cursor: pointer;
       }
 
@@ -422,7 +477,7 @@
       #download-btn {
         background-color: white;
         width: 70%;
-        height: 2.3rem;
+        height: 2rem;
         color: black;
         border: none;
         padding-left: 0.8rem;
@@ -436,7 +491,7 @@
       #new-file-btn {
         color: white;
         width: 27%;
-        height: 2.3rem;
+        height: 2rem;
         background-color: black;
         border: 1px solid rgba(255, 255, 255, 0.5);
         /* padding-left: 0.8rem; */
@@ -450,7 +505,7 @@
         transition: opacity 0.2s;
         text-align: left;
       }
-      button:hover {
+      .buttons button:hover {
         opacity: 0.5;
       }
       #file-input {
@@ -577,7 +632,7 @@
             </div>
           </div>
 
-          <div>
+          <div class="controls">
             <div class="input">
               <span>Frame</span>
               <input
@@ -585,13 +640,55 @@
                 class="url-input"
                 id="frameUrl"
                 placeholder="cdn.discordapp.com/avatar-decoration-presets/....png"
+                title="https://cdn.discordapp.com/avatar-decoration-presets/....png"
               />
+              <div class="divider"></div>
+              <div class="flip-buttons">
+                <button id="flip-h-btn" class="icon-btn" title="Flip Horizontal">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="icon-tabler-flip-vertical"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M12 3l0 18" />
+                    <path d="M16 7l0 10l5 0l-5 -10" />
+                    <path d="M8 7l0 10l-5 0l5 -10" />
+                  </svg>
+                </button>
+                <button id="flip-v-btn" class="icon-btn" title="Flip Vertical">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="icon-tabler-flip-horizontal"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M3 12l18 0" />
+                    <path d="M7 16l10 0l-10 5l0 -5" />
+                    <path d="M7 8l10 0l-10 -5l0 5" />
+                  </svg>
+                </button>
+              </div>
             </div>
             <div class="control">
-              <!-- <label for="rotation"><span>Rotation</span><span class="rotate-degree"></span></label>
-              <input type="range" id="rotation" min="0" max="360" value="0" disabled /> -->
               <label for="zoom-range"><span>Zoom</span><span class="zoom-percent"></span></label>
               <input type="range" id="zoom-range" min="100" max="1000" value="100" disabled />
+              <label for="rotation-range"><span>Rotation</span><span class="rotate-degree"></span></label>
+              <input type="range" id="rotation-range" min="-180" max="180" value="0" disabled />
               <label for="prev-radius"><span>Preview radius</span><span class="prev-percent"></span></label>
               <input type="range" id="prev-radius" min="0" max="50" value="50" disabled />
             </div>
@@ -625,11 +722,15 @@
       const fileInput = document.getElementById("file-input");
       const fileName = document.getElementById("file-name");
       const zoomRange = document.getElementById("zoom-range");
+      const rotationRange = document.getElementById("rotation-range");
       const prevRange = document.getElementById("prev-radius");
+      const flipHBtn = document.getElementById("flip-h-btn");
+      const flipVBtn = document.getElementById("flip-v-btn");
       const downloadBtn = document.getElementById("download-btn");
       const newFileBtn = document.getElementById("new-file-btn");
       const sideEl = document.querySelector(".side");
       const zoomPer = document.querySelector(".zoom-percent");
+      const rotateDeg = document.querySelector(".rotate-degree");
       const prevPer = document.querySelector(".prev-percent");
       const dimentsions = document.getElementById("dimensions");
       const size = document.getElementById("size");
@@ -637,26 +738,43 @@
       const cPosition = document.getElementById("c-position");
       const cSize = document.getElementById("c-size");
 
-      // preview icons
       const discord = document.querySelector(".discord");
       const discord2 = document.querySelector(".discord2");
       const discordServer = document.querySelector(".discord-server");
       const insta = document.querySelector(".insta");
+      const previewTargets = [discord, discord2, discordServer, insta];
+      const previewSurfaceState = new Map();
+      const EVEN_ROTATION_STEP = 2;
+      const ROTATION_SNAP_INTERVAL = 45;
+      const ROTATION_SNAP_THRESHOLD = 5;
+      const CROP_SIZE_DEBOUNCE_MS = 120;
 
-      // cropperArea border radius
       let savedRadius = localStorage.getItem("cropperRadius") || "50";
-      prevPer.textContent = `${savedRadius}%`;
       prevRange.value = savedRadius;
+      prevPer.textContent = `${savedRadius}%`;
+      zoomPer.textContent = `${zoomRange.value}%`;
+      rotateDeg.textContent = `${rotationRange.value}deg`;
 
       let imageName = "";
-      zoomPer.textContent = `${zoomRange.value}%`;
-      prevPer.textContent = `${prevRange.value}%`;
-
       let isDragging = false;
-      let startX, startY, startLeft, startTop;
+      let startX = 0;
+      let startY = 0;
+      let startLocalOffsetX = 0;
+      let startLocalOffsetY = 0;
       let currentImage = null;
+      let lastTouchDistance = null;
+      let cropSizeUpdateTimeout = null;
+      let imageState = {
+        zoom: 1,
+        rotation: 0,
+        width: 0,
+        height: 0,
+        localOffsetX: 0,
+        localOffsetY: 0,
+        flipX: 1,
+        flipY: 1,
+      };
 
-      // discord avatar frame preview
       const input = document.getElementById("frameUrl");
       const frames = document.querySelectorAll(".frame");
       const savedUrl = localStorage.getItem("frameUrl") || "";
@@ -675,28 +793,331 @@
         });
       });
 
-      // slider background color style
-      zoomRange.oninput = function () {
-        var value = ((this.value - this.min) / (this.max - this.min)) * 100;
-        this.style.background =
+      function updateRangeBackground(range) {
+        const value = ((range.value - range.min) / (range.max - range.min)) * 100;
+        range.style.background =
           "linear-gradient(to right, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.25) " +
           value +
           "%, rgba(255, 255, 255, 0.1) " +
           value +
           "%, rgba(255, 255, 255, 0.1) 100%)";
-      };
-      prevRange.oninput = function () {
-        var value = ((this.value - this.min) / (this.max - this.min)) * 100;
-        this.style.background =
-          "linear-gradient(to right, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.25) " +
-          value +
-          "%, rgba(255, 255, 255, 0.1) " +
-          value +
-          "%, rgba(255, 255, 255, 0.1) 100%)";
-      };
-      prevRange.oninput();
+      }
 
-      // cropperArea drag over
+      function getCropperMetrics() {
+        return {
+          width: cropperArea.offsetWidth,
+          height: cropperArea.offsetHeight,
+          centerX: cropperArea.offsetWidth / 2,
+          centerY: cropperArea.offsetHeight / 2,
+          previewRadius: Math.min(cropperArea.offsetWidth, cropperArea.offsetHeight) / 2,
+        };
+      }
+
+      function getBaseImageSize(img) {
+        const containerRatio = cropperArea.offsetWidth / cropperArea.offsetHeight;
+        const imageRatio = img.width / img.height;
+
+        if (imageRatio > containerRatio) {
+          const height = cropperArea.offsetHeight;
+          return { width: height * imageRatio, height };
+        }
+
+        const width = cropperArea.offsetWidth;
+        return { width, height: width / imageRatio };
+      }
+
+      function getRotationRadians() {
+        return (getVisualRotation() * Math.PI) / 180;
+      }
+
+      function getVisualRotation() {
+        return imageState.rotation * imageState.flipX * imageState.flipY;
+      }
+
+      function rotateVector(x, y, radians) {
+        const cos = Math.cos(radians);
+        const sin = Math.sin(radians);
+        return {
+          x: x * cos - y * sin,
+          y: x * sin + y * cos,
+        };
+      }
+
+      function screenVectorToLocal(dx, dy) {
+        const rotated = rotateVector(dx, dy, -getRotationRadians());
+        return {
+          x: rotated.x * imageState.flipX,
+          y: rotated.y * imageState.flipY,
+        };
+      }
+
+      function refreshImageSize() {
+        if (!currentImage) return;
+        const base = getBaseImageSize(currentImage);
+        imageState.width = base.width * imageState.zoom;
+        imageState.height = base.height * imageState.zoom;
+      }
+
+      function setZoomValue(value) {
+        zoomRange.value = value;
+        imageState.zoom = value / 100;
+        zoomPer.textContent = `${value}%`;
+        updateRangeBackground(zoomRange);
+      }
+
+      function setRotationValue(value) {
+        rotationRange.value = value;
+        imageState.rotation = value;
+        rotateDeg.textContent = `${value}deg`;
+        updateRangeBackground(rotationRange);
+      }
+
+      function normalizeRotation(value) {
+        return Math.max(-180, Math.min(180, value));
+      }
+
+      function snapRotationForSlider(value) {
+        const snappedValue = Math.round(value / ROTATION_SNAP_INTERVAL) * ROTATION_SNAP_INTERVAL;
+        return Math.abs(snappedValue - value) <= ROTATION_SNAP_THRESHOLD ? snappedValue : value;
+      }
+
+      function getNextWheelRotation(currentValue, direction) {
+        const normalized = normalizeRotation(currentValue);
+        if (normalized % EVEN_ROTATION_STEP !== 0) {
+          return normalizeRotation(normalized + direction);
+        }
+        return normalizeRotation(normalized + direction * EVEN_ROTATION_STEP);
+      }
+
+      function getImagePixelScale() {
+        if (!currentImage || !imageState.width) return 1;
+        return currentImage.width / imageState.width;
+      }
+
+      function getOutputResolution() {
+        return Math.max(1, Math.round(cropperArea.offsetWidth * getImagePixelScale()));
+      }
+
+      function clampImageState() {
+        const { previewRadius } = getCropperMetrics();
+        const maxOffsetX = Math.max(0, imageState.width / 2 - previewRadius);
+        const maxOffsetY = Math.max(0, imageState.height / 2 - previewRadius);
+
+        imageState.localOffsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, imageState.localOffsetX));
+        imageState.localOffsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, imageState.localOffsetY));
+      }
+
+      function renderPreviewImage() {
+        const { centerX, centerY } = getCropperMetrics();
+        const flippedOffset = {
+          x: imageState.localOffsetX * imageState.flipX,
+          y: imageState.localOffsetY * imageState.flipY,
+        };
+        const rotatedOffset = rotateVector(flippedOffset.x, flippedOffset.y, getRotationRadians());
+        const imageCenterX = centerX - rotatedOffset.x;
+        const imageCenterY = centerY - rotatedOffset.y;
+
+        previewImage.style.width = `${imageState.width}px`;
+        previewImage.style.height = `${imageState.height}px`;
+        previewImage.style.left = `${imageCenterX}px`;
+        previewImage.style.top = `${imageCenterY}px`;
+        previewImage.style.transform = `translate(-50%, -50%) rotate(${getVisualRotation()}deg) scale(${imageState.flipX}, ${imageState.flipY})`;
+        previewImage.style.transformOrigin = "center center";
+      }
+
+      function renderCurrentViewToCanvas(ctx, width, height) {
+        if (!currentImage) return;
+
+        const scale = width / cropperArea.offsetWidth;
+        ctx.clearRect(0, 0, width, height);
+        ctx.save();
+        ctx.translate(width / 2, height / 2);
+        ctx.scale(scale, scale);
+        ctx.rotate(getRotationRadians());
+        ctx.scale(imageState.flipX, imageState.flipY);
+        ctx.drawImage(
+          currentImage,
+          -imageState.localOffsetX - imageState.width / 2,
+          -imageState.localOffsetY - imageState.height / 2,
+          imageState.width,
+          imageState.height,
+        );
+        ctx.restore();
+      }
+
+      function getCropPositionInSource() {
+        if (!currentImage) return null;
+
+        const scale = getImagePixelScale();
+        return {
+          x: Math.max(0, Math.min(currentImage.width, currentImage.width / 2 + imageState.localOffsetX * scale)),
+          y: Math.max(0, Math.min(currentImage.height, currentImage.height / 2 + imageState.localOffsetY * scale)),
+        };
+      }
+
+      function updateCropInfo() {
+        if (!currentImage) return;
+
+        const outputResolution = getOutputResolution();
+        cDimentsions.textContent = `${outputResolution} x ${outputResolution}`;
+
+        const position = getCropPositionInSource();
+        if (position) {
+          cPosition.textContent = `${Math.round(position.x)}, ${Math.round(position.y)}`;
+        }
+
+        scheduleCropSizeUpdate(outputResolution);
+      }
+
+      function scheduleCropSizeUpdate(outputResolution) {
+        if (cropSizeUpdateTimeout !== null) {
+          clearTimeout(cropSizeUpdateTimeout);
+        }
+
+        cropSizeUpdateTimeout = setTimeout(() => {
+          cropSizeUpdateTimeout = null;
+
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          canvas.width = outputResolution;
+          canvas.height = outputResolution;
+          renderCurrentViewToCanvas(ctx, canvas.width, canvas.height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                cSize.textContent = "N/A";
+                return;
+              }
+              requestAnimationFrame(() => {
+                cSize.textContent =
+                  blob.size >= 1024 * 1024
+                    ? `${(blob.size / (1024 * 1024)).toFixed(2)} MB`
+                    : `${(blob.size / 1024).toFixed(2)} KB`;
+              });
+            },
+            currentImage.src.startsWith("data:image/png") ? "image/png" : "image/jpeg",
+          );
+        }, CROP_SIZE_DEBOUNCE_MS);
+      }
+
+      function applyImageState() {
+        clampImageState();
+        renderPreviewImage();
+        updateCropInfo();
+      }
+
+      function updateZoom(anchorX, anchorY) {
+        if (!currentImage) return;
+
+        const metrics = getCropperMetrics();
+        const focusX = anchorX ?? metrics.centerX;
+        const focusY = anchorY ?? metrics.centerY;
+        const localPointer = screenVectorToLocal(focusX - metrics.centerX, focusY - metrics.centerY);
+
+        const prevWidth = imageState.width;
+        const prevHeight = imageState.height;
+        const normalizedX = prevWidth ? (imageState.localOffsetX + localPointer.x) / prevWidth : 0;
+        const normalizedY = prevHeight ? (imageState.localOffsetY + localPointer.y) / prevHeight : 0;
+
+        imageState.zoom = parseInt(zoomRange.value, 10) / 100;
+        refreshImageSize();
+
+        imageState.localOffsetX = normalizedX * imageState.width - localPointer.x;
+        imageState.localOffsetY = normalizedY * imageState.height - localPointer.y;
+
+        applyImageState();
+      }
+
+      function updateRotation(value, options = {}) {
+        if (!currentImage) return;
+        const nextValue = options.fromSlider ? snapRotationForSlider(value) : value;
+        setRotationValue(normalizeRotation(nextValue));
+        applyImageState();
+        syncPreviews();
+      }
+
+      function updateFlipButtonState(button, isActive) {
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-pressed", isActive ? "true" : "false");
+      }
+
+      function syncFlipButtons() {
+        updateFlipButtonState(flipHBtn, imageState.flipX === -1);
+        updateFlipButtonState(flipVBtn, imageState.flipY === -1);
+      }
+
+      function toggleFlip(axis) {
+        if (axis === "x") {
+          imageState.flipX *= -1;
+        } else {
+          imageState.flipY *= -1;
+        }
+
+        syncFlipButtons();
+        if (!currentImage) return;
+        applyImageState();
+        syncPreviews();
+      }
+
+      function beginDrag(clientX, clientY) {
+        isDragging = true;
+        startX = clientX;
+        startY = clientY;
+        startLocalOffsetX = imageState.localOffsetX;
+        startLocalOffsetY = imageState.localOffsetY;
+      }
+
+      function continueDrag(clientX, clientY) {
+        if (!isDragging) return;
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
+        const localDelta = screenVectorToLocal(deltaX, deltaY);
+
+        imageState.localOffsetX = startLocalOffsetX - localDelta.x;
+        imageState.localOffsetY = startLocalOffsetY - localDelta.y;
+        applyImageState();
+        syncPreviews();
+      }
+
+      function getPreviewSurface(target) {
+        let surfaceState = previewSurfaceState.get(target);
+        if (surfaceState) {
+          return surfaceState;
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.className = "preview-surface";
+        target.prepend(canvas);
+        surfaceState = {
+          canvas,
+          ctx: canvas.getContext("2d"),
+          width: 0,
+          height: 0,
+        };
+        previewSurfaceState.set(target, surfaceState);
+        return surfaceState;
+      }
+
+      function resizePreviewSurface(surfaceState, target) {
+        const targetWidth = Math.max(1, Math.round(target.clientWidth * window.devicePixelRatio));
+        const targetHeight = Math.max(1, Math.round(target.clientHeight * window.devicePixelRatio));
+
+        if (surfaceState.width === targetWidth && surfaceState.height === targetHeight) {
+          return;
+        }
+
+        surfaceState.width = targetWidth;
+        surfaceState.height = targetHeight;
+        surfaceState.canvas.width = targetWidth;
+        surfaceState.canvas.height = targetHeight;
+      }
+
+      updateRangeBackground(zoomRange);
+      updateRangeBackground(rotationRange);
+      updateRangeBackground(prevRange);
+      syncFlipButtons();
+
       cropperArea.addEventListener("dragover", (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -704,27 +1125,21 @@
         previewImage.style.opacity = "0.5";
       });
 
-      // cropperArea drag leave
       cropperArea.addEventListener("dragleave", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (cropperArea.classList.contains("has-image")) {
-          cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0)";
-        } else {
-          cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0.25)";
-        }
+        cropperArea.style.border = cropperArea.classList.contains("has-image")
+          ? "1px dashed rgba(255, 255, 255, 0)"
+          : "1px dashed rgba(255, 255, 255, 0.25)";
         previewImage.style.opacity = "";
       });
 
-      // cropperArea drop
       cropperArea.addEventListener("drop", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (cropperArea.classList.contains("has-image")) {
-          cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0)";
-        } else {
-          cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0.25)";
-        }
+        cropperArea.style.border = cropperArea.classList.contains("has-image")
+          ? "1px dashed rgba(255, 255, 255, 0)"
+          : "1px dashed rgba(255, 255, 255, 0.25)";
         previewImage.style.opacity = "";
 
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
@@ -732,81 +1147,39 @@
         }
       });
 
-      // cropperArea click
-      cropperArea.addEventListener("click", (e) => {
+      cropperArea.addEventListener("click", () => {
         if (!cropperArea.classList.contains("has-image")) {
           fileInput.click();
         }
       });
 
-      fileInput.addEventListener("change", (e) => {
+      fileInput.addEventListener("change", () => {
         if (fileInput.files && fileInput.files[0]) {
           handleFile(fileInput.files[0]);
         }
       });
 
-      // Image drag handling
       cropperArea.addEventListener("mousedown", (e) => {
         if (!cropperArea.classList.contains("has-image")) return;
-
-        isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        startLeft = parseInt(window.getComputedStyle(previewImage).left);
-        startTop = parseInt(window.getComputedStyle(previewImage).top);
-
+        beginDrag(e.clientX, e.clientY);
         e.preventDefault();
       });
 
       document.addEventListener("mousemove", (e) => {
-        if (!isDragging) return;
-
-        const deltaX = e.clientX - startX;
-        const deltaY = e.clientY - startY;
-
-        const newLeft = startLeft + deltaX;
-        const newTop = startTop + deltaY;
-
-        // Ensure the image always covers the cropper area
-        const currentZoom = parseInt(zoomRange.value) / 100;
-        const imageWidth = parseFloat(previewImage.style.width);
-        const imageHeight = parseFloat(previewImage.style.height);
-
-        // Calculate boundaries to ensure the image always covers the cropper
-        const minLeft = Math.min(0, cropperArea.offsetWidth - imageWidth);
-        const maxLeft = 0;
-        const minTop = Math.min(0, cropperArea.offsetHeight - imageHeight);
-        const maxTop = 0;
-
-        const boundedLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
-        const boundedTop = Math.max(minTop, Math.min(maxTop, newTop));
-
-        previewImage.style.left = boundedLeft + "px";
-        previewImage.style.top = boundedTop + "px";
-
-        syncPreviews();
+        continueDrag(e.clientX, e.clientY);
       });
 
       document.addEventListener("mouseup", () => {
         isDragging = false;
       });
 
-      let lastTouchDistance = null;
-
-      // Touch start: drag or pinch
       cropperArea.addEventListener(
         "touchstart",
         (e) => {
-          if (!cropperArea.contains(e.target)) return;
-          if (!cropperArea.classList.contains("has-image")) return;
+          if (!cropperArea.contains(e.target) || !cropperArea.classList.contains("has-image")) return;
 
           if (e.touches.length === 1) {
-            const touch = e.touches[0];
-            isDragging = true;
-            startX = touch.clientX;
-            startY = touch.clientY;
-            startLeft = parseInt(window.getComputedStyle(previewImage).left);
-            startTop = parseInt(window.getComputedStyle(previewImage).top);
+            beginDrag(e.touches[0].clientX, e.touches[0].clientY);
           } else if (e.touches.length === 2) {
             lastTouchDistance = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
@@ -819,36 +1192,13 @@
         { passive: false },
       );
 
-      // Touch move: drag or pinch zoom
       document.addEventListener(
         "touchmove",
         (e) => {
-          if (!cropperArea.contains(e.target)) return;
-          if (!cropperArea.classList.contains("has-image")) return;
+          if (!cropperArea.contains(e.target) || !cropperArea.classList.contains("has-image")) return;
 
           if (e.touches.length === 1 && isDragging) {
-            const touch = e.touches[0];
-            const deltaX = touch.clientX - startX;
-            const deltaY = touch.clientY - startY;
-
-            const newLeft = startLeft + deltaX;
-            const newTop = startTop + deltaY;
-
-            const imageWidth = parseFloat(previewImage.style.width);
-            const imageHeight = parseFloat(previewImage.style.height);
-
-            const minLeft = Math.min(0, cropperArea.offsetWidth - imageWidth);
-            const maxLeft = 0;
-            const minTop = Math.min(0, cropperArea.offsetHeight - imageHeight);
-            const maxTop = 0;
-
-            const boundedLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
-            const boundedTop = Math.max(minTop, Math.min(maxTop, newTop));
-
-            previewImage.style.left = boundedLeft + "px";
-            previewImage.style.top = boundedTop + "px";
-
-            syncPreviews();
+            continueDrag(e.touches[0].clientX, e.touches[0].clientY);
           } else if (e.touches.length === 2) {
             const currentDistance = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
@@ -857,20 +1207,14 @@
 
             if (lastTouchDistance !== null) {
               const delta = currentDistance - lastTouchDistance;
-
               if (Math.abs(delta) > 2) {
                 const rect = cropperArea.getBoundingClientRect();
                 const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
                 const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
-
-                const currentZoom = parseInt(zoomRange.value);
-                const newZoom = Math.max(100, Math.min(1000, currentZoom + delta));
-                zoomRange.value = newZoom;
-
+                const newZoom = Math.max(100, Math.min(1000, parseInt(zoomRange.value, 10) + delta));
+                setZoomValue(newZoom);
                 updateZoom(centerX, centerY);
                 syncPreviews();
-                zoomPer.textContent = `${zoomRange.value}%`;
-                zoomRange.oninput();
               }
             }
 
@@ -887,97 +1231,83 @@
         lastTouchDistance = null;
       });
 
-      // Wheel zoom
       cropperArea.addEventListener("wheel", (e) => {
         if (!cropperArea.classList.contains("has-image")) return;
 
         e.preventDefault();
-
-        // Calculate zoom change
-        const delta = e.deltaY > 0 ? -20 : 20;
-        const newZoom = Math.max(100, Math.min(1000, parseInt(zoomRange.value) + delta));
-        zoomRange.value = newZoom;
-
-        // Get mouse position relative to the cropper
         const rect = cropperArea.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
 
-        // Update zoom with cursor as center point
+        if (e.shiftKey) {
+          const direction = e.deltaY > 0 ? -1 : 1;
+          const nextRotation = getNextWheelRotation(parseInt(rotationRange.value, 10), direction);
+          updateRotation(nextRotation);
+          return;
+        }
+
+        const delta = e.deltaY > 0 ? -20 : 20;
+        const newZoom = Math.max(100, Math.min(1000, parseInt(zoomRange.value, 10) + delta));
+        setZoomValue(newZoom);
         updateZoom(mouseX, mouseY);
         syncPreviews();
-        zoomPer.textContent = `${zoomRange.value}%`;
-        zoomRange.oninput();
       });
 
-      // Zoom slider
       zoomRange.addEventListener("input", () => {
-        // Use the center of the cropper as the zoom point
+        updateRangeBackground(zoomRange);
+        zoomPer.textContent = `${zoomRange.value}%`;
         updateZoom(cropperArea.offsetWidth / 2, cropperArea.offsetHeight / 2);
         syncPreviews();
-        zoomPer.textContent = `${zoomRange.value}%`;
       });
+
+      rotationRange.addEventListener("input", () => {
+        updateRotation(parseInt(rotationRange.value, 10), { fromSlider: true });
+      });
+
+      flipHBtn.addEventListener("click", () => {
+        toggleFlip("x");
+      });
+
+      flipVBtn.addEventListener("click", () => {
+        toggleFlip("y");
+      });
+
       prevRange.addEventListener("input", () => {
         cropperArea.style.borderRadius = `${prevRange.value}%`;
         prevPer.textContent = `${prevRange.value}%`;
         savedRadius = prevRange.value;
         localStorage.setItem("cropperRadius", prevRange.value);
+        updateRangeBackground(prevRange);
       });
 
-      // icon clicks
       function setCropperRadius(element, radius) {
         element.addEventListener("click", () => {
           cropperArea.style.borderRadius = `${radius}%`;
           prevPer.textContent = `${radius}%`;
           prevRange.value = radius;
-          prevRange.oninput();
           savedRadius = prevRange.value;
           localStorage.setItem("cropperRadius", radius);
+          updateRangeBackground(prevRange);
         });
       }
+
       setCropperRadius(discordServer, 27);
       setCropperRadius(discord, 50);
       setCropperRadius(discord2, 50);
       setCropperRadius(insta, 50);
 
-      // new file button
       newFileBtn.addEventListener("click", () => {
         fileInput.click();
       });
 
-      // Download button
       downloadBtn.addEventListener("click", () => {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
+        const outputResolution = getOutputResolution();
+        canvas.width = outputResolution;
+        canvas.height = outputResolution;
+        renderCurrentViewToCanvas(ctx, canvas.width, canvas.height);
 
-        // Get the current view state
-        const displayedWidth = parseFloat(previewImage.style.width);
-        const displayedHeight = parseFloat(previewImage.style.height);
-        const left = parseFloat(previewImage.style.left);
-        const top = parseFloat(previewImage.style.top);
-
-        // Calculate the scale between original image and displayed image
-        const scaleX = currentImage.width / displayedWidth;
-        const scaleY = currentImage.height / displayedHeight;
-
-        // Cropper area size (in CSS pixels)
-        const cropperWidth = cropperArea.offsetWidth;
-        const cropperHeight = cropperArea.offsetHeight;
-
-        // Calculate source rectangle (area in the original image)
-        const sourceX = -left * scaleX;
-        const sourceY = -top * scaleY;
-        const sourceWidth = cropperWidth * scaleX;
-        const sourceHeight = cropperHeight * scaleY;
-
-        // Set canvas size to match source area in original image resolution
-        canvas.width = Math.round(sourceWidth);
-        canvas.height = Math.round(sourceHeight);
-
-        // Draw with 1:1 scale (original resolution)
-        ctx.drawImage(currentImage, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
-
-        // Download
         const link = document.createElement("a");
         const now = new Date();
         const timestamp = `${now.getFullYear().toString().slice(2)}${(now.getMonth() + 1)
@@ -1006,7 +1336,6 @@
         }
 
         const reader = new FileReader();
-
         reader.onload = (e) => {
           const img = new Image();
           img.onload = () => {
@@ -1015,235 +1344,61 @@
           };
           img.src = e.target.result;
         };
-
         reader.readAsDataURL(file);
+
         fileName.textContent = file.name;
         imageName = file.name;
-        if (file.size >= 1024 * 1024) {
-          size.textContent = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
-        } else {
-          size.textContent = `${(file.size / 1024).toFixed(2)} KB`;
-        }
+        size.textContent =
+          file.size >= 1024 * 1024
+            ? `${(file.size / (1024 * 1024)).toFixed(2)} MB`
+            : `${(file.size / 1024).toFixed(2)} KB`;
       }
 
       function displayImage(img) {
-        // update style
         uploadPrompt.style.display = "none";
         cropperArea.classList.add("has-image");
         cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0)";
+        cropperArea.style.borderRadius = `${savedRadius}%`;
         previewImage.style.display = "block";
+        previewImage.src = img.src;
         sideEl.style.opacity = "1";
         sideEl.style.pointerEvents = "auto";
-        dimentsions.textContent = `${img.width} × ${img.height}`;
+        dimentsions.textContent = `${img.width} x ${img.height}`;
 
-        prevPer.textContent = `${savedRadius}%`;
-        cropperArea.style.borderRadius = `${savedRadius}%`;
-        prevRange.value = savedRadius;
-
-        // enable download button and slider
         downloadBtn.disabled = false;
         zoomRange.disabled = false;
+        rotationRange.disabled = false;
         prevRange.disabled = false;
 
-        // calculate image ratio
-        const containerRatio = cropperArea.offsetWidth / cropperArea.offsetHeight;
-        const imageRatio = img.width / img.height;
+        setZoomValue(100);
+        setRotationValue(0);
+        imageState.flipX = 1;
+        imageState.flipY = 1;
+        syncFlipButtons();
+        prevRange.value = savedRadius;
+        prevPer.textContent = `${savedRadius}%`;
+        updateRangeBackground(prevRange);
 
-        let width, height;
-
-        if (imageRatio > containerRatio) {
-          // landscape
-          height = cropperArea.offsetHeight;
-          width = height * imageRatio;
-        } else {
-          // portrait
-          width = cropperArea.offsetWidth;
-          height = width / imageRatio;
-        }
-
-        // default position to center
-        const left = (cropperArea.offsetWidth - width) / 2;
-        const top = (cropperArea.offsetHeight - height) / 2;
-
-        previewImage.style.width = width + "px";
-        previewImage.style.height = height + "px";
-        previewImage.style.left = left + "px";
-        previewImage.style.top = top + "px";
-        previewImage.src = img.src;
-
-        // reset zoom to 100
-        zoomRange.value = 100;
-        zoomPer.textContent = `${zoomRange.value}%`;
-        zoomRange.oninput();
-
-        updateZoom(cropperArea.offsetWidth / 2, cropperArea.offsetHeight / 2);
+        imageState.localOffsetX = 0;
+        imageState.localOffsetY = 0;
+        refreshImageSize();
+        applyImageState();
         syncPreviews();
-      }
-
-      function updateZoom(centerX, centerY) {
-        if (!currentImage) return;
-
-        const zoom = parseInt(zoomRange.value) / 100;
-
-        // Calculate base size (cover effect)
-        const containerRatio = cropperArea.offsetWidth / cropperArea.offsetHeight;
-        const imageRatio = currentImage.width / currentImage.height;
-
-        let baseWidth, baseHeight;
-
-        if (imageRatio > containerRatio) {
-          baseHeight = cropperArea.offsetHeight;
-          baseWidth = baseHeight * imageRatio;
-        } else {
-          baseWidth = cropperArea.offsetWidth;
-          baseHeight = baseWidth / imageRatio;
-        }
-
-        // Calculate new size
-        const newWidth = baseWidth * zoom;
-        const newHeight = baseHeight * zoom;
-
-        // Get current image position and dimensions
-        const oldWidth = parseFloat(previewImage.style.width);
-        const oldHeight = parseFloat(previewImage.style.height);
-        const oldLeft = parseFloat(previewImage.style.left);
-        const oldTop = parseFloat(previewImage.style.top);
-
-        let newLeft, newTop;
-
-        if (centerX !== undefined && centerY !== undefined) {
-          // Calculate zoom from the specified center point
-          const relativeX = (centerX - oldLeft) / oldWidth;
-          const relativeY = (centerY - oldTop) / oldHeight;
-
-          newLeft = centerX - relativeX * newWidth;
-          newTop = centerY - relativeY * newHeight;
-        } else {
-          // Default: maintain the center of the image
-          const centerPointX = oldLeft + oldWidth / 2;
-          const centerPointY = oldTop + oldHeight / 2;
-
-          newLeft = centerPointX - newWidth / 2;
-          newTop = centerPointY - newHeight / 2;
-        }
-
-        // Apply constraints to ensure the image always covers the cropper
-        const minLeft = Math.min(0, cropperArea.offsetWidth - newWidth);
-        const maxLeft = 0;
-        const minTop = Math.min(0, cropperArea.offsetHeight - newHeight);
-        const maxTop = 0;
-
-        const boundedLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
-        const boundedTop = Math.max(minTop, Math.min(maxTop, newTop));
-
-        // Apply changes
-        previewImage.style.width = newWidth + "px";
-        previewImage.style.height = newHeight + "px";
-        previewImage.style.left = boundedLeft + "px";
-        previewImage.style.top = boundedTop + "px";
-
-        const visibleWidth = cropperArea.offsetWidth * (currentImage.width / newWidth);
-        const visibleHeight = cropperArea.offsetHeight * (currentImage.height / newHeight);
-        cDimentsions.textContent = `${Math.round(visibleWidth)} × ${Math.round(visibleHeight)}`;
-
-        // calculate crop image data size
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-
-        canvas.width = Math.round(currentImage.width * (cropperArea.offsetWidth / newWidth));
-        canvas.height = Math.round(currentImage.height * (cropperArea.offsetHeight / newHeight));
-
-        const sx = -parseFloat(previewImage.style.left) * (currentImage.width / newWidth);
-        const sy = -parseFloat(previewImage.style.top) * (currentImage.height / newHeight);
-        const sw = canvas.width;
-        const sh = canvas.height;
-
-        ctx.drawImage(currentImage, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
-
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              requestAnimationFrame(() => {
-                const sizeInBytes = blob.size;
-                const sizeText =
-                  sizeInBytes >= 1024 * 1024
-                    ? `${(sizeInBytes / (1024 * 1024)).toFixed(2)} MB`
-                    : `${(sizeInBytes / 1024).toFixed(2)} KB`;
-                cSize.textContent = sizeText;
-              });
-            } else {
-              cSize.textContent = "N/A";
-            }
-          },
-          currentImage.src.startsWith("data:image/png") ? "image/png" : "image/jpeg",
-        );
       }
 
       let syncRequested = false;
       function syncPreviews() {
-        if (syncRequested) return;
+        if (syncRequested || !currentImage) return;
         syncRequested = true;
 
         requestAnimationFrame(() => {
           syncRequested = false;
 
-          const displayedWidth = parseFloat(previewImage.style.width);
-          const displayedHeight = parseFloat(previewImage.style.height);
-          const left = parseFloat(previewImage.style.left);
-          const top = parseFloat(previewImage.style.top);
-
-          const cropperAreaRect = cropperArea.getBoundingClientRect();
-          const cropperWidth = cropperAreaRect.width;
-          const cropperHeight = cropperAreaRect.height;
-
-          const previewTargets = [discord, discord2, discordServer, insta];
-
-          for (let i = 0; i < previewTargets.length; i++) {
-            const target = previewTargets[i];
-
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-
-            const fixedResolution = 68;
-            canvas.width = fixedResolution;
-            canvas.height = fixedResolution;
-
-            const targetRect = target.getBoundingClientRect();
-
-            const scaleX = targetRect.width / cropperWidth;
-            const scaleY = targetRect.height / cropperHeight;
-            const scale = Math.min(scaleX, scaleY);
-
-            const scaledWidth = displayedWidth * scale;
-            const scaledHeight = displayedHeight * scale;
-            const scaledLeft = left * scale;
-            const scaledTop = top * scale;
-
-            // render image size and position whithin fixed resolution
-            ctx.drawImage(
-              currentImage,
-              // where to crop source image
-              (left / displayedWidth) * currentImage.naturalWidth * -1,
-              (top / displayedHeight) * currentImage.naturalHeight * -1,
-              (cropperWidth / displayedWidth) * currentImage.naturalWidth,
-              (cropperHeight / displayedHeight) * currentImage.naturalHeight,
-              // fixed resolution
-              0,
-              0,
-              fixedResolution,
-              fixedResolution,
-            );
-
-            // get dataURL from canvas and apply to background
-            target.style.backgroundImage = `url(${canvas.toDataURL()})`;
-            target.style.backgroundSize = `100% 100%`;
-            target.style.backgroundPosition = `center`;
-            target.style.backgroundRepeat = "no-repeat";
+          for (const target of previewTargets) {
+            const surfaceState = getPreviewSurface(target);
+            resizePreviewSurface(surfaceState, target);
+            renderCurrentViewToCanvas(surfaceState.ctx, surfaceState.canvas.width, surfaceState.canvas.height);
           }
-
-          cPosition.textContent = `${Math.round(Math.abs((left / displayedWidth) * currentImage.width))}, ${Math.round(
-            Math.abs((top / displayedHeight) * currentImage.height),
-          )}`;
         });
       }
     </script>
