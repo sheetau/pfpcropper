@@ -20,6 +20,8 @@
 
     <title>Free Square Image Cropper for Profile Pictures & Icons</title>
     <link rel="icon" href="cropicon.png" type="image/x-icon" />
+    <link rel="preload" href="https://pvinis.github.io/iosevka-webfont/3.4.1/iosevka.css" as="style" />
+    <link rel="stylesheet" href="https://pvinis.github.io/iosevka-webfont/3.4.1/iosevka.css" />
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
       * {
@@ -62,13 +64,40 @@
           color 0.2s,
           border 0.2s;
         background-color: rgba(255, 255, 255, 0.1);
-        padding: 0.25rem 0.5rem;
+        padding: 0 0.5rem;
         border-radius: 0.25rem;
         border: solid 1px rgba(255, 255, 255, 0);
+        box-sizing: border-box;
+        display: inline-flex;
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.5rem;
       }
-      #links a:hover {
+      #links a:hover,
+      #links a:first-child:hover {
         color: rgba(255, 255, 255, 0.6);
         border: solid 1px rgba(255, 255, 255, 0.25);
+      }
+      #links img {
+        position: absolute;
+        height: 1.25rem;
+        top: 50%;
+        left: 1rem;
+        transform: translate(-50%, -50%);
+      }
+      #links a:first-child {
+        font-family:
+          Iosevka Web,
+          "Courier New",
+          monospace;
+        font-size: 1rem;
+        padding-left: 1.9rem;
+        padding-top: 0;
+        padding-bottom: 0;
+        position: relative;
+        background-color: transparent;
+        border: solid 1px rgba(255, 255, 255, 0.1);
       }
       h1 {
         width: auto;
@@ -573,7 +602,13 @@
       <div class="header-row">
         <h1 id="page-title" onclick="location.reload()">Square Image Cropper for PFP</h1>
         <p id="links">
-          <a href="https://linktr.ee/sheetau" target="_blank" rel="noopener noreferrer">Sheeta</a
+          <a href="https://sheetau.github.io/monapad/" target="_blank" rel="noopener noreferrer">
+            <img
+              src="https://raw.githubusercontent.com/sheetau/monapad/refs/heads/main/src/icon/favicon.ico"
+              alt="Monapad icon"
+            />
+            Monapad</a
+          ><a href="https://linktr.ee/sheetau" target="_blank" rel="noopener noreferrer">Sheeta</a
           ><a href="https://github.com/sheetau/pfpcropper" target="_blank" rel="noopener noreferrer">GitHub</a>
         </p>
         <!-- <p class="byline">
