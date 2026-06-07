@@ -204,7 +204,6 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        opacity: 1;
         opacity: 0.1;
         pointer-events: none;
       }
@@ -216,7 +215,7 @@
         display: none;
         user-select: none;
         -webkit-user-drag: none;
-        transition: opacity 0.2s;
+        transition: opacity 0.5s;
       }
       #crop-edge-hint {
         position: absolute;
@@ -226,11 +225,18 @@
         border-radius: 50%;
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.2s;
         z-index: 2;
       }
       #crop-edge-hint.is-visible {
-        opacity: 1;
+        animation: crop-edge-hint-fade 0.5s ease-out forwards;
+      }
+      @keyframes crop-edge-hint-fade {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
       }
       .info,
       .icon-preview,
@@ -462,6 +468,7 @@
         background: rgb(18, 18, 18);
         border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 0.25rem;
+        box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 1);
       }
       .frame-url-select.is-open .frame-url-menu {
         display: block;
@@ -473,7 +480,7 @@
         display: block;
         background: transparent;
         border: none;
-        border-radius: 0.2rem;
+        border-radius: 0.1rem;
         color: rgba(255, 255, 255, 0.75);
         cursor: pointer;
         font: inherit;
@@ -946,7 +953,6 @@
       const ROTATION_SNAP_INTERVAL = 45;
       const ROTATION_SNAP_THRESHOLD = 5;
       const CROP_SIZE_DEBOUNCE_MS = 120;
-      const EDGE_HINT_MS = 450;
       const EDGE_EPSILON = 0.01;
 
       let savedRadius = localStorage.getItem("cropperRadius") || "50";
@@ -964,7 +970,6 @@
       let currentImage = null;
       let lastTouchDistance = null;
       let cropSizeUpdateTimeout = null;
-      let edgeHintTimeout = null;
       let lastEdgeHintSignature = "";
       let imageState = {
         zoom: 1,
@@ -1193,24 +1198,14 @@
         if (signature === lastEdgeHintSignature) return;
         lastEdgeHintSignature = signature;
 
+        cropEdgeHint.classList.remove("is-visible");
+        cropEdgeHint.offsetWidth;
         cropEdgeHint.classList.add("is-visible");
-        if (edgeHintTimeout !== null) {
-          clearTimeout(edgeHintTimeout);
-        }
-
-        edgeHintTimeout = setTimeout(() => {
-          cropEdgeHint.classList.remove("is-visible");
-          edgeHintTimeout = null;
-        }, EDGE_HINT_MS);
       }
 
       function hideEdgeHint() {
         lastEdgeHintSignature = "";
         cropEdgeHint.classList.remove("is-visible");
-        if (edgeHintTimeout !== null) {
-          clearTimeout(edgeHintTimeout);
-          edgeHintTimeout = null;
-        }
       }
 
       function clampImageState() {
