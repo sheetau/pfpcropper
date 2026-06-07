@@ -391,13 +391,17 @@
         margin-left: 0.5rem;
       }
 
+      .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
       .input {
         display: flex;
         align-items: center;
         gap: 0.5rem;
         width: 100%;
         height: 1.6rem;
-        margin-bottom: 0.5rem;
         font-size: 0.85rem;
       }
       .url-input {
@@ -424,8 +428,17 @@
         min-width: 0;
         height: 100%;
       }
+      .frame-url-label {
+        position: absolute;
+        top: 50%;
+        padding: 0 0.5rem;
+        transform: translateY(-50%);
+        pointer-events: none;
+        z-index: 1;
+      }
       .frame-url-select .url-input {
         width: 100%;
+        padding-left: 3.6rem;
         padding-right: 1.9rem;
       }
       .frame-url-toggle {
@@ -439,6 +452,7 @@
         justify-content: center;
         background: transparent;
         border: none;
+        border-radius: 0 0.25rem 0.25rem 0;
         color: rgba(255, 255, 255, 0.7);
         cursor: pointer;
         transition:
@@ -490,12 +504,6 @@
         background: rgba(255, 255, 255, 0.1);
       }
 
-      .divider {
-        width: 1px;
-        height: 100%;
-        background-color: rgba(255, 255, 255, 0.25);
-      }
-
       .flip-buttons {
         display: flex;
         background: rgba(255, 255, 255, 0.1);
@@ -528,7 +536,9 @@
       }
 
       .control {
-        margin-bottom: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
         width: 100%;
         font-size: 0.85rem;
         -webkit-user-select: none; /* Safari */
@@ -539,7 +549,6 @@
         --range-progress: 0%;
         position: relative;
         height: 1.6rem;
-        margin-bottom: 0.5rem;
         border-radius: 0.25rem;
         background: rgba(255, 255, 255, 0.1);
         overflow: hidden;
@@ -580,7 +589,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 0.5rem;
-        padding: 0 0.6rem;
+        padding: 0 0.5rem;
         pointer-events: none;
       }
       .range-value {
@@ -802,14 +811,14 @@
 
           <div class="controls">
             <div class="input">
-              <span>Frame</span>
               <div class="frame-url-select" id="frame-url-select">
+                <span class="frame-url-label">Frame</span>
                 <input
                   type="url"
                   class="url-input"
                   id="frameUrl"
                   placeholder="cdn.discordapp.com/avatar-decoration-presets/....png"
-                  title="https://cdn.discordapp.com/avatar-decoration-presets/....png"
+                  title="Enter the URL of a Discord frame preset (e.g. cdn.discordapp.com/avatar-decoration-presets/....png)"
                 />
                 <button
                   type="button"
@@ -836,7 +845,6 @@
                 </button>
                 <div class="frame-url-menu" id="frame-url-menu"></div>
               </div>
-              <div class="divider"></div>
               <div class="flip-buttons">
                 <button id="flip-h-btn" class="icon-btn" title="Flip Horizontal">
                   <svg
