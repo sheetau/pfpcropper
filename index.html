@@ -218,6 +218,20 @@
         -webkit-user-drag: none;
         transition: opacity 0.2s;
       }
+      #crop-edge-hint {
+        position: absolute;
+        inset: 0;
+        border: 1px solid rgba(255, 255, 255, 1);
+        mix-blend-mode: difference;
+        border-radius: 50%;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        z-index: 2;
+      }
+      #crop-edge-hint.is-visible {
+        opacity: 1;
+      }
       .info,
       .icon-preview,
       .controls {
@@ -256,7 +270,6 @@
         width: 4.25rem;
         height: 4.25rem;
         border-radius: 50%;
-        background-color: rgba(255, 255, 255, 0.1);
         position: relative;
         cursor: pointer;
         transition: opacity 0.2s;
@@ -283,7 +296,6 @@
       .discord-server {
         width: 4.25rem;
         height: 4.25rem;
-        background-color: black;
         position: relative;
         overflow: hidden;
         cursor: pointer;
@@ -322,7 +334,6 @@
         width: 4.25rem;
         height: 4.25rem;
         border-radius: 50%;
-        background-color: rgba(255, 255, 255, 0.1);
         position: relative;
         overflow: hidden;
         transform: rotate(-45deg);
@@ -351,7 +362,6 @@
         width: 2.8rem;
         height: 2.8rem;
         border-radius: 50%;
-        background-color: rgba(255, 255, 255, 0.1);
         position: relative;
         cursor: pointer;
         transition: opacity 0.2s;
@@ -380,7 +390,7 @@
         align-items: center;
         gap: 0.5rem;
         width: 100%;
-        height: 1.5rem;
+        height: 1.6rem;
         margin-bottom: 0.5rem;
         font-size: 0.85rem;
       }
@@ -402,6 +412,76 @@
       .url-input::placeholder {
         color: rgba(255, 255, 255, 0.1);
       }
+      .frame-url-select {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+      }
+      .frame-url-select .url-input {
+        width: 100%;
+        padding-right: 1.9rem;
+      }
+      .frame-url-toggle {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 1.6rem;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        transition:
+          color 0.2s,
+          transform 0.2s,
+          background 0.2s;
+      }
+      .frame-url-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .frame-url-toggle svg {
+        width: 1.1rem;
+        height: 1.1rem;
+        transition: transform 0.2s;
+      }
+      .frame-url-select.is-open .frame-url-toggle svg {
+        transform: rotate(180deg);
+      }
+      .frame-url-menu {
+        position: absolute;
+        top: calc(100% + 0.25rem);
+        left: 0;
+        right: 0;
+        z-index: 5;
+        display: none;
+        padding: 0.2rem;
+        background: rgb(18, 18, 18);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 0.25rem;
+      }
+      .frame-url-select.is-open .frame-url-menu {
+        display: block;
+      }
+      .frame-url-option {
+        width: 100%;
+        height: 1.6rem;
+        padding: 0 0.4rem;
+        display: block;
+        background: transparent;
+        border: none;
+        border-radius: 0.2rem;
+        color: rgba(255, 255, 255, 0.75);
+        cursor: pointer;
+        font: inherit;
+        text-align: left;
+      }
+      .frame-url-option:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
 
       .divider {
         width: 1px;
@@ -414,13 +494,14 @@
         background: rgba(255, 255, 255, 0.1);
         border-radius: 0.25rem;
         overflow: hidden;
+        height: 100%;
       }
       .icon-btn {
         display: flex;
         align-items: center;
         justify-content: center;
         height: 100%;
-        padding: 0.2rem;
+        width: 1.6rem;
         background: transparent;
         border: none;
         color: white;
@@ -434,6 +515,10 @@
       .icon-btn.is-active {
         background: rgba(255, 255, 255, 0.25);
       }
+      .icon-btn svg {
+        width: 1.1rem;
+        height: 1.1rem;
+      }
 
       .control {
         margin-bottom: 0.5rem;
@@ -443,30 +528,67 @@
         -ms-user-select: none; /* IE 10 and IE 11 */
         user-select: none; /* Standard syntax */
       }
-      label {
-        display: flex;
-        justify-content: space-between;
+      .range-control {
+        --range-progress: 0%;
+        position: relative;
+        height: 1.6rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.25rem;
+        background: rgba(255, 255, 255, 0.1);
+        overflow: hidden;
       }
-      .zoom-percent,
-      .prev-percent,
-      .rotate-degree {
-        opacity: 0.25;
+      .range-control:has(input:disabled) {
+        opacity: 0.55;
+      }
+      .range-fill {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: var(--range-progress);
+        min-width: 0.2rem;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 0.25rem;
+        transition: background 0.2s;
+      }
+      .range-fill::after {
+        content: "";
+        position: absolute;
+        top: calc(50% / 2);
+        right: 0.4rem;
+        width: 2px;
+        height: 50%;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.1);
+        transition: background 0.2s;
+      }
+      .range-control:hover .range-fill {
+        background: rgba(255, 255, 255, 0.25);
+      }
+      .range-control:hover .range-fill::after {
+        background: rgba(255, 255, 255, 0.5);
+      }
+      .range-text {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0 0.6rem;
+        pointer-events: none;
+      }
+      .range-value {
+        opacity: 0.5;
       }
       input[type="range"] {
         -webkit-appearance: none;
         appearance: none;
+        position: absolute;
+        inset: 0;
         width: 100%;
-        background: linear-gradient(
-          to right,
-          rgba(255, 255, 255, 0.25) 0%,
-          rgba(255, 255, 255, 0.25) 0%,
-          rgba(255, 255, 255, 0.1) 0%,
-          rgba(255, 255, 255, 0.1) 100%
-        );
-        height: 0.5rem;
+        height: 100%;
+        background: transparent;
         outline: none;
-        border-radius: 0.25rem;
-        margin-bottom: 0.5rem;
+        opacity: 0;
         cursor: pointer;
       }
 
@@ -474,25 +596,18 @@
       input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
         width: 1rem;
-        height: 0.5rem;
-        border-top-left-radius: 25% 50%;
-        border-top-right-radius: 25% 50%;
-        border-bottom-right-radius: 25% 50%;
-        border-bottom-left-radius: 25% 50%;
-        background: white;
+        height: 1.8rem;
       }
 
       /* Firefox */
       input[type="range"]::-moz-range-thumb {
         width: 1rem;
-        height: 0.5rem;
-        border-radius: 25% / 50%;
-        background: white;
+        height: 1.8rem;
+        background: transparent;
         border: none;
       }
       @supports (-moz-appearance: none) {
-        input[type="range"] {
-          margin-top: 0.3rem;
+        .range-control {
           margin-bottom: 0.75rem;
         }
         #download-btn {
@@ -642,6 +757,7 @@
         <div id="cropper" class="cropper-area">
           <p id="upload-prompt">Drop or click to upload image</p>
           <img id="preview-image" alt="Preview" />
+          <div id="crop-edge-hint" aria-hidden="true"></div>
         </div>
 
         <div class="side">
@@ -659,8 +775,8 @@
           <div class="icon-preview">
             <div class="social-icons">
               <div class="discord">
-                <div class="online"></div>
                 <div class="frame"></div>
+                <div class="online"></div>
               </div>
               <div class="discord-server"></div>
               <div class="insta-ring">
@@ -680,13 +796,39 @@
           <div class="controls">
             <div class="input">
               <span>Frame</span>
-              <input
-                type="url"
-                class="url-input"
-                id="frameUrl"
-                placeholder="cdn.discordapp.com/avatar-decoration-presets/....png"
-                title="https://cdn.discordapp.com/avatar-decoration-presets/....png"
-              />
+              <div class="frame-url-select" id="frame-url-select">
+                <input
+                  type="url"
+                  class="url-input"
+                  id="frameUrl"
+                  placeholder="cdn.discordapp.com/avatar-decoration-presets/....png"
+                  title="https://cdn.discordapp.com/avatar-decoration-presets/....png"
+                />
+                <button
+                  type="button"
+                  class="frame-url-toggle"
+                  id="frame-url-toggle"
+                  aria-label="Frame presets"
+                  aria-expanded="false"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-down"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M6 9l6 6l6 -6" />
+                  </svg>
+                </button>
+                <div class="frame-url-menu" id="frame-url-menu"></div>
+              </div>
               <div class="divider"></div>
               <div class="flip-buttons">
                 <button id="flip-h-btn" class="icon-btn" title="Flip Horizontal">
@@ -730,12 +872,21 @@
               </div>
             </div>
             <div class="control">
-              <label for="zoom-range"><span>Zoom</span><span class="zoom-percent"></span></label>
-              <input type="range" id="zoom-range" min="100" max="1000" value="100" disabled />
-              <label for="rotation-range"><span>Rotation</span><span class="rotate-degree"></span></label>
-              <input type="range" id="rotation-range" min="-180" max="180" value="0" disabled />
-              <label for="prev-radius"><span>Preview radius</span><span class="prev-percent"></span></label>
-              <input type="range" id="prev-radius" min="0" max="50" value="50" disabled />
+              <div class="range-control">
+                <div class="range-fill"></div>
+                <div class="range-text"><span>Zoom</span><span class="range-value zoom-percent"></span></div>
+                <input type="range" id="zoom-range" aria-label="Zoom" min="100" max="1000" value="100" disabled />
+              </div>
+              <div class="range-control">
+                <div class="range-fill"></div>
+                <div class="range-text"><span>Rotation</span><span class="range-value rotate-degree"></span></div>
+                <input type="range" id="rotation-range" aria-label="Rotation" min="-180" max="180" value="0" disabled />
+              </div>
+              <div class="range-control">
+                <div class="range-fill"></div>
+                <div class="range-text"><span>Preview radius</span><span class="range-value prev-percent"></span></div>
+                <input type="range" id="prev-radius" aria-label="Preview radius" min="0" max="50" value="50" disabled />
+              </div>
             </div>
 
             <div class="buttons">
@@ -763,6 +914,7 @@
     <script>
       const cropperArea = document.getElementById("cropper");
       const previewImage = document.getElementById("preview-image");
+      const cropEdgeHint = document.getElementById("crop-edge-hint");
       const uploadPrompt = document.getElementById("upload-prompt");
       const fileInput = document.getElementById("file-input");
       const fileName = document.getElementById("file-name");
@@ -794,12 +946,14 @@
       const ROTATION_SNAP_INTERVAL = 45;
       const ROTATION_SNAP_THRESHOLD = 5;
       const CROP_SIZE_DEBOUNCE_MS = 120;
+      const EDGE_HINT_MS = 450;
+      const EDGE_EPSILON = 0.01;
 
       let savedRadius = localStorage.getItem("cropperRadius") || "50";
       prevRange.value = savedRadius;
       prevPer.textContent = `${savedRadius}%`;
       zoomPer.textContent = `${zoomRange.value}%`;
-      rotateDeg.textContent = `${rotationRange.value}deg`;
+      rotateDeg.textContent = `${rotationRange.value}°`;
 
       let imageName = "";
       let isDragging = false;
@@ -810,6 +964,8 @@
       let currentImage = null;
       let lastTouchDistance = null;
       let cropSizeUpdateTimeout = null;
+      let edgeHintTimeout = null;
+      let lastEdgeHintSignature = "";
       let imageState = {
         zoom: 1,
         rotation: 0,
@@ -822,31 +978,97 @@
       };
 
       const input = document.getElementById("frameUrl");
+      const frameUrlSelect = document.getElementById("frame-url-select");
+      const frameUrlToggle = document.getElementById("frame-url-toggle");
+      const frameUrlMenu = document.getElementById("frame-url-menu");
       const frames = document.querySelectorAll(".frame");
+      const frameUrlPresets = [
+        {
+          name: "Angel",
+          url: "https://cdn.discordapp.com/avatar-decoration-presets/a_c86b11a49bb8057ce9c974a6f7ad658a.png",
+        },
+        {
+          name: "Dark Roses",
+          url: "https://cdn.discordapp.com/media/v1/collectibles-shop/1462116613653401775/animated",
+        },
+        {
+          name: "Spray Doodles",
+          url: "https://cdn.discordapp.com/media/v1/collectibles-shop/1506049399703474186/animated",
+        },
+        {
+          name: "Git Gud",
+          url: "https://cdn.discordapp.com/media/v1/collectibles-shop/1357589632581374042/animated",
+        },
+        {
+          name: "LittleTwinStars",
+          url: "https://cdn.discordapp.com/media/v1/collectibles-shop/1488244261362340101/animated",
+        },
+      ];
       const savedUrl = localStorage.getItem("frameUrl") || "";
       input.value = savedUrl;
-      if (savedUrl) {
-        frames.forEach((frame) => {
-          frame.style.backgroundImage = `url("${savedUrl}")`;
-        });
-      }
 
-      input.addEventListener("input", () => {
+      function applyFrameUrl() {
         const url = input.value.trim().split("?")[0];
         localStorage.setItem("frameUrl", url);
         frames.forEach((frame) => {
           frame.style.backgroundImage = url ? `url("${url}")` : "none";
         });
+      }
+
+      function closeFrameUrlMenu() {
+        frameUrlSelect.classList.remove("is-open");
+        frameUrlToggle.setAttribute("aria-expanded", "false");
+      }
+
+      function toggleFrameUrlMenu() {
+        const isOpen = frameUrlSelect.classList.toggle("is-open");
+        frameUrlToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      }
+
+      function renderFrameUrlPresets() {
+        frameUrlPresets.forEach((preset) => {
+          const option = document.createElement("button");
+          option.type = "button";
+          option.className = "frame-url-option";
+          option.textContent = preset.name;
+          option.addEventListener("click", () => {
+            input.value = preset.url;
+            applyFrameUrl();
+            closeFrameUrlMenu();
+          });
+          frameUrlMenu.appendChild(option);
+        });
+      }
+
+      renderFrameUrlPresets();
+
+      if (savedUrl) {
+        applyFrameUrl();
+      }
+
+      input.addEventListener("input", () => {
+        applyFrameUrl();
+      });
+
+      frameUrlToggle.addEventListener("click", () => {
+        toggleFrameUrlMenu();
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!frameUrlSelect.contains(e.target)) {
+          closeFrameUrlMenu();
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeFrameUrlMenu();
+        }
       });
 
       function updateRangeBackground(range) {
         const value = ((range.value - range.min) / (range.max - range.min)) * 100;
-        range.style.background =
-          "linear-gradient(to right, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.25) " +
-          value +
-          "%, rgba(255, 255, 255, 0.1) " +
-          value +
-          "%, rgba(255, 255, 255, 0.1) 100%)";
+        range.parentElement.style.setProperty("--range-progress", `${value}%`);
       }
 
       function getCropperMetrics() {
@@ -914,7 +1136,7 @@
       function setRotationValue(value) {
         rotationRange.value = value;
         imageState.rotation = value;
-        rotateDeg.textContent = `${value}deg`;
+        rotateDeg.textContent = `${value}°`;
         updateRangeBackground(rotationRange);
       }
 
@@ -944,13 +1166,67 @@
         return Math.max(1, Math.round(cropperArea.offsetWidth * getImagePixelScale()));
       }
 
+      function isDiagonalRotation() {
+        const rotation = Math.abs(getVisualRotation()) % 90;
+        return rotation > EDGE_EPSILON && 90 - rotation > EDGE_EPSILON;
+      }
+
+      function canShowEdgeHint() {
+        return prevRange.value !== prevRange.max;
+      }
+
+      function getEdgeHintSignature() {
+        return [
+          imageState.width,
+          imageState.height,
+          imageState.localOffsetX,
+          imageState.localOffsetY,
+          imageState.rotation,
+          imageState.flipX,
+          imageState.flipY,
+        ]
+          .map((value) => Math.round(value * 100) / 100)
+          .join(",");
+      }
+
+      function showEdgeHint(signature) {
+        if (signature === lastEdgeHintSignature) return;
+        lastEdgeHintSignature = signature;
+
+        cropEdgeHint.classList.add("is-visible");
+        if (edgeHintTimeout !== null) {
+          clearTimeout(edgeHintTimeout);
+        }
+
+        edgeHintTimeout = setTimeout(() => {
+          cropEdgeHint.classList.remove("is-visible");
+          edgeHintTimeout = null;
+        }, EDGE_HINT_MS);
+      }
+
+      function hideEdgeHint() {
+        lastEdgeHintSignature = "";
+        cropEdgeHint.classList.remove("is-visible");
+        if (edgeHintTimeout !== null) {
+          clearTimeout(edgeHintTimeout);
+          edgeHintTimeout = null;
+        }
+      }
+
       function clampImageState() {
         const { previewRadius } = getCropperMetrics();
         const maxOffsetX = Math.max(0, imageState.width / 2 - previewRadius);
         const maxOffsetY = Math.max(0, imageState.height / 2 - previewRadius);
+        const nextOffsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, imageState.localOffsetX));
+        const nextOffsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, imageState.localOffsetY));
 
-        imageState.localOffsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, imageState.localOffsetX));
-        imageState.localOffsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, imageState.localOffsetY));
+        imageState.localOffsetX = nextOffsetX;
+        imageState.localOffsetY = nextOffsetY;
+
+        return (
+          Math.abs(Math.abs(nextOffsetX) - maxOffsetX) <= EDGE_EPSILON ||
+          Math.abs(Math.abs(nextOffsetY) - maxOffsetY) <= EDGE_EPSILON
+        );
       }
 
       function renderPreviewImage() {
@@ -1048,7 +1324,14 @@
       }
 
       function applyImageState() {
-        clampImageState();
+        const isAtEdge = clampImageState();
+        if (canShowEdgeHint() && isDiagonalRotation() && isAtEdge) {
+          showEdgeHint(getEdgeHintSignature());
+        } else if (!canShowEdgeHint()) {
+          hideEdgeHint();
+        } else {
+          lastEdgeHintSignature = "";
+        }
         renderPreviewImage();
         updateCropInfo();
       }
@@ -1325,6 +1608,9 @@
         savedRadius = prevRange.value;
         localStorage.setItem("cropperRadius", prevRange.value);
         updateRangeBackground(prevRange);
+        if (!canShowEdgeHint()) {
+          hideEdgeHint();
+        }
       });
 
       function setCropperRadius(element, radius) {
@@ -1335,6 +1621,9 @@
           savedRadius = prevRange.value;
           localStorage.setItem("cropperRadius", radius);
           updateRangeBackground(prevRange);
+          if (!canShowEdgeHint()) {
+            hideEdgeHint();
+          }
         });
       }
 
