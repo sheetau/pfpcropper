@@ -99,6 +99,7 @@
         --size-insta-ring: 5rem;
         --size-control-height: 1.6rem;
         --size-button-height: 2rem;
+        --size-icon-xs: 1rem;
         --size-icon-sm: 1.1rem;
         --size-icon-md: 1.25rem;
         --size-logo: 25px;
@@ -305,17 +306,16 @@
         color: var(--color-text-soft);
       }
       #links a:first-child {
-        padding: 0 var(--space-md) 0 var(--space-link-brand-left);
+        padding: 0 var(--space-md);
         border: var(--border-soft);
         background: transparent;
         font-family: var(--font-mono);
         font-size: var(--text-base);
+        gap: var(--space-xs);
       }
-      #links img {
-        top: var(--position-center);
-        left: var(--space-2xl);
-        height: var(--size-icon-md);
-        transform: translate(-50%, -50%);
+      #links svg {
+        height: var(--size-icon-xs);
+        color: var(--color-white-50);
       }
       .mobile-break {
         display: none;
@@ -793,11 +793,15 @@
             rel="noopener noreferrer"
             title="The text editor that thinks like a code editor"
           >
-            <img
-              class="u-absolute"
-              src="https://raw.githubusercontent.com/sheetau/monapad/refs/heads/main/src/icon/favicon.ico"
-              alt="Monapad icon"
-            />
+            <svg viewBox="0 0 22.91 22.91" fill="none" aria-hidden="true">
+              <path
+                d="M7.37 15.54 21.41 1.5v19.91l-9.96-9.96M7.37 7.37 1.5 1.5v19.91"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
             Monapad</a
           ><a
             class="u-inline-center u-radius-sm u-plain-link u-text-muted"
