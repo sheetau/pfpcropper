@@ -270,6 +270,7 @@
         margin-bottom: var(--space-6xl);
       }
       .container {
+        position: relative;
         flex-wrap: wrap;
       }
 
@@ -325,20 +326,19 @@
       .cropper-area {
         width: var(--size-cropper);
         height: var(--size-cropper);
-        border: var(--border-crop);
-        border-radius: var(--radius-none);
-        transition: var(--transition-border);
-      }
-      .cropper-area:not(.has-image):hover {
-        border: var(--border-crop-hover);
       }
       .cropper-area.has-image {
         cursor: move;
       }
-      #placeholder {
+      #placeholder,
+      #cropper-border {
+        top: 0;
+        left: 0;
         width: var(--size-cropper);
         height: var(--size-cropper);
         pointer-events: none;
+      }
+      #placeholder {
         background:
           linear-gradient(
             to top right,
@@ -354,6 +354,15 @@
           );
         background-size: var(--size-full) var(--size-full);
         background-repeat: no-repeat;
+      }
+      #cropper-border {
+        border: var(--border-crop);
+        border-radius: var(--radius-none);
+        transition: var(--transition-border);
+        z-index: 3;
+      }
+      .cropper-area:not(.has-image):hover + #cropper-border {
+        border: var(--border-crop-hover);
       }
       #upload-prompt {
         text-align: center;
@@ -763,7 +772,8 @@
           border-left: none;
         }
         .cropper-area,
-        #placeholder {
+        #placeholder,
+        #cropper-border {
           width: var(--size-full);
           max-width: var(--size-cropper-mobile);
           height: auto;
@@ -826,6 +836,7 @@
           <img id="preview-image" class="u-absolute" alt="Preview" />
           <div id="crop-edge-hint" class="u-absolute u-round" aria-hidden="true"></div>
         </div>
+        <div id="cropper-border" class="u-absolute" aria-hidden="true"></div>
 
         <div class="side u-flex u-column u-between">
           <div class="info u-panel-section">
@@ -1024,7 +1035,7 @@
       <defs>
         <mask id="blobMask" maskContentUnits="objectBoundingBox">
           <path
-            d="M0 0.436 C0 0.284 0 0.207 0.03 0.149 C0.056 0.098 0.098 0.056 0.149 0.03 C0.207 0 0.284 0 0.436 0 H0.564 C0.716 0 0.793 0 0.851 0.03 C0.902 0.056 0.944 0.098 0.97 0.149 C1 0.207 1 0.284 1 0.436 V0.564 C1 0.716 1 0.793 0.97 0.851 C0.944 0.902 0.902 0.944 0.851 0.97 C0.793 1 0.716 1 0.564 1 H0.436 C0.284 1 0.207 1 0.149 0.97 C0.098 0.944 0.056 0.902 0.03 0.851 C0 0.793 0 0.716 0 0.564 V0.436 Z"
+            d="M0 0.4363625 C0 0.2836225 0 0.20725125 0.0297255 0.14891175 C0.05587275 0.09759475 0.09759475 0.05587275 0.14891175 0.0297255 C0.20725125 0 0.2836225 0 0.4363625 0 H0.5636375 C0.7163775 0 0.79275 0 0.8510875 0.0297255 C0.902405 0.05587275 0.9441275 0.09759475 0.970275 0.14891175 C1 0.20725125 1 0.2836225 1 0.4363625 V0.5636375 C1 0.7163775 1 0.79275 0.970275 0.8510875 C0.9441275 0.902405 0.902405 0.9441275 0.8510875 0.970275 C0.79275 1 0.7163775 1 0.5636375 1 H0.4363625 C0.2836225 1 0.20725125 1 0.14891175 0.970275 C0.09759475 0.9441275 0.05587275 0.902405 0.0297255 0.8510875 C0 0.79275 0 0.7163775 0 0.5636375 V0.4363625 Z"
             fill="white"
           />
         </mask>
@@ -1033,6 +1044,7 @@
 
     <script>
       const cropperArea = document.getElementById("cropper");
+      const cropperBorder = document.getElementById("cropper-border");
       const previewImage = document.getElementById("preview-image");
       const cropEdgeHint = document.getElementById("crop-edge-hint");
       const uploadPrompt = document.getElementById("upload-prompt");
@@ -1067,6 +1079,7 @@
       const ROTATION_SNAP_THRESHOLD = 5;
       const CROP_SIZE_DEBOUNCE_MS = 120;
       const EDGE_EPSILON = 0.01;
+      const PREVIEW_CORNER_SMOOTHING = 0.6;
 
       let savedRadius = localStorage.getItem("cropperRadius") || "50";
       prevRange.value = savedRadius;
@@ -1282,6 +1295,103 @@
 
       function getOutputResolution() {
         return Math.max(1, Math.round(cropperArea.offsetWidth * getImagePixelScale()));
+      }
+
+      function toRadians(degrees) {
+        return (degrees * Math.PI) / 180;
+      }
+
+      function formatPathNumber(value) {
+        return Number(value.toFixed(4));
+      }
+
+      function getSquircleCornerParams(cornerRadius, cornerSmoothing, roundingAndSmoothingBudget) {
+        if (!cornerRadius) {
+          return { a: 0, b: 0, c: 0, d: 0, p: 0, arcSectionLength: 0, cornerRadius: 0 };
+        }
+
+        const maxCornerSmoothing = roundingAndSmoothingBudget / cornerRadius - 1;
+        const smoothing = Math.max(0, Math.min(cornerSmoothing, maxCornerSmoothing));
+        const p = Math.min((1 + smoothing) * cornerRadius, roundingAndSmoothingBudget);
+        const arcMeasure = 90 * (1 - smoothing);
+        const arcSectionLength = Math.sin(toRadians(arcMeasure / 2)) * cornerRadius * Math.sqrt(2);
+        const angleAlpha = (90 - arcMeasure) / 2;
+        const p3ToP4Distance = cornerRadius * Math.tan(toRadians(angleAlpha / 2));
+        const angleBeta = 45 * smoothing;
+        const c = p3ToP4Distance * Math.cos(toRadians(angleBeta));
+        const d = c * Math.tan(toRadians(angleBeta));
+        const b = (p - arcSectionLength - c - d) / 3;
+
+        return {
+          a: 2 * b,
+          b,
+          c,
+          d,
+          p,
+          arcSectionLength,
+          cornerRadius,
+        };
+      }
+
+      function getSquirclePath(width, height, radiusPercent) {
+        const roundingBudget = Math.min(width, height) / 2;
+        const cornerRadius = Math.min(roundingBudget, (Math.min(width, height) * radiusPercent) / 100);
+        const { a, b, c, d, p, arcSectionLength } = getSquircleCornerParams(
+          cornerRadius,
+          PREVIEW_CORNER_SMOOTHING,
+          roundingBudget,
+        );
+        const r = formatPathNumber(cornerRadius);
+        const values = {
+          w: formatPathNumber(width),
+          h: formatPathNumber(height),
+          a: formatPathNumber(a),
+          ab: formatPathNumber(a + b),
+          abc: formatPathNumber(a + b + c),
+          c: formatPathNumber(c),
+          d: formatPathNumber(d),
+          p: formatPathNumber(p),
+          arc: formatPathNumber(arcSectionLength),
+          r,
+        };
+
+        if (!cornerRadius) {
+          return `M 0 0 H ${values.w} V ${values.h} H 0 Z`;
+        }
+
+        return [
+          `M ${formatPathNumber(width - p)} 0`,
+          `c ${values.a} 0 ${values.ab} 0 ${values.abc} ${values.d}`,
+          `a ${values.r} ${values.r} 0 0 1 ${values.arc} ${values.arc}`,
+          `c ${values.d} ${values.c} ${values.d} ${formatPathNumber(b + c)} ${values.d} ${values.abc}`,
+          `L ${values.w} ${formatPathNumber(height - p)}`,
+          `c 0 ${values.a} 0 ${values.ab} ${formatPathNumber(-d)} ${values.abc}`,
+          `a ${values.r} ${values.r} 0 0 1 ${formatPathNumber(-arcSectionLength)} ${values.arc}`,
+          `c ${formatPathNumber(-c)} ${values.d} ${formatPathNumber(-(b + c))} ${values.d} ${formatPathNumber(-(a + b + c))} ${values.d}`,
+          `L ${values.p} ${values.h}`,
+          `c ${formatPathNumber(-a)} 0 ${formatPathNumber(-(a + b))} 0 ${formatPathNumber(-(a + b + c))} ${formatPathNumber(-d)}`,
+          `a ${values.r} ${values.r} 0 0 1 ${formatPathNumber(-arcSectionLength)} ${formatPathNumber(-arcSectionLength)}`,
+          `c ${formatPathNumber(-d)} ${formatPathNumber(-c)} ${formatPathNumber(-d)} ${formatPathNumber(-(b + c))} ${formatPathNumber(-d)} ${formatPathNumber(-(a + b + c))}`,
+          `L 0 ${values.p}`,
+          `c 0 ${formatPathNumber(-a)} 0 ${formatPathNumber(-(a + b))} ${values.d} ${formatPathNumber(-(a + b + c))}`,
+          `a ${values.r} ${values.r} 0 0 1 ${values.arc} ${formatPathNumber(-arcSectionLength)}`,
+          `c ${values.c} ${formatPathNumber(-d)} ${formatPathNumber(b + c)} ${formatPathNumber(-d)} ${values.abc} ${formatPathNumber(-d)}`,
+          "Z",
+        ].join(" ");
+      }
+
+      function applyPreviewRadius(radius) {
+        const numericRadius = Number(radius);
+        cropperBorder.style.borderRadius = `${numericRadius}%`;
+
+        const width = cropperArea.offsetWidth;
+        const height = cropperArea.offsetHeight;
+        if (!width || !height) return;
+
+        const path = getSquirclePath(width, height, numericRadius);
+        const clipPath = `path("${path}")`;
+        cropperArea.style.clipPath = clipPath;
+        cropperArea.style.webkitClipPath = clipPath;
       }
 
       function isDiagonalRotation() {
@@ -1559,25 +1669,25 @@
       cropperArea.addEventListener("dragover", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        cropperArea.style.border = "1px dashed rgba(255, 255, 255, 1)";
+        cropperBorder.style.border = "1px dashed rgba(255, 255, 255, 1)";
         previewImage.style.opacity = "0.5";
       });
 
       cropperArea.addEventListener("dragleave", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        cropperArea.style.border = cropperArea.classList.contains("has-image")
+        cropperBorder.style.border = cropperArea.classList.contains("has-image")
           ? "1px dashed rgba(255, 255, 255, 0)"
-          : "1px dashed rgba(255, 255, 255, 0.25)";
+          : "";
         previewImage.style.opacity = "";
       });
 
       cropperArea.addEventListener("drop", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        cropperArea.style.border = cropperArea.classList.contains("has-image")
+        cropperBorder.style.border = cropperArea.classList.contains("has-image")
           ? "1px dashed rgba(255, 255, 255, 0)"
-          : "1px dashed rgba(255, 255, 255, 0.25)";
+          : "";
         previewImage.style.opacity = "";
 
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
@@ -1710,8 +1820,13 @@
         toggleFlip("y");
       });
 
+      window.addEventListener("resize", () => {
+        if (!cropperArea.classList.contains("has-image")) return;
+        applyPreviewRadius(savedRadius);
+      });
+
       prevRange.addEventListener("input", () => {
-        cropperArea.style.borderRadius = `${prevRange.value}%`;
+        applyPreviewRadius(prevRange.value);
         prevPer.textContent = `${prevRange.value}%`;
         savedRadius = prevRange.value;
         localStorage.setItem("cropperRadius", prevRange.value);
@@ -1723,7 +1838,7 @@
 
       function setCropperRadius(element, radius) {
         element.addEventListener("click", () => {
-          cropperArea.style.borderRadius = `${radius}%`;
+          applyPreviewRadius(radius);
           prevPer.textContent = `${radius}%`;
           prevRange.value = radius;
           savedRadius = prevRange.value;
@@ -1801,8 +1916,8 @@
       function displayImage(img) {
         uploadPrompt.style.display = "none";
         cropperArea.classList.add("has-image");
-        cropperArea.style.border = "1px dashed rgba(255, 255, 255, 0)";
-        cropperArea.style.borderRadius = `${savedRadius}%`;
+        cropperBorder.style.border = "1px dashed rgba(255, 255, 255, 0)";
+        applyPreviewRadius(savedRadius);
         previewImage.style.display = "block";
         previewImage.src = img.src;
         sideEl.style.opacity = "1";
