@@ -31,12 +31,11 @@
     </script>
 
     <title>Free Square Image Cropper for Profile Pictures &amp; Icons</title>
-    <link rel="icon" type="image/png" href="cropicon.png" sizes="32x32" />
-    <link rel="icon" type="image/png" href="cropicon.png" sizes="16x16" />
-    <link rel="icon" type="image/png" href="cropicon.png" />
-    <link rel="icon" type="image/png" href="cropicon.png?v=2" sizes="32x32" />
-    <link rel="icon" type="image/png" href="cropicon.png?v=2" sizes="16x16" />
-    <link rel="icon" type="image/png" href="cropicon.png?v=2" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27.68 27.68"%3E%3Cpath d="M11 1H4.64A3.64 3.64 0 0 0 1 4.64V11M1 16.68v8.18c0 1 .81 1.82 1.82 1.82H11M26.68 11V6.45A5.45 5.45 0 0 0 21.23 1h-4.55M16.68 26.68c5.52 0 10-4.48 10-10" fill="none" stroke="%23fff" stroke-miterlimit="10" stroke-width="2"/%3E%3Cpath d="M21.03 11.38v4.91M10.4 16.24c.04-1.79 1.13-4.71 2.93-4.71 1.36 0 2.01 1.84 2.15 4.77" fill="none" stroke="%23fff" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/%3E%3C/svg%3E'
+    />
     <link rel="preload" href="https://pvinis.github.io/iosevka-webfont/3.4.1/iosevka.css" as="style" />
     <link rel="stylesheet" href="https://pvinis.github.io/iosevka-webfont/3.4.1/iosevka.css" />
     <style>
@@ -88,7 +87,7 @@
         --space-6xl: 2.5rem;
         --space-7xl: 3rem;
         --space-link-brand-left: 1.9rem;
-        --space-frame-label-left: 3.6rem;
+        --space-frame-label-left: 3.3rem;
         --size-main: 52rem;
         --size-full: 100%;
         --size-half: 50%;
@@ -102,7 +101,7 @@
         --size-icon-xs: 1rem;
         --size-icon-sm: 1.1rem;
         --size-icon-md: 1.25rem;
-        --size-logo: 25px;
+        --size-icon-lg: 1.5rem;
         --size-thumb-width: 1rem;
         --size-thumb-height: 1.8rem;
         --size-range-fill-min: 0.2rem;
@@ -260,7 +259,7 @@
         justify-content: center;
         background: var(--color-black);
         color: var(--color-white);
-        font-family: var(--font-sans);
+        font-family: var(--font-mono);
       }
       main {
         width: var(--size-main);
@@ -283,15 +282,15 @@
         line-height: var(--line-title);
       }
       #page-title:hover {
-        opacity: 0.75;
+        opacity: 0.7;
       }
-      #page-title img {
-        height: var(--size-logo);
+      #page-title svg {
+        height: var(--size-icon-lg);
       }
       #links {
         gap: var(--space-md);
         color: var(--color-text-dim);
-        font-size: var(--text-md);
+        font-size: var(--text-base);
       }
       #links a {
         padding: 0 var(--space-md);
@@ -307,11 +306,8 @@
         color: var(--color-text-soft);
       }
       #links a:first-child {
-        padding: 0 var(--space-md);
         border: var(--border-soft);
         background: transparent;
-        font-family: var(--font-mono);
-        font-size: var(--text-base);
         gap: var(--space-xs);
       }
       #links svg {
@@ -480,6 +476,7 @@
         z-index: 1;
       }
       .discord-message {
+        font-family: var(--font-sans);
         font-size: var(--text-sm);
       }
       .message {
@@ -518,6 +515,7 @@
         min-width: 0;
         padding: var(--space-xs) var(--space-sm);
         color: var(--color-text-muted);
+        font-family: var(--font-mono);
       }
       .url-input:focus,
       .url-input:hover {
@@ -666,7 +664,7 @@
         overflow: hidden;
         justify-content: flex-start;
         color: inherit;
-        font-family: var(--font-sans);
+        font-family: var(--font-mono);
         text-align: left;
       }
       #download-btn {
@@ -793,7 +791,19 @@
     <main>
       <div class="header-row u-flex u-between u-center u-wrap u-full">
         <h1 id="page-title" class="u-flex u-center u-clickable u-transition-opacity" onclick="location.reload()">
-          <img src="cropicon.png" alt="" />Square Image Cropper for PFP
+          <svg xmlns="http://www.w3.org/2000/svg" id="crop-icon" data-name="Layer 1" viewBox="0 0 27.68 27.68">
+            <path
+              d="M11 1H4.64A3.64 3.64 0 0 0 1 4.64V11M1 16.68v8.18c0 1 .81 1.82 1.82 1.82H11M26.68 11V6.45A5.45 5.45 0 0 0 21.23 1h-4.55M16.68 26.68c5.52 0 10-4.48 10-10"
+              class="cls-2"
+              style="fill: none; stroke: currentColor; stroke-miterlimit: 10; stroke-width: 2px"
+            />
+            <path
+              d="M21.03 11.38v4.91M10.4 16.24c.04-1.79 1.13-4.71 2.93-4.71 1.36 0 2.01 1.84 2.15 4.77"
+              class="cls-1"
+              style="stroke-linecap: round; fill: none; stroke: currentColor; stroke-miterlimit: 10; stroke-width: 2px"
+            />
+          </svg>
+          Square Image Cropper for PFP
         </h1>
         <p id="links" class="u-flex">
           <a
