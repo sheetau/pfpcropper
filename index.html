@@ -1879,7 +1879,7 @@
         const flipY = imageState.flipY === -1 ? "-fv" : "";
         const baseName = imageName.replace(/\.[^/.]+$/, "");
 
-        return `${baseName}-cropped-x${cropX}-y${cropY}-s${outputResolution}${rotation}${flipX}${flipY}.${extension}`;
+        return `${baseName}-x${cropX}-y${cropY}-s${outputResolution}${rotation}${flipX}${flipY}.${extension}`;
       }
 
       downloadBtn.addEventListener("click", () => {
