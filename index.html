@@ -1869,6 +1869,19 @@
         fileInput.click();
       });
 
+      function getDownloadFileName(extension) {
+        const outputResolution = getOutputResolution();
+        const position = getCropPositionInSource();
+        const cropX = position ? Math.round(position.x) : 0;
+        const cropY = position ? Math.round(position.y) : 0;
+        const rotation = imageState.rotation ? `-r${imageState.rotation}` : "";
+        const flipX = imageState.flipX === -1 ? "-fh" : "";
+        const flipY = imageState.flipY === -1 ? "-fv" : "";
+        const baseName = imageName.replace(/\.[^/.]+$/, "");
+
+        return `${baseName}-cropped-x${cropX}-y${cropY}-s${outputResolution}${rotation}${flipX}${flipY}.${extension}`;
+      }
+
       downloadBtn.addEventListener("click", () => {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
@@ -1878,22 +1891,11 @@
         renderCurrentViewToCanvas(ctx, canvas.width, canvas.height);
 
         const link = document.createElement("a");
-        const now = new Date();
-        const timestamp = `${now.getFullYear().toString().slice(2)}${(now.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}${now.getDate().toString().padStart(2, "0")}${now
-          .getHours()
-          .toString()
-          .padStart(2, "0")}${now.getMinutes().toString().padStart(2, "0")}${now
-          .getSeconds()
-          .toString()
-          .padStart(2, "0")}`;
-
         const isPNG = currentImage.src.startsWith("data:image/png");
         const extension = isPNG ? "png" : "jpg";
         const mimeType = isPNG ? "image/png" : "image/jpeg";
 
-        link.download = `${imageName.replace(/\.[^/.]+$/, "")}-cropped-${timestamp}.${extension}`;
+        link.download = getDownloadFileName(extension);
         link.href = canvas.toDataURL(mimeType);
         link.click();
       });
