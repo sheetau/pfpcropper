@@ -268,6 +268,11 @@
         gap: var(--space-xl);
         margin-bottom: var(--space-6xl);
       }
+      .page-title-group {
+        display: flex;
+        align-items: stretch;
+        gap: var(--space-md);
+      }
       .container {
         position: relative;
         flex-wrap: wrap;
@@ -276,16 +281,41 @@
       /* Header */
       #page-title {
         width: auto;
-        gap: var(--space-xl);
-        font-size: var(--text-title);
+        gap: var(--space-md);
+        background: var(--color-black);
+        color: inherit;
+        font-family: inherit;
+        font-size: var(--text-title-mobile);
         font-weight: 400;
         line-height: var(--line-title);
+        border: var(--border-muted);
+        padding: 0 var(--space-xs);
+        transition: var(--transition-border);
       }
       #page-title:hover {
-        opacity: 0.7;
+        border: var(--border-strong);
       }
       #page-title svg {
-        height: var(--size-icon-lg);
+        height: var(--size-icon-md);
+      }
+      .page-switcher {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 var(--space-xs);
+        border: var(--border-muted);
+        border-radius: var(--radius-sm);
+        background: var(--color-black);
+        color: inherit;
+        cursor: pointer;
+        transition: var(--transition-opacity), var(--transition-border);
+      }
+      .page-switcher:hover {
+        border: var(--border-strong);
+      }
+      .page-switcher svg {
+        width: auto;
+        height: var(--size-icon-md);
       }
       #links {
         gap: var(--space-md);
@@ -790,21 +820,61 @@
   <body>
     <main>
       <div class="header-row u-flex u-between u-center u-wrap u-full">
-        <h1 id="page-title" class="u-flex u-center u-clickable u-transition-opacity" onclick="location.reload()">
-          <svg xmlns="http://www.w3.org/2000/svg" id="crop-icon" data-name="Layer 1" viewBox="0 0 27.68 27.68">
-            <path
-              d="M11 1H4.64A3.64 3.64 0 0 0 1 4.64V11M1 16.68v8.18c0 1 .81 1.82 1.82 1.82H11M26.68 11V6.45A5.45 5.45 0 0 0 21.23 1h-4.55M16.68 26.68c5.52 0 10-4.48 10-10"
-              class="cls-2"
-              style="fill: none; stroke: currentColor; stroke-miterlimit: 10; stroke-width: 2px"
-            />
-            <path
-              d="M21.03 11.38v4.91M10.4 16.24c.04-1.79 1.13-4.71 2.93-4.71 1.36 0 2.01 1.84 2.15 4.77"
-              class="cls-1"
-              style="stroke-linecap: round; fill: none; stroke: currentColor; stroke-miterlimit: 10; stroke-width: 2px"
-            />
-          </svg>
-          Square Image Cropper for PFP
-        </h1>
+        <div class="page-title-group">
+          <button
+            type="button"
+            id="page-title"
+            class="u-flex u-center u-clickable u-transition-opacity u-radius-sm"
+            aria-label="Reset Square Image Cropper"
+            onclick="location.reload()"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" id="crop-icon" data-name="Layer 1" viewBox="0 0 27.68 27.68">
+              <path
+                d="M11 1H4.64A3.64 3.64 0 0 0 1 4.64V11M1 16.68v8.18c0 1 .81 1.82 1.82 1.82H11M26.68 11V6.45A5.45 5.45 0 0 0 21.23 1h-4.55M16.68 26.68c5.52 0 10-4.48 10-10"
+                class="cls-2"
+                style="fill: none; stroke: currentColor; stroke-miterlimit: 10; stroke-width: 2px"
+              />
+              <path
+                d="M21.03 11.38v4.91M10.4 16.24c.04-1.79 1.13-4.71 2.93-4.71 1.36 0 2.01 1.84 2.15 4.77"
+                class="cls-1"
+                style="
+                  stroke-linecap: round;
+                  fill: none;
+                  stroke: currentColor;
+                  stroke-miterlimit: 10;
+                  stroke-width: 2px;
+                "
+              />
+            </svg>
+            Square Image Cropper for PFP
+          </button>
+          <button
+            type="button"
+            id="image-merger-link"
+            class="page-switcher"
+            aria-label="Open Image Merger"
+            title="Image Merger"
+            onclick="location.href = './imagemerger/'"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 53.35 27.68" aria-hidden="true">
+              <path
+                d="M1 16.68v6c0 2.21 1.79 4 4 4h6M11 1H5C2.79 1 1 2.79 1 5v6M26.68 11V5c0-2.21-1.79-4-4-4h-6M16.68 26.68h6c2.21 0 4-1.79 4-4v-6M26.68 16.68v6c0 2.21 1.79 4 4 4h6M36.68 1h-6c-2.21 0-4 1.79-4 4v6M52.35 11V5c0-2.21-1.79-4-4-4h-6M42.35 26.68h6c2.21 0 4-1.79 4-4v-6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-miterlimit="10"
+              />
+              <path
+                d="M21.03 11.38v4.91M10.4 16.24c.04-1.79 1.13-4.71 2.93-4.71 1.36 0 2.01 1.84 2.15 4.77M49.11 14.36c-.08.68-.56 1.31-1.36 1.31s-1.29-.66-1.36-1.34M37.37 14.59c1.58 1.58 4.15 1.58 5.73 0"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-miterlimit="10"
+              />
+            </svg>
+          </button>
+        </div>
         <p id="links" class="u-flex">
           <a
             class="u-inline-center u-radius-sm u-plain-link u-text-muted u-relative"

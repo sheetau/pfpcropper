@@ -1,0 +1,1938 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Merge multiple images horizontally or vertically, preview the result, and download it as a PNG."
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27.68 27.68"%3E%3Cpath d="M11 1H4.64A3.64 3.64 0 0 0 1 4.64V11M1 16.68v8.18c0 1 .81 1.82 1.82 1.82H11M26.68 11V6.45A5.45 5.45 0 0 0 21.23 1h-4.55M16.68 26.68c5.52 0 10-4.48 10-10" fill="none" stroke="%23fff" stroke-miterlimit="10" stroke-width="2"/%3E%3Cpath d="M21.03 11.38v4.91M10.4 16.24c.04-1.79 1.13-4.71 2.93-4.71 1.36 0 2.01 1.84 2.15 4.77" fill="none" stroke="%23fff" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/%3E%3C/svg%3E'
+    />
+    <link rel="preload" href="https://pvinis.github.io/iosevka-webfont/3.4.1/iosevka.css" as="style" />
+    <link rel="stylesheet" href="https://pvinis.github.io/iosevka-webfont/3.4.1/iosevka.css" />
+    <link rel="canonical" href="https://sheetau.github.io/pfpcropper/imagemerger/" />
+    <meta property="og:title" content="Image Merger" />
+    <meta
+      property="og:description"
+      content="Merge multiple images horizontally or vertically and download the result."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://sheetau.github.io/pfpcropper/imagemerger/" />
+    <title>Image Merger</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
+
+      :root {
+        --font-sans: "Inter", "Noto Sans JP", sans-serif;
+        --font-mono: Iosevka Web, "Courier New", monospace;
+        --color-black: #000;
+        --color-white: #fff;
+        --color-panel: rgb(18, 18, 18);
+        --color-download-hover: #d0d6e0;
+        --color-download-glow: color-mix(in srgb, #edecec, transparent 80%);
+        --color-text-dim: rgba(255, 255, 255, 0.4);
+        --color-text-muted: rgba(255, 255, 255, 0.7);
+        --color-white-00: rgba(255, 255, 255, 0);
+        --color-white-10: rgba(255, 255, 255, 0.1);
+        --color-white-15: rgba(255, 255, 255, 0.15);
+        --color-white-25: rgba(255, 255, 255, 0.25);
+        --color-white-50: rgba(255, 255, 255, 0.5);
+        --color-white-75: rgba(255, 255, 255, 0.75);
+        --color-black-00: rgba(0, 0, 0, 0);
+        --color-black-10: rgba(0, 0, 0, 0.1);
+        --color-black-15: rgba(0, 0, 0, 0.15);
+        --color-black-25: rgba(0, 0, 0, 0.25);
+        --color-black-50: rgba(0, 0, 0, 0.5);
+        --color-black-75: rgba(0, 0, 0, 0.75);
+        --color-add-icon: #666;
+        --text-sm: 0.85rem;
+        --text-title: 1.3rem;
+        --text-title-mobile: 1.2rem;
+        --space-xs: 0.3rem;
+        --space-sm: 0.4rem;
+        --space-md: 0.5rem;
+        --space-lg: 0.6rem;
+        --space-xl: 0.75rem;
+        --space-2xl: 1rem;
+        --space-3xl: 1.25rem;
+        --space-5xl: 2rem;
+        --size-drop: 500px;
+        --size-control-height: 1.6rem;
+        --size-button-height: 2rem;
+        --size-icon-xs: 1rem;
+        --size-icon-sm: 1.1rem;
+        --size-icon-md: 1.25rem;
+        --size-icon-lg: 1.5rem;
+        --size-add-icon: 1.5rem;
+        --size-reorder-indicator: 4px;
+        --offset-add: 2rem;
+        --radius-sm: 0.25rem;
+        --border-transparent: solid 1px var(--color-white-00);
+        --border-soft: solid 1px var(--color-white-10);
+        --border-muted: solid 1px var(--color-white-25);
+        --border-strong: solid 1px var(--color-white-50);
+        --border-drop: 1px dashed var(--color-white-25);
+        --border-drop-hover: 1px dashed var(--color-white-75);
+        --shadow-header: 0 0 0.7rem rgba(0, 0, 0, 0.85);
+        --duration-fast: 0.2s;
+        --transition-border: border var(--duration-fast);
+        --duration-shine: 2s;
+        --ease-shine: cubic-bezier(0.5, 0, 1, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      *:focus-visible {
+        outline: none;
+      }
+
+      img {
+        -webkit-user-drag: none;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--color-black);
+        color: var(--color-white);
+        font-family: var(--font-mono);
+      }
+
+      button {
+        color: inherit;
+        font: inherit;
+      }
+
+      button:focus-visible {
+        outline: 1px solid var(--color-white);
+        outline-offset: 3px;
+      }
+
+      .app-header {
+        position: fixed;
+        top: var(--space-5xl);
+        right: var(--space-5xl);
+        left: var(--space-5xl);
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-xl);
+        pointer-events: none;
+      }
+
+      .app-header > * {
+        filter: drop-shadow(var(--shadow-header));
+      }
+
+      .page-title-group {
+        display: flex;
+        align-items: stretch;
+        gap: var(--space-md);
+        pointer-events: auto;
+      }
+
+      #page-title {
+        display: flex;
+        align-items: center;
+        gap: var(--space-md);
+        border: var(--border-muted);
+        background: transparent;
+        font-size: var(--text-title-mobile);
+        font-weight: 400;
+        line-height: 1.5;
+        cursor: pointer;
+        pointer-events: auto;
+        transition:
+          opacity var(--duration-fast),
+          var(--transition-border);
+        border-radius: var(--radius-sm);
+        padding: 0 var(--space-xs);
+        background: var(--color-black);
+      }
+
+      #page-title:hover {
+        border: var(--border-strong);
+      }
+
+      .page-switcher {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 var(--space-xs);
+        border: var(--border-muted);
+        border-radius: var(--radius-sm);
+        background: var(--color-black);
+        cursor: pointer;
+        transition:
+          opacity var(--duration-fast),
+          var(--transition-border);
+      }
+
+      .page-switcher:hover {
+        border: var(--border-strong);
+      }
+
+      .page-switcher svg {
+        width: auto;
+        height: var(--size-icon-md);
+      }
+
+      #merge-icon {
+        width: auto;
+        height: var(--size-icon-md);
+        overflow: visible;
+      }
+
+      #tools {
+        display: flex;
+        align-items: center;
+        gap: var(--space-md);
+        height: var(--size-control-height);
+        pointer-events: auto;
+      }
+
+      #tools[hidden] {
+        display: none;
+      }
+
+      .icon-group {
+        display: flex;
+        height: var(--size-control-height);
+        overflow: hidden;
+        border-radius: var(--radius-sm);
+        background: color-mix(in srgb, var(--color-white) 10%, var(--color-black) 90%);
+      }
+
+      .icon-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--size-control-height);
+        height: 100%;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        transition: background var(--duration-fast);
+      }
+
+      .icon-btn:hover {
+        background: var(--color-white-15);
+      }
+
+      .icon-btn svg {
+        width: var(--size-icon-sm);
+        height: var(--size-icon-sm);
+      }
+
+      #fit-btn .icon-minimize,
+      #orientation-btn .icon-horizontal {
+        display: none;
+      }
+
+      #fit-btn[data-fitted="true"] .icon-maximize,
+      #orientation-btn[data-orientation="vertical"] .icon-vertical {
+        display: none;
+      }
+
+      #fit-btn[data-fitted="true"] .icon-minimize,
+      #orientation-btn[data-orientation="vertical"] .icon-horizontal {
+        display: block;
+      }
+
+      .action-btn {
+        position: relative;
+        height: var(--size-control-height);
+        padding: 0 var(--space-lg);
+        overflow: hidden;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: var(--text-sm);
+        text-align: left;
+      }
+
+      #download-btn {
+        border: 0;
+        background: var(--color-white);
+        color: var(--color-black);
+        transition:
+          background var(--duration-fast),
+          box-shadow var(--duration-fast);
+      }
+
+      #download-btn:hover {
+        background: var(--color-download-hover);
+        box-shadow: 0 0 var(--space-5xl) var(--color-download-glow);
+      }
+
+      #download-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -50%;
+        display: none;
+        width: 30%;
+        height: 100%;
+        background: var(--color-white-50);
+        pointer-events: none;
+        transform: skewX(-30deg);
+      }
+
+      #download-btn:hover::before {
+        display: block;
+        animation: shine var(--duration-shine) var(--ease-shine) infinite;
+      }
+
+      #download-btn:disabled {
+        cursor: wait;
+        opacity: 0.65;
+      }
+
+      #new-file-btn {
+        border: var(--border-muted);
+        background: var(--color-black);
+        transition: border var(--duration-fast);
+      }
+
+      #new-file-btn:hover {
+        border: var(--border-strong);
+      }
+
+      #workspace {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        overscroll-behavior: none;
+        touch-action: none;
+      }
+
+      #workspace.has-images {
+        cursor: grab;
+      }
+
+      #workspace.is-panning {
+        cursor: grabbing;
+      }
+
+      #initial-drop {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: min(var(--size-drop), calc(100vw - 4rem), calc(100vh - 8rem));
+        aspect-ratio: 1;
+        border: var(--border-drop);
+        background: transparent;
+        color: var(--color-white);
+        cursor: pointer;
+        transform: translate(-50%, -50%);
+        transition: border var(--duration-fast);
+      }
+
+      #initial-drop:hover,
+      #initial-drop.is-drag-target,
+      #workspace[data-hover-axis] #initial-drop {
+        border: var(--border-drop-hover);
+      }
+
+      #initial-drop[hidden] {
+        display: none;
+      }
+
+      #initial-drop span {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        padding: var(--space-2xl);
+        text-align: center;
+        transform: translate(-50%, -50%);
+      }
+
+      #media-strip {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: none;
+        transform-origin: 0 0;
+        will-change: transform;
+        outline: none;
+      }
+
+      #media-strip.is-visible {
+        display: flex;
+      }
+
+      #media-strip[data-orientation="vertical"] {
+        flex-direction: column;
+      }
+
+      #media-strip img {
+        display: block;
+        flex: none;
+        max-width: none;
+        user-select: none;
+        pointer-events: auto;
+        cursor: pointer;
+      }
+
+      #media-strip[data-reorderable="true"] img {
+        touch-action: none;
+      }
+
+      #media-strip.is-reordering img {
+        cursor: grabbing;
+      }
+
+      #media-strip.is-reordering img.is-drag-source {
+        opacity: var(--drag-opacity, 0.55);
+      }
+
+      #reorder-indicator {
+        position: absolute;
+        z-index: 6;
+        pointer-events: none;
+      }
+
+      #reorder-indicator[data-orientation="horizontal"] {
+        background: linear-gradient(to bottom, var(--color-black) 0%, var(--color-white) 50%, var(--color-black) 100%);
+      }
+
+      #reorder-indicator[data-orientation="vertical"] {
+        background: linear-gradient(to right, var(--color-black) 0%, var(--color-white) 50%, var(--color-black) 100%);
+      }
+
+      #reorder-indicator[hidden] {
+        display: none;
+      }
+
+      body.is-fullscreen #media-strip img {
+        cursor: grab;
+      }
+
+      body.is-fullscreen #workspace.is-panning #media-strip img {
+        cursor: grabbing;
+      }
+
+      body.is-fullscreen.is-cursor-hidden #media-strip img {
+        cursor: none;
+      }
+
+      #media-strip img:focus-visible {
+        outline: 1px solid var(--color-white);
+        outline-offset: -2px;
+      }
+
+      .add-btn {
+        position: absolute;
+        z-index: 4;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .add-icon {
+        position: absolute;
+        top: var(--add-top, 50%);
+        left: var(--add-left, 50%);
+        width: var(--size-add-icon);
+        height: var(--size-add-icon);
+        fill: none;
+        color: var(--color-add-icon);
+        stroke: currentColor;
+        stroke-width: 1;
+        transform: translate(-50%, -50%);
+        transition: color var(--duration-fast);
+      }
+
+      .add-btn:hover .add-icon,
+      .add-btn:focus-visible .add-icon,
+      #workspace[data-hover-axis="horizontal"] .add-btn[data-direction="left"] .add-icon,
+      #workspace[data-hover-axis="horizontal"] .add-btn[data-direction="right"] .add-icon,
+      #workspace[data-hover-axis="vertical"] .add-btn[data-direction="top"] .add-icon,
+      #workspace[data-hover-axis="vertical"] .add-btn[data-direction="bottom"] .add-icon {
+        color: var(--color-white);
+      }
+
+      .add-btn:focus-visible {
+        outline: 0;
+      }
+
+      .add-btn[hidden] {
+        display: none;
+      }
+
+      #drop-indicator {
+        position: absolute;
+        z-index: 5;
+        border: 0;
+        outline: var(--border-drop-hover);
+        outline-offset: -1px;
+        background: var(--color-white-10);
+        color: var(--color-text-muted);
+        font-size: var(--text-sm);
+        text-align: center;
+        pointer-events: none;
+      }
+
+      #drop-indicator[hidden] {
+        display: none;
+      }
+
+      #drop-indicator .add-icon {
+        color: var(--color-white);
+        opacity: 1;
+      }
+
+      #workspace[data-drag-direction="left"] .add-btn[data-direction="left"] .add-icon,
+      #workspace[data-drag-direction="right"] .add-btn[data-direction="right"] .add-icon,
+      #workspace[data-drag-direction="top"] .add-btn[data-direction="top"] .add-icon,
+      #workspace[data-drag-direction="bottom"] .add-btn[data-direction="bottom"] .add-icon {
+        opacity: 0;
+      }
+
+      #file-input {
+        display: none;
+      }
+
+      #status {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      body.is-fullscreen .app-header,
+      body.is-fullscreen #initial-drop,
+      body.is-fullscreen .add-btn,
+      body.is-fullscreen #drop-indicator,
+      body.is-fullscreen #status {
+        display: none;
+      }
+
+      @keyframes shine {
+        0% {
+          left: -50%;
+        }
+        50%,
+        100% {
+          left: 120%;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .app-header {
+          top: var(--space-3xl);
+          right: var(--space-3xl);
+          left: var(--space-3xl);
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        #page-title {
+          font-size: var(--text-title-mobile);
+        }
+
+        #tools {
+          max-width: 100%;
+          flex-wrap: wrap;
+        }
+
+        #initial-drop {
+          width: min(var(--size-drop), calc(100vw - 2.5rem), calc(100vh - 10rem));
+        }
+      }
+
+      @media (max-width: 520px) {
+        .action-btn {
+          padding: 0 var(--space-md);
+        }
+
+        #page-title {
+          gap: var(--space-md);
+        }
+
+        #merge-icon {
+          height: var(--size-icon-sm);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="page-title-group">
+        <button
+          type="button"
+          id="cropper-link"
+          class="page-switcher"
+          aria-label="Open Square Image Cropper"
+          title="Square Image Cropper"
+          onclick="location.href = '../'"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27.68 27.68" aria-hidden="true">
+            <path
+              d="M11 1H4.64A3.64 3.64 0 0 0 1 4.64V11M1 16.68v8.18c0 1 .81 1.82 1.82 1.82H11M26.68 11V6.45A5.45 5.45 0 0 0 21.23 1h-4.55M16.68 26.68c5.52 0 10-4.48 10-10"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-miterlimit="10"
+            />
+            <path
+              d="M21.03 11.38v4.91M10.4 16.24c.04-1.79 1.13-4.71 2.93-4.71 1.36 0 2.01 1.84 2.15 4.77"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-miterlimit="10"
+            />
+          </svg>
+        </button>
+        <button type="button" id="page-title" aria-label="Reset Image Merger">
+          <svg xmlns="http://www.w3.org/2000/svg" id="merge-icon" viewBox="0 0 53.35 27.68" aria-hidden="true">
+            <path
+              d="M1 16.68v6c0 2.21 1.79 4 4 4h6M11 1H5C2.79 1 1 2.79 1 5v6M26.68 11V5c0-2.21-1.79-4-4-4h-6M16.68 26.68h6c2.21 0 4-1.79 4-4v-6M26.68 16.68v6c0 2.21 1.79 4 4 4h6M36.68 1h-6c-2.21 0-4 1.79-4 4v6M52.35 11V5c0-2.21-1.79-4-4-4h-6M42.35 26.68h6c2.21 0 4-1.79 4-4v-6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-miterlimit="10"
+            />
+            <path
+              d="M21.03 11.38v4.91M10.4 16.24c.04-1.79 1.13-4.71 2.93-4.71 1.36 0 2.01 1.84 2.15 4.77M49.11 14.36c-.08.68-.56 1.31-1.36 1.31s-1.29-.66-1.36-1.34M37.37 14.59c1.58 1.58 4.15 1.58 5.73 0"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-miterlimit="10"
+            />
+          </svg>
+          <span>Image Merger</span>
+        </button>
+      </div>
+
+      <div id="tools" hidden>
+        <div class="icon-group">
+          <button
+            type="button"
+            id="fit-btn"
+            class="icon-btn"
+            data-fitted="false"
+            aria-label="Fit to screen"
+            title="Fit to screen"
+          >
+            <svg
+              class="icon-maximize"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M4 8V6a2 2 0 0 1 2-2h2M4 16v2a2 2 0 0 0 2 2h2M16 4h2a2 2 0 0 1 2 2v2M16 20h2a2 2 0 0 0 2-2v-2" />
+            </svg>
+            <svg
+              class="icon-minimize"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 19v-2a2 2 0 0 1 2-2h2M15 5v2a2 2 0 0 0 2 2h2M5 15h2a2 2 0 0 1 2 2v2M5 9h2a2 2 0 0 0 2-2V5" />
+            </svg>
+          </button>
+          <button type="button" id="fullscreen-btn" class="icon-btn" aria-label="Open fullscreen" title="Fullscreen">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M16 4h4v4M14 10l6-6M8 20H4v-4M4 20l6-6M16 20h4v-4M14 14l6 6M8 4H4v4M4 4l6 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            id="orientation-btn"
+            class="icon-btn"
+            data-orientation="horizontal"
+            aria-label="Arrange vertically"
+            title="Arrange vertically"
+          >
+            <svg
+              class="icon-vertical"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M19 8v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1M7 22v-1a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v1M17 2v1a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V2"
+              />
+            </svg>
+            <svg
+              class="icon-horizontal"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M7 6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V6M22 17h-1a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h1M2 17h1a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H2"
+              />
+            </svg>
+          </button>
+        </div>
+        <button type="button" id="download-btn" class="action-btn">Download</button>
+        <button type="button" id="new-file-btn" class="action-btn">New file</button>
+      </div>
+    </header>
+
+    <main id="workspace" aria-label="Image merger workspace">
+      <button type="button" id="initial-drop">
+        <span>Drop or click to upload image</span>
+      </button>
+      <div id="media-strip" role="group" aria-label="Merged image preview"></div>
+      <div id="reorder-indicator" hidden></div>
+      <div id="drop-indicator" hidden>
+        <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+      </div>
+      <button type="button" class="add-btn" data-direction="left" aria-label="Add images to the left">
+        <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+      </button>
+      <button type="button" class="add-btn" data-direction="right" aria-label="Add images to the right">
+        <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+      </button>
+      <button type="button" class="add-btn" data-direction="top" aria-label="Add images above">
+        <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+      </button>
+      <button type="button" class="add-btn" data-direction="bottom" aria-label="Add images below">
+        <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+      </button>
+    </main>
+
+    <input type="file" id="file-input" accept="image/*" multiple />
+    <p id="status" role="status" aria-live="polite"></p>
+
+    <script>
+      const workspace = document.getElementById("workspace");
+      const initialDrop = document.getElementById("initial-drop");
+      const mediaStrip = document.getElementById("media-strip");
+      const reorderIndicator = document.getElementById("reorder-indicator");
+      const dropIndicator = document.getElementById("drop-indicator");
+      const addButtons = Array.from(document.querySelectorAll(".add-btn"));
+      const fileInput = document.getElementById("file-input");
+      const tools = document.getElementById("tools");
+      const pageTitle = document.getElementById("page-title");
+      const fullscreenBtn = document.getElementById("fullscreen-btn");
+      const fitBtn = document.getElementById("fit-btn");
+      const orientationBtn = document.getElementById("orientation-btn");
+      const downloadBtn = document.getElementById("download-btn");
+      const newFileBtn = document.getElementById("new-file-btn");
+      const status = document.getElementById("status");
+
+      const MAX_ZOOM = 8;
+      const MIN_ZOOM = 0.05;
+      const MAX_CANVAS_DIMENSION = 16384;
+      const MAX_CANVAS_AREA = 67_108_864;
+      const DROP_REFERENCE_SIZE = 500;
+      const ADD_CONTROL_OFFSET = 32;
+
+      const state = {
+        images: [],
+        referenceImage: null,
+        orientation: "horizontal",
+        zoom: 1,
+        defaultZoom: true,
+        translateX: 0,
+        translateY: 0,
+        fitted: false,
+        dragDirection: null,
+        layout: null,
+        statusTimer: null,
+        pan: null,
+        beforeFullscreen: null,
+        fullscreenAutoFit: false,
+        pendingDirection: "initial",
+        replaceIndex: null,
+        reorder: null,
+        suppressImageClick: false,
+        fullscreenCursorTimer: null,
+      };
+
+      function announce(message) {
+        clearTimeout(state.statusTimer);
+        status.textContent = message;
+        status.classList.add("is-visible");
+        state.statusTimer = setTimeout(() => status.classList.remove("is-visible"), 2600);
+      }
+
+      function getViewportBounds() {
+        const fullscreen = Boolean(document.fullscreenElement);
+        const headerBottom = fullscreen ? 0 : document.querySelector(".app-header").getBoundingClientRect().bottom;
+        const gutter = fullscreen ? 0 : 32;
+        return {
+          left: gutter,
+          top: fullscreen ? 0 : Math.min(window.innerHeight, headerBottom + 16),
+          right: window.innerWidth - gutter,
+          bottom: window.innerHeight - gutter,
+        };
+      }
+
+      function getDefaultDisplaySize() {
+        const compact = window.matchMedia("(max-width: 900px)").matches;
+        const widthGutter = compact ? 40 : 64;
+        const heightGutter = compact ? 160 : 128;
+        return Math.max(
+          1,
+          Math.min(DROP_REFERENCE_SIZE, window.innerWidth - widthGutter, window.innerHeight - heightGutter),
+        );
+      }
+
+      function getDefaultZoom() {
+        if (!state.layout) return 1;
+        const crossSize = state.orientation === "horizontal" ? state.layout.height : state.layout.width;
+        return Math.max(MIN_ZOOM, getDefaultDisplaySize() / crossSize);
+      }
+
+      function resetToDefaultView() {
+        if (!state.layout) return;
+        state.zoom = getDefaultZoom();
+        state.fitted = false;
+        state.defaultZoom = true;
+        centerContent();
+        applyTransform();
+        updateControls();
+      }
+
+      function buildLayout() {
+        if (!state.images.length) return null;
+        const horizontal = state.orientation === "horizontal";
+        const referenceImage = state.referenceImage || state.images[0];
+        const crossSize = horizontal ? referenceImage.height : referenceImage.width;
+        let cursor = 0;
+        const items = state.images.map((image) => {
+          const width = horizontal ? (image.width * crossSize) / image.height : crossSize;
+          const height = horizontal ? crossSize : (image.height * crossSize) / image.width;
+          const item = { image, x: horizontal ? cursor : 0, y: horizontal ? 0 : cursor, width, height };
+          cursor += horizontal ? width : height;
+          return item;
+        });
+        return {
+          items,
+          width: horizontal ? cursor : crossSize,
+          height: horizontal ? crossSize : cursor,
+        };
+      }
+
+      function getActiveBounds() {
+        return { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight };
+      }
+
+      function getScrollMetrics(zoom = state.zoom) {
+        if (!state.layout || state.images.length < 2) return null;
+        const first = state.layout.items[0];
+        const last = state.layout.items[state.layout.items.length - 1];
+        if (state.orientation === "horizontal") {
+          const start = window.innerWidth / 2 - (first.x + first.width / 2) * zoom;
+          const end = window.innerWidth / 2 - (last.x + last.width / 2) * zoom;
+          return { axis: "x", start, end, distance: Math.max(0, start - end) };
+        }
+        const start = window.innerHeight / 2 - (first.y + first.height / 2) * zoom;
+        const end = window.innerHeight / 2 - (last.y + last.height / 2) * zoom;
+        return { axis: "y", start, end, distance: Math.max(0, start - end) };
+      }
+
+      function getScrollProgress() {
+        const metrics = getScrollMetrics();
+        if (!metrics || metrics.distance === 0) return 0.5;
+        const current = metrics.axis === "x" ? state.translateX : state.translateY;
+        return Math.max(0, Math.min(1, (metrics.start - current) / metrics.distance));
+      }
+
+      function setScrollProgress(progress, { centerCrossAxis = true } = {}) {
+        if (!state.layout) return;
+        const metrics = getScrollMetrics();
+        const safeProgress = Math.max(0, Math.min(1, progress));
+        const bounds = getActiveBounds();
+        const centerX = (bounds.left + bounds.right) / 2;
+        const centerY = (bounds.top + bounds.bottom) / 2;
+
+        if (!metrics) {
+          if (centerCrossAxis) {
+            state.translateX = centerX - (state.layout.width * state.zoom) / 2;
+            state.translateY = centerY - (state.layout.height * state.zoom) / 2;
+          }
+          return;
+        }
+
+        const translation = metrics.start - safeProgress * metrics.distance;
+        if (metrics.axis === "x") {
+          state.translateX = translation;
+          if (centerCrossAxis) state.translateY = centerY - (state.layout.height * state.zoom) / 2;
+        } else {
+          state.translateY = translation;
+          if (centerCrossAxis) state.translateX = centerX - (state.layout.width * state.zoom) / 2;
+        }
+      }
+
+      function clampTranslation({ centerCrossAxis = true } = {}) {
+        if (!state.layout) return;
+        const bounds = getActiveBounds();
+        const centerX = (bounds.left + bounds.right) / 2;
+        const centerY = (bounds.top + bounds.bottom) / 2;
+        const metrics = getScrollMetrics();
+
+        if (metrics?.axis === "x") {
+          state.translateX = Math.max(metrics.end, Math.min(metrics.start, state.translateX));
+          if (centerCrossAxis) state.translateY = centerY - (state.layout.height * state.zoom) / 2;
+        } else if (metrics?.axis === "y") {
+          state.translateY = Math.max(metrics.end, Math.min(metrics.start, state.translateY));
+          if (centerCrossAxis) state.translateX = centerX - (state.layout.width * state.zoom) / 2;
+        } else if (centerCrossAxis) {
+          state.translateX = centerX - (state.layout.width * state.zoom) / 2;
+          state.translateY = centerY - (state.layout.height * state.zoom) / 2;
+        }
+      }
+
+      function centerContent({ fullViewport = false } = {}) {
+        if (!state.layout) return;
+        const bounds = fullViewport
+          ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight }
+          : getViewportBounds();
+        state.translateX = (bounds.left + bounds.right - state.layout.width * state.zoom) / 2;
+        state.translateY = (bounds.top + bounds.bottom - state.layout.height * state.zoom) / 2;
+        if (!fullViewport) clampTranslation();
+      }
+
+      function applyTransform() {
+        if (!state.layout) return;
+        mediaStrip.style.width = `${state.layout.width}px`;
+        mediaStrip.style.height = `${state.layout.height}px`;
+        mediaStrip.style.transform = `translate3d(${state.translateX}px, ${state.translateY}px, 0) scale(${state.zoom})`;
+        workspace.dataset.orientation = state.orientation;
+        workspace.dataset.zoom = state.zoom.toFixed(4);
+        workspace.dataset.translateX = state.translateX.toFixed(2);
+        workspace.dataset.translateY = state.translateY.toFixed(2);
+        updateAddControls();
+        if (state.dragDirection && state.images.length) positionDropIndicator(state.dragDirection);
+      }
+
+      function updateControls() {
+        const hasImages = state.images.length > 0;
+        tools.hidden = !hasImages;
+        initialDrop.hidden = hasImages;
+        workspace.classList.toggle("has-images", state.images.length > 1);
+        mediaStrip.classList.toggle("is-visible", hasImages);
+        mediaStrip.dataset.orientation = state.orientation;
+        fitBtn.dataset.fitted = String(state.fitted);
+        fitBtn.setAttribute("aria-label", state.fitted ? "Reset zoom" : "Fit to screen");
+        fitBtn.title = state.fitted ? "Reset zoom" : "Fit to screen";
+        orientationBtn.dataset.orientation = state.orientation;
+        const nextDirection = state.orientation === "horizontal" ? "vertically" : "horizontally";
+        orientationBtn.setAttribute("aria-label", `Arrange ${nextDirection}`);
+        orientationBtn.title = `Arrange ${nextDirection}`;
+        workspace.dataset.imageCount = String(state.images.length);
+        updateAddControls();
+      }
+
+      function updateImageInteractions() {
+        const fullscreen = Boolean(document.fullscreenElement);
+        const reorderable = state.images.length > 1 && !fullscreen;
+        mediaStrip.dataset.reorderable = String(reorderable);
+        for (const image of mediaStrip.querySelectorAll("img")) {
+          image.draggable = false;
+          image.tabIndex = fullscreen ? -1 : 0;
+          image.toggleAttribute("aria-disabled", fullscreen);
+        }
+      }
+
+      function renderLayout({ recenter = true } = {}) {
+        state.layout = buildLayout();
+        mediaStrip.replaceChildren();
+        if (!state.layout) {
+          updateControls();
+          return;
+        }
+
+        for (const [index, item] of state.layout.items.entries()) {
+          const image = item.image.element;
+          image.alt = `Image ${index + 1}: ${item.image.name}`;
+          image.setAttribute("role", "button");
+          image.setAttribute("aria-label", `Replace image ${index + 1}: ${item.image.name}`);
+          image.dataset.index = String(index);
+          image.onclick = () => {
+            if (state.suppressImageClick) return;
+            if (!document.fullscreenElement) openFilePicker("replace", index);
+          };
+          image.onkeydown = (event) => {
+            if (!document.fullscreenElement && (event.key === "Enter" || event.key === " ")) {
+              event.preventDefault();
+              openFilePicker("replace", index);
+            }
+          };
+          image.width = Math.max(1, Math.round(item.width));
+          image.height = Math.max(1, Math.round(item.height));
+          image.style.width = `${item.width}px`;
+          image.style.height = `${item.height}px`;
+          mediaStrip.append(image);
+        }
+
+        updateImageInteractions();
+
+        if (recenter) centerContent();
+        applyTransform();
+        updateControls();
+      }
+
+      function clearImages() {
+        for (const image of state.images) {
+          URL.revokeObjectURL(image.url);
+        }
+        state.images = [];
+        state.referenceImage = null;
+        state.layout = null;
+        state.orientation = "horizontal";
+        state.zoom = 1;
+        state.fitted = false;
+        state.defaultZoom = true;
+        state.dragDirection = null;
+        state.pendingDirection = "initial";
+        state.replaceIndex = null;
+        state.reorder = null;
+        state.suppressImageClick = false;
+        mediaStrip.classList.remove("is-reordering");
+        mediaStrip.replaceChildren();
+        mediaStrip.removeAttribute("style");
+        hideDropIndicator();
+        updateControls();
+      }
+
+      async function decodeFile(file) {
+        if (!file.type.startsWith("image/")) return null;
+        const url = URL.createObjectURL(file);
+        try {
+          const element = new Image();
+          element.decoding = "async";
+          await new Promise((resolve, reject) => {
+            element.addEventListener("load", resolve, { once: true });
+            element.addEventListener("error", () => reject(new Error("Image could not be decoded")), { once: true });
+            element.src = url;
+          });
+          if (!element.naturalWidth || !element.naturalHeight) throw new Error("Image has no dimensions");
+          return {
+            file,
+            url,
+            element,
+            width: element.naturalWidth,
+            height: element.naturalHeight,
+            name: file.name,
+          };
+        } catch (error) {
+          URL.revokeObjectURL(url);
+          console.error(`Could not open ${file.name}`, error);
+          return null;
+        }
+      }
+
+      async function addFiles(fileList, direction = "initial") {
+        const files = Array.from(fileList).filter((file) => file.type.startsWith("image/"));
+        if (!files.length) {
+          announce("Choose one or more image files.");
+          return;
+        }
+
+        const decoded = [];
+        for (const file of files) {
+          const image = await decodeFile(file);
+          if (image) decoded.push(image);
+        }
+        if (!decoded.length) {
+          announce("The selected images could not be opened.");
+          return;
+        }
+
+        if (!state.images.length) {
+          state.images.push(...decoded);
+          state.referenceImage = decoded[0];
+          state.orientation = direction === "top" || direction === "bottom" ? "vertical" : "horizontal";
+        } else {
+          if (state.images.length === 1) {
+            state.orientation = direction === "top" || direction === "bottom" ? "vertical" : "horizontal";
+          }
+          if (direction === "left" || direction === "top") state.images.unshift(...decoded);
+          else state.images.push(...decoded);
+        }
+
+        state.fitted = false;
+        renderLayout({ recenter: false });
+        resetToDefaultView();
+        announce(`${decoded.length} image${decoded.length === 1 ? "" : "s"} added.`);
+      }
+
+      async function replaceImage(index, file) {
+        const replacement = await decodeFile(file);
+        if (!replacement || !state.images[index]) {
+          announce("The selected image could not be opened.");
+          return;
+        }
+
+        const oldImage = state.images[index];
+        const wasFitted = state.fitted;
+        const wasDefaultZoom = state.defaultZoom;
+        const progress = getScrollProgress();
+        state.images[index] = replacement;
+        if (state.referenceImage === oldImage) state.referenceImage = replacement;
+        URL.revokeObjectURL(oldImage.url);
+        renderLayout({ recenter: false });
+
+        if (wasFitted) {
+          state.zoom = getFitZoom();
+          state.fitted = true;
+          state.defaultZoom = false;
+        } else if (wasDefaultZoom) {
+          state.zoom = getDefaultZoom();
+          state.fitted = false;
+          state.defaultZoom = true;
+        }
+        setScrollProgress(progress);
+        applyTransform();
+        updateControls();
+        announce(`Image ${index + 1} replaced.`);
+      }
+
+      function removeImage(index) {
+        if (document.fullscreenElement || !state.images[index]) return;
+        const wasFitted = state.fitted;
+        const wasDefaultZoom = state.defaultZoom;
+        const progress = getScrollProgress();
+        const [removed] = state.images.splice(index, 1);
+        if (state.referenceImage === removed) state.referenceImage = state.images[0] || null;
+        URL.revokeObjectURL(removed.url);
+
+        if (!state.images.length) {
+          clearImages();
+          announce("Image removed.");
+          return;
+        }
+
+        renderLayout({ recenter: false });
+        if (wasFitted) {
+          state.zoom = getFitZoom();
+          state.fitted = true;
+          state.defaultZoom = false;
+        } else if (wasDefaultZoom) {
+          state.zoom = getDefaultZoom();
+          state.fitted = false;
+          state.defaultZoom = true;
+        }
+        setScrollProgress(progress);
+        applyTransform();
+        updateControls();
+        announce(`Image ${index + 1} removed.`);
+      }
+
+      function getReorderInsertionIndex(fromIndex, targetIndex, placeAfter) {
+        let insertionIndex = targetIndex + (placeAfter ? 1 : 0);
+        if (fromIndex < insertionIndex) insertionIndex -= 1;
+        return insertionIndex;
+      }
+
+      function reorderImage(fromIndex, targetIndex, placeAfter) {
+        if (
+          document.fullscreenElement ||
+          state.images.length < 2 ||
+          !state.images[fromIndex] ||
+          !state.images[targetIndex]
+        ) {
+          return;
+        }
+
+        const insertionIndex = getReorderInsertionIndex(fromIndex, targetIndex, placeAfter);
+        const translateX = state.translateX;
+        const translateY = state.translateY;
+        const [moved] = state.images.splice(fromIndex, 1);
+        state.images.splice(insertionIndex, 0, moved);
+
+        if (insertionIndex === fromIndex) return;
+        renderLayout({ recenter: false });
+        state.translateX = translateX;
+        state.translateY = translateY;
+        clampTranslation();
+        applyTransform();
+        updateControls();
+        announce(`Image moved to position ${insertionIndex + 1}.`);
+      }
+
+      async function replaceAllImages(fileList) {
+        const files = Array.from(fileList).filter((file) => file.type.startsWith("image/"));
+        if (!files.length) return;
+
+        const decoded = [];
+        for (const file of files) {
+          const image = await decodeFile(file);
+          if (image) decoded.push(image);
+        }
+        if (!decoded.length) {
+          announce("The selected images could not be opened.");
+          return;
+        }
+
+        const previousImages = state.images;
+        const progress = getScrollProgress();
+        const orientation = state.orientation;
+        const zoom = state.zoom;
+        const fitted = state.fitted;
+        const defaultZoom = state.defaultZoom;
+
+        state.images = decoded;
+        state.referenceImage = decoded[0];
+        state.orientation = orientation;
+        state.zoom = zoom;
+        state.fitted = fitted;
+        state.defaultZoom = defaultZoom;
+        renderLayout({ recenter: false });
+        setScrollProgress(progress);
+        applyTransform();
+        updateControls();
+        for (const image of previousImages) URL.revokeObjectURL(image.url);
+        announce(`${decoded.length} image${decoded.length === 1 ? "" : "s"} opened.`);
+      }
+
+      function getFitZoom() {
+        if (!state.layout) return 1;
+        return Math.max(
+          MIN_ZOOM,
+          state.orientation === "horizontal"
+            ? window.innerHeight / state.layout.height
+            : window.innerWidth / state.layout.width,
+        );
+      }
+
+      function fitToScreen() {
+        if (!state.layout) return;
+        const progress = getScrollProgress();
+        if (state.fitted) {
+          state.zoom = getDefaultZoom();
+          state.fitted = false;
+          state.defaultZoom = true;
+        } else {
+          state.zoom = getFitZoom();
+          state.fitted = true;
+          state.defaultZoom = false;
+        }
+        setScrollProgress(progress);
+        applyTransform();
+        updateControls();
+      }
+
+      function fitFullscreenCrossAxis(progress = getScrollProgress()) {
+        if (!state.layout) return;
+        state.zoom = getFitZoom();
+        state.defaultZoom = false;
+        state.fullscreenAutoFit = true;
+        setScrollProgress(progress);
+        applyTransform();
+      }
+
+      function setZoomAt(nextZoom) {
+        if (!state.layout) return;
+        const progress = getScrollProgress();
+        const fitZoom = getFitZoom();
+        const currentZoom = state.zoom;
+        const maximumZoom = Math.max(MAX_ZOOM, getDefaultZoom(), fitZoom);
+        let zoom = Math.max(MIN_ZOOM, Math.min(maximumZoom, nextZoom));
+        const tolerance = Math.max(1, fitZoom) * 0.0001;
+        const atFit = Math.abs(currentZoom - fitZoom) <= tolerance;
+        const reachesFit = Math.abs(zoom - fitZoom) <= tolerance;
+        const crossesFit = (currentZoom < fitZoom && zoom > fitZoom) || (currentZoom > fitZoom && zoom < fitZoom);
+        if (!atFit && (reachesFit || crossesFit)) zoom = fitZoom;
+        state.zoom = zoom;
+        state.fitted = Math.abs(zoom - fitZoom) <= tolerance;
+        state.defaultZoom = false;
+        state.fullscreenAutoFit = false;
+        setScrollProgress(progress);
+        applyTransform();
+        updateControls();
+      }
+
+      function getDisplayedItemRect(item) {
+        return {
+          left: state.translateX + item.x * state.zoom,
+          top: state.translateY + item.y * state.zoom,
+          right: state.translateX + (item.x + item.width) * state.zoom,
+          bottom: state.translateY + (item.y + item.height) * state.zoom,
+        };
+      }
+
+      function getReferenceRect(item) {
+        const rect = getDisplayedItemRect(item);
+        const centerX = (rect.left + rect.right) / 2;
+        const centerY = (rect.top + rect.bottom) / 2;
+        const halfWidth = Math.min((rect.right - rect.left) / 2, DROP_REFERENCE_SIZE / 2);
+        const halfHeight = Math.min((rect.bottom - rect.top) / 2, DROP_REFERENCE_SIZE / 2);
+        return {
+          left: centerX - halfWidth,
+          right: centerX + halfWidth,
+          top: centerY - halfHeight,
+          bottom: centerY + halfHeight,
+        };
+      }
+
+      function makeRect(left, top, right, bottom) {
+        return {
+          left,
+          top,
+          width: Math.max(0, right - left),
+          height: Math.max(0, bottom - top),
+        };
+      }
+
+      function getInitialBaseRect() {
+        const size = getDefaultDisplaySize();
+        const left = (window.innerWidth - size) / 2;
+        const top = (window.innerHeight - size) / 2;
+        return { left, top, right: left + size, bottom: top + size, width: size, height: size };
+      }
+
+      function getAdditionGeometry(direction) {
+        const firstDisplayed = state.images.length ? getDisplayedItemRect(state.layout.items[0]) : getInitialBaseRect();
+        const lastDisplayed = state.images.length
+          ? getDisplayedItemRect(state.layout.items[state.layout.items.length - 1])
+          : firstDisplayed;
+        let rect;
+        let addX;
+        let addY;
+
+        if (direction === "left") {
+          rect = makeRect(0, firstDisplayed.top, firstDisplayed.left, firstDisplayed.bottom);
+          addX = firstDisplayed.left - ADD_CONTROL_OFFSET;
+          addY = (firstDisplayed.top + firstDisplayed.bottom) / 2;
+        } else if (direction === "right") {
+          rect = makeRect(lastDisplayed.right, lastDisplayed.top, window.innerWidth, lastDisplayed.bottom);
+          addX = lastDisplayed.right + ADD_CONTROL_OFFSET;
+          addY = (lastDisplayed.top + lastDisplayed.bottom) / 2;
+        } else if (direction === "top") {
+          rect = makeRect(firstDisplayed.left, 0, firstDisplayed.right, firstDisplayed.top);
+          addX = (firstDisplayed.left + firstDisplayed.right) / 2;
+          addY = firstDisplayed.top - ADD_CONTROL_OFFSET;
+        } else {
+          rect = makeRect(lastDisplayed.left, lastDisplayed.bottom, lastDisplayed.right, window.innerHeight);
+          addX = (lastDisplayed.left + lastDisplayed.right) / 2;
+          addY = lastDisplayed.bottom + ADD_CONTROL_OFFSET;
+        }
+
+        return {
+          ...rect,
+          addLeft: addX - rect.left,
+          addTop: addY - rect.top,
+        };
+      }
+
+      function canAddInDirection(direction) {
+        if (state.images.length < 2) return true;
+        return state.orientation === "horizontal"
+          ? direction === "left" || direction === "right"
+          : direction === "top" || direction === "bottom";
+      }
+
+      function updateAddControls() {
+        const dragAxis =
+          state.dragDirection === "left" || state.dragDirection === "right"
+            ? "horizontal"
+            : state.dragDirection === "top" || state.dragDirection === "bottom"
+              ? "vertical"
+              : null;
+
+        for (const button of addButtons) {
+          const direction = button.dataset.direction;
+          const axis = direction === "left" || direction === "right" ? "horizontal" : "vertical";
+          const rect = getAdditionGeometry(direction);
+          const hiddenForInitialDrag = !state.images.length && dragAxis === axis;
+          button.hidden = !canAddInDirection(direction) || hiddenForInitialDrag || rect.width < 1 || rect.height < 1;
+          button.style.left = `${rect.left}px`;
+          button.style.top = `${rect.top}px`;
+          button.style.width = `${rect.width}px`;
+          button.style.height = `${rect.height}px`;
+          button.style.setProperty("--add-left", `${rect.addLeft}px`);
+          button.style.setProperty("--add-top", `${rect.addTop}px`);
+        }
+      }
+
+      function getDropDirection(clientX, clientY) {
+        if (!state.images.length) {
+          const rect = getInitialBaseRect();
+          if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+            return "initial";
+          }
+          if (clientY >= rect.top && clientY <= rect.bottom && clientX < rect.left) return "left";
+          if (clientY >= rect.top && clientY <= rect.bottom && clientX > rect.right) return "right";
+          if (clientX >= rect.left && clientX <= rect.right && clientY < rect.top) return "top";
+          if (clientX >= rect.left && clientX <= rect.right && clientY > rect.bottom) return "bottom";
+          return null;
+        }
+
+        const first = getReferenceRect(state.layout.items[0]);
+        const last = getReferenceRect(state.layout.items[state.layout.items.length - 1]);
+        const firstDisplayed = getDisplayedItemRect(state.layout.items[0]);
+        const lastDisplayed = getDisplayedItemRect(state.layout.items[state.layout.items.length - 1]);
+        const allowHorizontal = state.images.length === 1 || state.orientation === "horizontal";
+        const allowVertical = state.images.length === 1 || state.orientation === "vertical";
+
+        if (allowHorizontal && clientY >= first.top && clientY <= first.bottom && clientX < firstDisplayed.left)
+          return "left";
+        if (allowHorizontal && clientY >= last.top && clientY <= last.bottom && clientX > lastDisplayed.right)
+          return "right";
+        if (allowVertical && clientX >= first.left && clientX <= first.right && clientY < firstDisplayed.top)
+          return "top";
+        if (allowVertical && clientX >= last.left && clientX <= last.right && clientY > lastDisplayed.bottom)
+          return "bottom";
+        return null;
+      }
+
+      function positionDropIndicator(direction) {
+        if (!direction || !state.layout || !state.images.length) {
+          dropIndicator.hidden = true;
+          return;
+        }
+        const rect = getAdditionGeometry(direction);
+        dropIndicator.style.left = `${rect.left}px`;
+        dropIndicator.style.top = `${rect.top}px`;
+        dropIndicator.style.width = `${rect.width}px`;
+        dropIndicator.style.height = `${rect.height}px`;
+        dropIndicator.style.setProperty("--add-left", `${rect.addLeft}px`);
+        dropIndicator.style.setProperty("--add-top", `${rect.addTop}px`);
+        dropIndicator.hidden = rect.width < 1 || rect.height < 1;
+      }
+
+      function showDropIndicator(direction) {
+        state.dragDirection = direction;
+        initialDrop.classList.toggle("is-drag-target", Boolean(direction) && !state.images.length);
+        workspace.dataset.dragDirection = direction || "";
+        if (!state.images.length) {
+          const rect = getInitialBaseRect();
+          const horizontal = direction === "left" || direction === "right";
+          const vertical = direction === "top" || direction === "bottom";
+          initialDrop.style.left = horizontal ? "0" : `${rect.left}px`;
+          initialDrop.style.top = vertical ? "0" : `${rect.top}px`;
+          initialDrop.style.width = horizontal ? "100vw" : `${rect.width}px`;
+          initialDrop.style.height = vertical ? "100vh" : `${rect.height}px`;
+          initialDrop.style.aspectRatio = horizontal || vertical ? "auto" : "1";
+          initialDrop.style.transform = "none";
+          dropIndicator.hidden = true;
+          updateAddControls();
+          return;
+        }
+        updateAddControls();
+        if (!direction || direction === "initial" || !state.layout) {
+          dropIndicator.hidden = true;
+          return;
+        }
+        positionDropIndicator(direction);
+      }
+
+      function hideDropIndicator() {
+        state.dragDirection = null;
+        initialDrop.classList.remove("is-drag-target");
+        initialDrop.removeAttribute("style");
+        workspace.dataset.dragDirection = "";
+        dropIndicator.hidden = true;
+        updateAddControls();
+      }
+
+      function hasDraggedFiles(event) {
+        return Array.from(event.dataTransfer?.types || []).includes("Files");
+      }
+
+      function getOutputScale(width, height) {
+        return Math.min(
+          1,
+          MAX_CANVAS_DIMENSION / width,
+          MAX_CANVAS_DIMENSION / height,
+          Math.sqrt(MAX_CANVAS_AREA / (width * height)),
+        );
+      }
+
+      async function downloadMergedImage() {
+        if (!state.layout || downloadBtn.disabled) return;
+        downloadBtn.disabled = true;
+        downloadBtn.textContent = "Preparing...";
+        try {
+          const outputScale = getOutputScale(state.layout.width, state.layout.height);
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(state.layout.width * outputScale));
+          canvas.height = Math.max(1, Math.round(state.layout.height * outputScale));
+          const context = canvas.getContext("2d");
+          if (!context) throw new Error("Canvas is unavailable");
+          context.imageSmoothingEnabled = true;
+          context.imageSmoothingQuality = "high";
+
+          for (const item of state.layout.items) {
+            context.drawImage(
+              item.image.element,
+              item.x * outputScale,
+              item.y * outputScale,
+              item.width * outputScale,
+              item.height * outputScale,
+            );
+          }
+
+          const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+          if (!blob) throw new Error("Could not create the output image");
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `merged-${state.images.length}-images-${canvas.width}x${canvas.height}.png`;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          announce(
+            outputScale < 1
+              ? `Downloaded at ${canvas.width} × ${canvas.height}; the result was scaled to browser limits.`
+              : `Downloaded ${canvas.width} × ${canvas.height} PNG.`,
+          );
+        } catch (error) {
+          console.error(error);
+          announce("The merged image could not be downloaded.");
+        } finally {
+          downloadBtn.disabled = false;
+          downloadBtn.textContent = "Download";
+        }
+      }
+
+      function openFilePicker(direction, replaceIndex = null) {
+        state.pendingDirection = direction;
+        state.replaceIndex = replaceIndex;
+        fileInput.multiple = replaceIndex === null;
+        fileInput.value = "";
+        fileInput.click();
+      }
+
+      pageTitle.addEventListener("click", () => location.reload());
+      initialDrop.addEventListener("click", () => openFilePicker("initial"));
+      for (const button of addButtons) {
+        const direction = button.dataset.direction;
+        const axis = direction === "left" || direction === "right" ? "horizontal" : "vertical";
+        const showPair = () => {
+          if (state.images.length) {
+            workspace.removeAttribute("data-hover-axis");
+            showDropIndicator(direction);
+          } else {
+            workspace.dataset.hoverAxis = axis;
+          }
+        };
+        const hidePair = () => {
+          workspace.removeAttribute("data-hover-axis");
+          if (state.images.length && state.dragDirection === direction) hideDropIndicator();
+        };
+        button.addEventListener("pointerenter", showPair);
+        button.addEventListener("pointerleave", hidePair);
+        button.addEventListener("focus", showPair);
+        button.addEventListener("blur", hidePair);
+        button.addEventListener("click", () => {
+          hideDropIndicator();
+          openFilePicker(direction);
+        });
+      }
+      newFileBtn.addEventListener("click", () => {
+        openFilePicker("new");
+      });
+
+      fileInput.addEventListener("change", async () => {
+        if (fileInput.files?.length) {
+          if (state.pendingDirection === "new") await replaceAllImages(fileInput.files);
+          else if (state.replaceIndex === null) await addFiles(fileInput.files, state.pendingDirection);
+          else await replaceImage(state.replaceIndex, fileInput.files[0]);
+        }
+        state.pendingDirection = "initial";
+        state.replaceIndex = null;
+        fileInput.multiple = true;
+        fileInput.value = "";
+      });
+
+      fitBtn.addEventListener("click", fitToScreen);
+      orientationBtn.addEventListener("click", () => {
+        const wasFitted = state.fitted;
+        const wasDefaultZoom = state.defaultZoom;
+        const zoomRatio = state.zoom / getDefaultZoom();
+        const progress = getScrollProgress();
+        state.orientation = state.orientation === "horizontal" ? "vertical" : "horizontal";
+        renderLayout({ recenter: false });
+        if (document.fullscreenElement) {
+          state.zoom = getFitZoom();
+          state.defaultZoom = false;
+          state.fullscreenAutoFit = true;
+          setScrollProgress(progress);
+        } else {
+          if (wasFitted) {
+            state.zoom = getFitZoom();
+            state.fitted = true;
+            state.defaultZoom = false;
+          } else if (wasDefaultZoom) {
+            state.zoom = getDefaultZoom();
+            state.fitted = false;
+            state.defaultZoom = true;
+          } else {
+            state.zoom = Math.max(
+              MIN_ZOOM,
+              Math.min(Math.max(MAX_ZOOM, getDefaultZoom()), getDefaultZoom() * zoomRatio),
+            );
+            state.fitted = false;
+            state.defaultZoom = false;
+          }
+          setScrollProgress(progress);
+        }
+        applyTransform();
+        updateControls();
+      });
+
+      fullscreenBtn.addEventListener("click", async () => {
+        if (!state.layout || document.fullscreenElement) return;
+        state.beforeFullscreen = {
+          zoom: state.zoom,
+          fitted: state.fitted,
+          defaultZoom: state.defaultZoom,
+          scrollProgress: getScrollProgress(),
+        };
+        try {
+          await document.documentElement.requestFullscreen();
+        } catch (error) {
+          state.beforeFullscreen = null;
+          console.error(error);
+          announce("Fullscreen mode is not available.");
+        }
+      });
+
+      document.addEventListener("fullscreenchange", () => {
+        const fullscreen = Boolean(document.fullscreenElement);
+        document.body.classList.toggle("is-fullscreen", fullscreen);
+        updateImageInteractions();
+        if (!fullscreen) {
+          clearTimeout(state.fullscreenCursorTimer);
+          state.fullscreenCursorTimer = null;
+          document.body.classList.remove("is-cursor-hidden");
+        }
+        if (fullscreen) {
+          const progress = state.beforeFullscreen?.scrollProgress ?? getScrollProgress();
+          requestAnimationFrame(() => fitFullscreenCrossAxis(progress));
+        } else if (state.beforeFullscreen) {
+          const previousView = state.beforeFullscreen;
+          state.zoom = previousView.zoom;
+          state.fitted = previousView.fitted;
+          state.defaultZoom = previousView.defaultZoom;
+          state.beforeFullscreen = null;
+          state.fullscreenAutoFit = false;
+          setScrollProgress(previousView.scrollProgress);
+          applyTransform();
+          updateControls();
+        }
+      });
+
+      downloadBtn.addEventListener("click", downloadMergedImage);
+
+      workspace.addEventListener(
+        "wheel",
+        (event) => {
+          if (!state.layout) return;
+          if (event.ctrlKey) {
+            event.preventDefault();
+            const factor = Math.exp(-event.deltaY * 0.0015);
+            setZoomAt(state.zoom * factor);
+            return;
+          }
+          if (state.images.length < 2) return;
+          event.preventDefault();
+          if (state.orientation === "horizontal") {
+            const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+            state.translateX -= delta;
+          } else {
+            state.translateY -= event.deltaY;
+          }
+          clampTranslation();
+          applyTransform();
+        },
+        { passive: false },
+      );
+
+      workspace.addEventListener("pointerdown", (event) => {
+        if (state.images.length < 2 || event.button !== 0) return;
+        if (event.target.closest(".add-btn")) return;
+        if (event.target.closest("#media-strip") && !document.fullscreenElement) return;
+        state.pan = {
+          pointerId: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+          translateX: state.translateX,
+          translateY: state.translateY,
+        };
+        workspace.setPointerCapture(event.pointerId);
+        workspace.classList.add("is-panning");
+      });
+
+      workspace.addEventListener("pointermove", (event) => {
+        if (!state.pan || state.pan.pointerId !== event.pointerId) return;
+        if (state.orientation === "horizontal") {
+          state.translateX = state.pan.translateX + event.clientX - state.pan.x;
+        } else {
+          state.translateY = state.pan.translateY + event.clientY - state.pan.y;
+        }
+        clampTranslation();
+        applyTransform();
+      });
+
+      function endPan(event) {
+        if (!state.pan || state.pan.pointerId !== event.pointerId) return;
+        state.pan = null;
+        workspace.classList.remove("is-panning");
+        if (workspace.hasPointerCapture(event.pointerId)) workspace.releasePointerCapture(event.pointerId);
+      }
+
+      workspace.addEventListener("pointerup", endPan);
+      workspace.addEventListener("pointercancel", endPan);
+
+      function clearReorderVisuals() {
+        mediaStrip.classList.remove("is-reordering");
+        for (const image of mediaStrip.querySelectorAll("img")) {
+          image.classList.remove("is-drag-source");
+          image.style.removeProperty("--drag-opacity");
+        }
+        reorderIndicator.hidden = true;
+      }
+
+      function positionReorderIndicator(target, placeAfter) {
+        const rect = target.getBoundingClientRect();
+        reorderIndicator.dataset.orientation = state.orientation;
+        reorderIndicator.hidden = false;
+        if (state.orientation === "horizontal") {
+          reorderIndicator.style.left = `${placeAfter ? rect.right : rect.left}px`;
+          reorderIndicator.style.top = `${rect.top}px`;
+          reorderIndicator.style.width = "var(--size-reorder-indicator)";
+          reorderIndicator.style.height = `${rect.height}px`;
+          reorderIndicator.style.transform = "translateX(-50%)";
+        } else {
+          reorderIndicator.style.left = `${rect.left}px`;
+          reorderIndicator.style.top = `${placeAfter ? rect.bottom : rect.top}px`;
+          reorderIndicator.style.width = `${rect.width}px`;
+          reorderIndicator.style.height = "var(--size-reorder-indicator)";
+          reorderIndicator.style.transform = "translateY(-50%)";
+        }
+      }
+
+      function updateReorderTarget(clientX, clientY) {
+        const images = Array.from(mediaStrip.querySelectorAll("img[data-index]"));
+        if (!state.reorder || !images.length) return;
+        const coordinate = state.orientation === "horizontal" ? clientX : clientY;
+        let target = images[images.length - 1];
+        let placeAfter = true;
+        for (const image of images) {
+          const rect = image.getBoundingClientRect();
+          const center = state.orientation === "horizontal" ? rect.left + rect.width / 2 : rect.top + rect.height / 2;
+          if (coordinate < center) {
+            target = image;
+            placeAfter = false;
+            break;
+          }
+        }
+
+        state.reorder.targetIndex = Number(target.dataset.index);
+        state.reorder.placeAfter = placeAfter;
+        if (
+          getReorderInsertionIndex(state.reorder.fromIndex, state.reorder.targetIndex, placeAfter) ===
+          state.reorder.fromIndex
+        ) {
+          reorderIndicator.hidden = true;
+        } else {
+          positionReorderIndicator(target, placeAfter);
+        }
+      }
+
+      mediaStrip.addEventListener("pointerdown", (event) => {
+        const image = event.target.closest("img[data-index]");
+        if (!image || event.button !== 0 || state.images.length < 2 || document.fullscreenElement) {
+          return;
+        }
+        const imageRect = image.getBoundingClientRect();
+        state.reorder = {
+          pointerId: event.pointerId,
+          fromIndex: Number(image.dataset.index),
+          startX: event.clientX,
+          startY: event.clientY,
+          targetIndex: Number(image.dataset.index),
+          placeAfter: false,
+          active: false,
+          source: image,
+          deleteDistance: Math.max(1, (state.orientation === "horizontal" ? imageRect.height : imageRect.width) / 2),
+          deleteReady: false,
+        };
+      });
+
+      mediaStrip.addEventListener("pointermove", (event) => {
+        if (!state.reorder || state.reorder.pointerId !== event.pointerId) return;
+        if (!state.reorder.active) {
+          if (Math.hypot(event.clientX - state.reorder.startX, event.clientY - state.reorder.startY) < 6) return;
+          state.reorder.active = true;
+          state.reorder.source.classList.add("is-drag-source");
+          mediaStrip.classList.add("is-reordering");
+          mediaStrip.setPointerCapture(event.pointerId);
+        }
+        event.preventDefault();
+        const deleteDragDistance = Math.max(
+          0,
+          state.orientation === "horizontal"
+            ? state.reorder.startY - event.clientY
+            : state.reorder.startX - event.clientX,
+        );
+        const remainingOpacity = Math.max(0, 1 - deleteDragDistance / state.reorder.deleteDistance);
+        state.reorder.source.style.setProperty("--drag-opacity", String(0.55 * remainingOpacity));
+        state.reorder.deleteReady = remainingOpacity === 0;
+        if (state.reorder.deleteReady) reorderIndicator.hidden = true;
+        else updateReorderTarget(event.clientX, event.clientY);
+      });
+
+      function endImageReorder(event, commit) {
+        if (!state.reorder || state.reorder.pointerId !== event.pointerId) return;
+        const reorder = state.reorder;
+        state.reorder = null;
+        if (mediaStrip.hasPointerCapture(event.pointerId)) mediaStrip.releasePointerCapture(event.pointerId);
+        clearReorderVisuals();
+        if (!reorder.active || !commit) return;
+        event.preventDefault();
+        state.suppressImageClick = true;
+        setTimeout(() => {
+          state.suppressImageClick = false;
+        });
+        if (reorder.deleteReady) removeImage(reorder.fromIndex);
+        else reorderImage(reorder.fromIndex, reorder.targetIndex, reorder.placeAfter);
+      }
+
+      mediaStrip.addEventListener("pointerup", (event) => endImageReorder(event, true));
+      mediaStrip.addEventListener("pointercancel", (event) => endImageReorder(event, false));
+
+      workspace.addEventListener("dragover", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+        const direction = getDropDirection(event.clientX, event.clientY);
+        event.dataTransfer.dropEffect = direction ? "copy" : "none";
+        showDropIndicator(direction);
+      });
+
+      workspace.addEventListener("drop", async (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+        const direction = getDropDirection(event.clientX, event.clientY);
+        hideDropIndicator();
+        if (!direction) {
+          announce("Drop beside the images in the current arrangement direction.");
+          return;
+        }
+        await addFiles(event.dataTransfer.files, direction);
+      });
+
+      workspace.addEventListener("dragleave", (event) => {
+        if (!event.relatedTarget || !workspace.contains(event.relatedTarget)) hideDropIndicator();
+      });
+
+      window.addEventListener("dragend", hideDropIndicator);
+      window.addEventListener("drop", hideDropIndicator);
+
+      window.addEventListener("keydown", (event) => {
+        if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || state.images.length < 2) return;
+        if (
+          event.target instanceof Element &&
+          event.target.matches("input, textarea, select, [contenteditable='true']")
+        )
+          return;
+        const key = event.key.toLowerCase();
+        let delta = 0;
+        if (state.orientation === "horizontal") {
+          if (event.key === "ArrowLeft" || key === "a") delta = 80;
+          else if (event.key === "ArrowRight" || key === "d") delta = -80;
+          if (!delta) return;
+          state.translateX += delta;
+        } else {
+          if (event.key === "ArrowUp" || key === "w") delta = 80;
+          else if (event.key === "ArrowDown" || key === "s") delta = -80;
+          if (!delta) return;
+          state.translateY += delta;
+        }
+        event.preventDefault();
+        clampTranslation();
+        applyTransform();
+      });
+
+      workspace.addEventListener("pointermove", (event) => {
+        if (!document.fullscreenElement) return;
+        clearTimeout(state.fullscreenCursorTimer);
+        state.fullscreenCursorTimer = null;
+        document.body.classList.remove("is-cursor-hidden");
+        if (!event.target.closest("#media-strip img")) return;
+        state.fullscreenCursorTimer = setTimeout(() => {
+          if (document.fullscreenElement) document.body.classList.add("is-cursor-hidden");
+        }, 2500);
+      });
+
+      workspace.addEventListener("pointerleave", () => {
+        clearTimeout(state.fullscreenCursorTimer);
+        state.fullscreenCursorTimer = null;
+        document.body.classList.remove("is-cursor-hidden");
+      });
+
+      window.addEventListener("resize", () => {
+        if (!state.layout) {
+          updateAddControls();
+          return;
+        }
+        if (document.fullscreenElement && state.fullscreenAutoFit) fitFullscreenCrossAxis();
+        else if (state.fitted) {
+          state.fitted = false;
+          fitToScreen();
+        } else if (state.defaultZoom) {
+          resetToDefaultView();
+        } else {
+          centerContent();
+          applyTransform();
+        }
+      });
+
+      window.addEventListener("beforeunload", () => {
+        for (const image of state.images) URL.revokeObjectURL(image.url);
+      });
+
+      updateControls();
+    </script>
+  </body>
+</html>
