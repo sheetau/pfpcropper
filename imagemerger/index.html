@@ -493,6 +493,41 @@
         display: none;
       }
 
+      #insert-btn {
+        position: absolute;
+        z-index: 8;
+        width: 3rem;
+        height: 3rem;
+        border: 0;
+        border-radius: 50%;
+        background: var(--color-black-75);
+        cursor: pointer;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+          opacity var(--duration-fast),
+          visibility 0s linear var(--duration-fast);
+      }
+
+      #insert-btn.is-visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition-delay: 0s;
+      }
+
+      #insert-btn .add-icon {
+        top: 50%;
+        left: 50%;
+      }
+
+      #insert-btn:hover .add-icon,
+      #insert-btn:focus-visible .add-icon {
+        color: var(--color-white);
+      }
+
       #drop-indicator {
         position: absolute;
         z-index: 5;
@@ -540,6 +575,7 @@
       body.is-fullscreen .app-header,
       body.is-fullscreen #initial-drop,
       body.is-fullscreen .add-btn,
+      body.is-fullscreen #insert-btn,
       body.is-fullscreen #drop-indicator,
       body.is-fullscreen #status {
         display: none;
@@ -740,7 +776,13 @@
               />
             </svg>
           </button>
-          <button type="button" id="reverse-btn" class="icon-btn" aria-label="Reverse image order" title="Reverse image order">
+          <button
+            type="button"
+            id="reverse-btn"
+            class="icon-btn"
+            aria-label="Reverse image order"
+            title="Reverse image order"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -772,6 +814,15 @@
       <div id="media-strip" role="group" aria-label="Merged image preview"></div>
       <div id="reorder-indicator" hidden></div>
       <div id="delete-indicator" hidden></div>
+      <button
+        type="button"
+        id="insert-btn"
+        aria-label="Add images between"
+        title="Add images between"
+        aria-hidden="true"
+      >
+        <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+      </button>
       <div id="drop-indicator" hidden>
         <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
       </div>
@@ -798,6 +849,7 @@
       const mediaStrip = document.getElementById("media-strip");
       const reorderIndicator = document.getElementById("reorder-indicator");
       const deleteIndicator = document.getElementById("delete-indicator");
+      const insertBtn = document.getElementById("insert-btn");
       const dropIndicator = document.getElementById("drop-indicator");
       const addButtons = Array.from(document.querySelectorAll(".add-btn"));
       const fileInput = document.getElementById("file-input");
@@ -818,6 +870,7 @@
       const DROP_REFERENCE_SIZE = 500;
       const ADD_CONTROL_OFFSET = 32;
       const MIN_END_MARGIN = 100;
+      const INSERT_HOVER_DISTANCE = 32;
       const EDGE_SCROLL_ZONE = 72;
       const EDGE_SCROLL_MAX_SPEED = 14;
 
@@ -837,9 +890,11 @@
         beforeFullscreen: null,
         fullscreenAutoFit: false,
         pendingDirection: "initial",
+        pendingInsertIndex: null,
         replaceIndex: null,
         reorder: null,
         autoScroll: null,
+        insertHover: null,
         suppressImageClick: false,
         fullscreenCursorTimer: null,
       };
@@ -1001,9 +1056,10 @@
 
       function centerContent({ fullViewport = false } = {}) {
         if (!state.layout) return;
-        const bounds = fullViewport || state.images.length === 1
-          ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight }
-          : getViewportBounds();
+        const bounds =
+          fullViewport || state.images.length === 1
+            ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight }
+            : getViewportBounds();
         state.translateX = (bounds.left + bounds.right - state.layout.width * state.zoom) / 2;
         state.translateY = (bounds.top + bounds.bottom - state.layout.height * state.zoom) / 2;
         if (!fullViewport) clampTranslation();
@@ -1019,6 +1075,7 @@
         workspace.dataset.translateX = state.translateX.toFixed(2);
         workspace.dataset.translateY = state.translateY.toFixed(2);
         updateAddControls();
+        if (state.insertHover) updateInsertButton(state.insertHover.clientX, state.insertHover.clientY);
         if (state.autoScroll?.mode === "external") {
           const direction = getDropDirection(state.autoScroll.clientX, state.autoScroll.clientY);
           if (direction !== state.dragDirection) showDropIndicator(direction);
@@ -1097,6 +1154,7 @@
         orientationBtn.setAttribute("aria-label", `Arrange ${nextDirection}`);
         orientationBtn.title = `Arrange ${nextDirection}`;
         workspace.dataset.imageCount = String(state.images.length);
+        if (state.images.length < 2) hideInsertButton();
         updateAddControls();
       }
 
@@ -1157,6 +1215,7 @@
         state.defaultZoom = true;
         state.dragDirection = null;
         state.pendingDirection = "initial";
+        state.pendingInsertIndex = null;
         state.replaceIndex = null;
         state.reorder = null;
         stopAutoScroll();
@@ -1164,6 +1223,7 @@
         mediaStrip.classList.remove("is-reordering");
         mediaStrip.replaceChildren();
         mediaStrip.removeAttribute("style");
+        hideInsertButton();
         hideDropIndicator();
         updateControls();
       }
@@ -1195,7 +1255,7 @@
         }
       }
 
-      async function addFiles(fileList, direction = "initial") {
+      async function addFiles(fileList, direction = "initial", insertIndex = null) {
         const files = Array.from(fileList).filter((file) => file.type.startsWith("image/"));
         if (!files.length) {
           announce("Choose one or more image files.");
@@ -1233,10 +1293,13 @@
           state.referenceImage = decoded[0];
           state.orientation = direction === "top" || direction === "bottom" ? "vertical" : "horizontal";
         } else {
-          if (state.images.length === 1) {
+          if (state.images.length === 1 && !Number.isInteger(insertIndex)) {
             state.orientation = direction === "top" || direction === "bottom" ? "vertical" : "horizontal";
           }
-          if (direction === "left" || direction === "top") state.images.unshift(...decoded);
+          if (Number.isInteger(insertIndex)) {
+            const safeIndex = Math.max(1, Math.min(state.images.length - 1, insertIndex));
+            state.images.splice(safeIndex, 0, ...decoded);
+          } else if (direction === "left" || direction === "top") state.images.unshift(...decoded);
           else state.images.push(...decoded);
         }
 
@@ -1307,7 +1370,9 @@
         state.defaultZoom = wasDefaultZoom && Math.abs(state.zoom - getDefaultZoom()) <= tolerance;
         applyTransform();
         updateControls();
-        announce(`${replacements.length} image${replacements.length === 1 ? "" : "s"} placed from position ${index + 1}.`);
+        announce(
+          `${replacements.length} image${replacements.length === 1 ? "" : "s"} placed from position ${index + 1}.`,
+        );
       }
 
       function removeImage(index) {
@@ -1510,6 +1575,67 @@
           right: state.translateX + (item.x + item.width) * state.zoom,
           bottom: state.translateY + (item.y + item.height) * state.zoom,
         };
+      }
+
+      function hideInsertButton() {
+        state.insertHover = null;
+        if (document.activeElement === insertBtn) insertBtn.blur();
+        insertBtn.classList.remove("is-visible");
+        insertBtn.setAttribute("aria-hidden", "true");
+        delete insertBtn.dataset.index;
+      }
+
+      function updateInsertButton(clientX, clientY) {
+        if (
+          !state.layout ||
+          state.images.length < 2 ||
+          document.fullscreenElement ||
+          state.pan ||
+          state.reorder?.active ||
+          state.autoScroll?.mode === "external"
+        ) {
+          hideInsertButton();
+          return;
+        }
+
+        const horizontal = state.orientation === "horizontal";
+        let nearest = null;
+        for (let index = 1; index < state.layout.items.length; index += 1) {
+          const previous = getDisplayedItemRect(state.layout.items[index - 1]);
+          const next = getDisplayedItemRect(state.layout.items[index]);
+          const boundary = horizontal ? (previous.right + next.left) / 2 : (previous.bottom + next.top) / 2;
+          const crossStart = horizontal ? Math.max(previous.top, next.top) : Math.max(previous.left, next.left);
+          const crossEnd = horizontal ? Math.min(previous.bottom, next.bottom) : Math.min(previous.right, next.right);
+          const crossCenter = (crossStart + crossEnd) / 2;
+          const crossRadius = (crossEnd - crossStart) / 4;
+          const coordinate = horizontal ? clientX : clientY;
+          const crossCoordinate = horizontal ? clientY : clientX;
+          const distance = Math.abs(coordinate - boundary);
+          if (
+            crossCoordinate >= crossCenter - crossRadius &&
+            crossCoordinate <= crossCenter + crossRadius &&
+            distance <= INSERT_HOVER_DISTANCE &&
+            (!nearest || distance < nearest.distance)
+          ) {
+            nearest = {
+              index,
+              distance,
+              left: horizontal ? boundary : crossCenter,
+              top: horizontal ? crossCenter : boundary,
+            };
+          }
+        }
+
+        if (!nearest) {
+          hideInsertButton();
+          return;
+        }
+        state.insertHover = { clientX, clientY, index: nearest.index };
+        insertBtn.dataset.index = String(nearest.index);
+        insertBtn.style.left = `${nearest.left}px`;
+        insertBtn.style.top = `${nearest.top}px`;
+        insertBtn.classList.add("is-visible");
+        insertBtn.setAttribute("aria-hidden", "false");
       }
 
       function getReferenceRect(item) {
@@ -1746,8 +1872,9 @@
         }
       }
 
-      function openFilePicker(direction, replaceIndex = null) {
+      function openFilePicker(direction, replaceIndex = null, insertIndex = null) {
         state.pendingDirection = direction;
+        state.pendingInsertIndex = insertIndex;
         state.replaceIndex = replaceIndex;
         fileInput.multiple = true;
         fileInput.value = "";
@@ -1783,14 +1910,23 @@
       newFileBtn.addEventListener("click", () => {
         openFilePicker("new");
       });
+      insertBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const insertIndex = Number(insertBtn.dataset.index);
+        if (!Number.isInteger(insertIndex)) return;
+        hideInsertButton();
+        openFilePicker("insert", null, insertIndex);
+      });
 
       fileInput.addEventListener("change", async () => {
         if (fileInput.files?.length) {
           if (state.pendingDirection === "new") await replaceAllImages(fileInput.files);
-          else if (state.replaceIndex === null) await addFiles(fileInput.files, state.pendingDirection);
+          else if (state.replaceIndex === null)
+            await addFiles(fileInput.files, state.pendingDirection, state.pendingInsertIndex);
           else await replaceImages(state.replaceIndex, fileInput.files);
         }
         state.pendingDirection = "initial";
+        state.pendingInsertIndex = null;
         state.replaceIndex = null;
         fileInput.multiple = true;
         fileInput.value = "";
@@ -1901,9 +2037,13 @@
         { passive: false },
       );
 
+      workspace.addEventListener("pointermove", (event) => {
+        updateInsertButton(event.clientX, event.clientY);
+      });
+
       workspace.addEventListener("pointerdown", (event) => {
         if (state.images.length < 2 || event.button !== 0) return;
-        if (event.target.closest(".add-btn")) return;
+        if (event.target.closest(".add-btn, #insert-btn")) return;
         if (event.target.closest("#media-strip") && !document.fullscreenElement) return;
         state.pan = {
           pointerId: event.pointerId,
@@ -2088,6 +2228,7 @@
       workspace.addEventListener("dragover", (event) => {
         if (!hasDraggedFiles(event)) return;
         event.preventDefault();
+        hideInsertButton();
         const direction = getDropDirection(event.clientX, event.clientY);
         event.dataTransfer.dropEffect = direction ? "copy" : "none";
         showDropIndicator(direction);
@@ -2159,6 +2300,7 @@
       });
 
       workspace.addEventListener("pointerleave", () => {
+        hideInsertButton();
         clearTimeout(state.fullscreenCursorTimer);
         state.fullscreenCursorTimer = null;
         document.body.classList.remove("is-cursor-hidden");
