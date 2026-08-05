@@ -67,7 +67,7 @@
         --size-icon-sm: 1.1rem;
         --size-icon-md: 1.25rem;
         --size-icon-lg: 1.5rem;
-        --size-add-icon: 1.5rem;
+        --size-add-icon: 2rem;
         --size-reorder-indicator: 4px;
         --offset-add: 2rem;
         --radius-sm: 0.25rem;
@@ -78,6 +78,9 @@
         --border-drop: 1px dashed var(--color-white-25);
         --border-drop-hover: 1px dashed var(--color-white-75);
         --shadow-header: 0 0 0.7rem rgba(0, 0, 0, 0.85);
+        --shadow-indicator: 0 0 0.5rem rgba(0, 0, 0, 1);
+        --line-placeholder: 0.5px;
+        --position-center: 50%;
         --duration-fast: 0.2s;
         --transition-border: border var(--duration-fast);
         --duration-shine: 2s;
@@ -403,14 +406,39 @@
       }
 
       #reorder-indicator[data-orientation="horizontal"] {
-        background: linear-gradient(to bottom, var(--color-black) 0%, var(--color-white) 50%, var(--color-black) 100%);
+        background: var(--color-white);
+        filter: drop-shadow(var(--shadow-indicator));
       }
 
       #reorder-indicator[data-orientation="vertical"] {
-        background: linear-gradient(to right, var(--color-black) 0%, var(--color-white) 50%, var(--color-black) 100%);
+        background: var(--color-white);
+        filter: drop-shadow(var(--shadow-indicator));
       }
 
       #reorder-indicator[hidden] {
+        display: none;
+      }
+
+      #delete-indicator {
+        position: absolute;
+        z-index: 7;
+        pointer-events: none;
+        background:
+          linear-gradient(
+            to top right,
+            transparent calc(var(--position-center) - var(--line-placeholder)),
+            var(--color-white-25) var(--position-center),
+            transparent calc(var(--position-center) + var(--line-placeholder))
+          ),
+          linear-gradient(
+            to bottom right,
+            transparent calc(var(--position-center) - var(--line-placeholder)),
+            var(--color-white-25) var(--position-center),
+            transparent calc(var(--position-center) + var(--line-placeholder))
+          );
+      }
+
+      #delete-indicator[hidden] {
         display: none;
       }
 
@@ -424,11 +452,6 @@
 
       body.is-fullscreen.is-cursor-hidden #media-strip img {
         cursor: none;
-      }
-
-      #media-strip img:focus-visible {
-        outline: 1px solid var(--color-white);
-        outline-offset: -2px;
       }
 
       .add-btn {
@@ -717,6 +740,25 @@
               />
             </svg>
           </button>
+          <button type="button" id="reverse-btn" class="icon-btn" aria-label="Reverse image order" title="Reverse image order">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-arrows-sort"
+              aria-hidden="true"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M3 9l4 -4l4 4m-4 -4v14" />
+              <path d="M21 15l-4 4l-4 -4m4 4v-14" />
+            </svg>
+          </button>
         </div>
         <button type="button" id="download-btn" class="action-btn">Download</button>
         <button type="button" id="new-file-btn" class="action-btn">New file</button>
@@ -729,6 +771,7 @@
       </button>
       <div id="media-strip" role="group" aria-label="Merged image preview"></div>
       <div id="reorder-indicator" hidden></div>
+      <div id="delete-indicator" hidden></div>
       <div id="drop-indicator" hidden>
         <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
       </div>
@@ -754,6 +797,7 @@
       const initialDrop = document.getElementById("initial-drop");
       const mediaStrip = document.getElementById("media-strip");
       const reorderIndicator = document.getElementById("reorder-indicator");
+      const deleteIndicator = document.getElementById("delete-indicator");
       const dropIndicator = document.getElementById("drop-indicator");
       const addButtons = Array.from(document.querySelectorAll(".add-btn"));
       const fileInput = document.getElementById("file-input");
@@ -762,6 +806,7 @@
       const fullscreenBtn = document.getElementById("fullscreen-btn");
       const fitBtn = document.getElementById("fit-btn");
       const orientationBtn = document.getElementById("orientation-btn");
+      const reverseBtn = document.getElementById("reverse-btn");
       const downloadBtn = document.getElementById("download-btn");
       const newFileBtn = document.getElementById("new-file-btn");
       const status = document.getElementById("status");
@@ -772,6 +817,9 @@
       const MAX_CANVAS_AREA = 67_108_864;
       const DROP_REFERENCE_SIZE = 500;
       const ADD_CONTROL_OFFSET = 32;
+      const MIN_END_MARGIN = 100;
+      const EDGE_SCROLL_ZONE = 72;
+      const EDGE_SCROLL_MAX_SPEED = 14;
 
       const state = {
         images: [],
@@ -791,6 +839,7 @@
         pendingDirection: "initial",
         replaceIndex: null,
         reorder: null,
+        autoScroll: null,
         suppressImageClick: false,
         fullscreenCursorTimer: null,
       };
@@ -824,10 +873,27 @@
         );
       }
 
+      function getSingleImageMarginZoom() {
+        if (!state.layout || state.images.length !== 1) return Infinity;
+        const bounds = getActiveBounds();
+        const mainAxisSize = state.orientation === "horizontal" ? state.layout.width : state.layout.height;
+        const availableMainAxis =
+          state.orientation === "horizontal"
+            ? bounds.right - bounds.left - MIN_END_MARGIN * 2
+            : bounds.bottom - bounds.top - MIN_END_MARGIN * 2;
+        return Math.max(Number.EPSILON, availableMainAxis / mainAxisSize);
+      }
+
+      function getMinimumZoom() {
+        return Math.min(MIN_ZOOM, getSingleImageMarginZoom());
+      }
+
       function getDefaultZoom() {
         if (!state.layout) return 1;
         const crossSize = state.orientation === "horizontal" ? state.layout.height : state.layout.width;
-        return Math.max(MIN_ZOOM, getDefaultDisplaySize() / crossSize);
+        const crossAxisZoom = getDefaultDisplaySize() / crossSize;
+        const marginZoom = getSingleImageMarginZoom();
+        return Math.max(getMinimumZoom(), Math.min(crossAxisZoom, marginZoom));
       }
 
       function resetToDefaultView() {
@@ -866,16 +932,19 @@
 
       function getScrollMetrics(zoom = state.zoom) {
         if (!state.layout || state.images.length < 2) return null;
-        const first = state.layout.items[0];
-        const last = state.layout.items[state.layout.items.length - 1];
-        if (state.orientation === "horizontal") {
-          const start = window.innerWidth / 2 - (first.x + first.width / 2) * zoom;
-          const end = window.innerWidth / 2 - (last.x + last.width / 2) * zoom;
-          return { axis: "x", start, end, distance: Math.max(0, start - end) };
+        const bounds = getActiveBounds();
+        const horizontal = state.orientation === "horizontal";
+        const viewportStart = horizontal ? bounds.left : bounds.top;
+        const viewportEnd = horizontal ? bounds.right : bounds.bottom;
+        const contentSize = (horizontal ? state.layout.width : state.layout.height) * zoom;
+        const availableSize = viewportEnd - viewportStart - MIN_END_MARGIN * 2;
+        if (contentSize <= availableSize) {
+          const centered = (viewportStart + viewportEnd - contentSize) / 2;
+          return { axis: horizontal ? "x" : "y", start: centered, end: centered, distance: 0 };
         }
-        const start = window.innerHeight / 2 - (first.y + first.height / 2) * zoom;
-        const end = window.innerHeight / 2 - (last.y + last.height / 2) * zoom;
-        return { axis: "y", start, end, distance: Math.max(0, start - end) };
+        const start = viewportStart + MIN_END_MARGIN;
+        const end = viewportEnd - MIN_END_MARGIN - contentSize;
+        return { axis: horizontal ? "x" : "y", start, end, distance: start - end };
       }
 
       function getScrollProgress() {
@@ -932,7 +1001,7 @@
 
       function centerContent({ fullViewport = false } = {}) {
         if (!state.layout) return;
-        const bounds = fullViewport
+        const bounds = fullViewport || state.images.length === 1
           ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight }
           : getViewportBounds();
         state.translateX = (bounds.left + bounds.right - state.layout.width * state.zoom) / 2;
@@ -950,7 +1019,67 @@
         workspace.dataset.translateX = state.translateX.toFixed(2);
         workspace.dataset.translateY = state.translateY.toFixed(2);
         updateAddControls();
-        if (state.dragDirection && state.images.length) positionDropIndicator(state.dragDirection);
+        if (state.autoScroll?.mode === "external") {
+          const direction = getDropDirection(state.autoScroll.clientX, state.autoScroll.clientY);
+          if (direction !== state.dragDirection) showDropIndicator(direction);
+          else if (direction && state.images.length) positionDropIndicator(direction);
+        } else if (state.dragDirection && state.images.length) {
+          positionDropIndicator(state.dragDirection);
+        }
+        if (state.reorder?.active) {
+          if (state.reorder.deleteReady) {
+            reorderIndicator.hidden = true;
+            positionDeleteIndicator();
+          } else {
+            updateReorderTarget(state.reorder.clientX, state.reorder.clientY);
+          }
+        }
+      }
+
+      function getEdgeScrollDelta(clientX, clientY) {
+        const metrics = getScrollMetrics();
+        if (!metrics || metrics.distance === 0) return 0;
+        const coordinate = metrics.axis === "x" ? clientX : clientY;
+        const viewportSize = metrics.axis === "x" ? window.innerWidth : window.innerHeight;
+        let delta = 0;
+        if (coordinate < EDGE_SCROLL_ZONE) {
+          delta = EDGE_SCROLL_MAX_SPEED * (1 - Math.max(0, coordinate) / EDGE_SCROLL_ZONE);
+        } else if (coordinate > viewportSize - EDGE_SCROLL_ZONE) {
+          delta = -EDGE_SCROLL_MAX_SPEED * (1 - Math.max(0, viewportSize - coordinate) / EDGE_SCROLL_ZONE);
+        }
+        const current = metrics.axis === "x" ? state.translateX : state.translateY;
+        if ((delta > 0 && current >= metrics.start) || (delta < 0 && current <= metrics.end)) return 0;
+        return delta;
+      }
+
+      function stopAutoScroll(mode) {
+        if (!state.autoScroll || (mode && state.autoScroll.mode !== mode)) return;
+        if (state.autoScroll.frame) cancelAnimationFrame(state.autoScroll.frame);
+        state.autoScroll = null;
+      }
+
+      function runAutoScroll() {
+        const autoScroll = state.autoScroll;
+        if (!autoScroll) return;
+        autoScroll.frame = null;
+        const delta = getEdgeScrollDelta(autoScroll.clientX, autoScroll.clientY);
+        if (!delta) return;
+        const metrics = getScrollMetrics();
+        if (metrics.axis === "x") state.translateX += delta;
+        else state.translateY += delta;
+        clampTranslation();
+        applyTransform();
+        if (state.autoScroll === autoScroll) autoScroll.frame = requestAnimationFrame(runAutoScroll);
+      }
+
+      function updateAutoScroll(mode, clientX, clientY) {
+        if (state.autoScroll?.mode !== mode) stopAutoScroll();
+        if (!state.autoScroll) state.autoScroll = { mode, clientX, clientY, frame: null };
+        state.autoScroll.clientX = clientX;
+        state.autoScroll.clientY = clientY;
+        if (!state.autoScroll.frame && getEdgeScrollDelta(clientX, clientY)) {
+          state.autoScroll.frame = requestAnimationFrame(runAutoScroll);
+        }
       }
 
       function updateControls() {
@@ -977,7 +1106,7 @@
         mediaStrip.dataset.reorderable = String(reorderable);
         for (const image of mediaStrip.querySelectorAll("img")) {
           image.draggable = false;
-          image.tabIndex = fullscreen ? -1 : 0;
+          image.tabIndex = -1;
           image.toggleAttribute("aria-disabled", fullscreen);
         }
       }
@@ -1000,12 +1129,7 @@
             if (state.suppressImageClick) return;
             if (!document.fullscreenElement) openFilePicker("replace", index);
           };
-          image.onkeydown = (event) => {
-            if (!document.fullscreenElement && (event.key === "Enter" || event.key === " ")) {
-              event.preventDefault();
-              openFilePicker("replace", index);
-            }
-          };
+          image.onkeydown = null;
           image.width = Math.max(1, Math.round(item.width));
           image.height = Math.max(1, Math.round(item.height));
           image.style.width = `${item.width}px`;
@@ -1035,6 +1159,7 @@
         state.pendingDirection = "initial";
         state.replaceIndex = null;
         state.reorder = null;
+        stopAutoScroll();
         state.suppressImageClick = false;
         mediaStrip.classList.remove("is-reordering");
         mediaStrip.replaceChildren();
@@ -1087,7 +1212,23 @@
           return;
         }
 
-        if (!state.images.length) {
+        const hadImages = state.images.length > 0;
+        const anchorImage = state.images[0] || null;
+        const anchorItem = state.layout?.items.find((item) => item.image === anchorImage);
+        const previousView = hadImages
+          ? {
+              zoom: state.zoom,
+              fitted: state.fitted,
+              defaultZoom: state.defaultZoom,
+              fullscreenAutoFit: state.fullscreenAutoFit,
+              progress: getScrollProgress(),
+              anchorImage,
+              anchorLeft: anchorItem ? state.translateX + anchorItem.x * state.zoom : null,
+              anchorTop: anchorItem ? state.translateY + anchorItem.y * state.zoom : null,
+            }
+          : null;
+
+        if (!hadImages) {
           state.images.push(...decoded);
           state.referenceImage = decoded[0];
           state.orientation = direction === "top" || direction === "bottom" ? "vertical" : "horizontal";
@@ -1099,48 +1240,85 @@
           else state.images.push(...decoded);
         }
 
-        state.fitted = false;
         renderLayout({ recenter: false });
-        resetToDefaultView();
+        if (!previousView) {
+          resetToDefaultView();
+        } else {
+          state.zoom = previousView.zoom;
+          state.fullscreenAutoFit = previousView.fullscreenAutoFit;
+          const nextAnchorItem = state.layout.items.find((item) => item.image === previousView.anchorImage);
+          if (nextAnchorItem && previousView.anchorLeft !== null && previousView.anchorTop !== null) {
+            state.translateX = previousView.anchorLeft - nextAnchorItem.x * state.zoom;
+            state.translateY = previousView.anchorTop - nextAnchorItem.y * state.zoom;
+          } else {
+            setScrollProgress(previousView.progress);
+          }
+          clampTranslation({ centerCrossAxis: false });
+          const tolerance = Math.max(1, state.zoom) * 0.0001;
+          state.fitted = previousView.fitted && Math.abs(state.zoom - getFitZoom()) <= tolerance;
+          state.defaultZoom = previousView.defaultZoom && Math.abs(state.zoom - getDefaultZoom()) <= tolerance;
+          applyTransform();
+          updateControls();
+        }
         announce(`${decoded.length} image${decoded.length === 1 ? "" : "s"} added.`);
       }
 
-      async function replaceImage(index, file) {
-        const replacement = await decodeFile(file);
-        if (!replacement || !state.images[index]) {
-          announce("The selected image could not be opened.");
+      async function replaceImages(index, fileList) {
+        const files = Array.from(fileList).filter((file) => file.type.startsWith("image/"));
+        if (!files.length || !state.images[index]) {
+          announce("Choose one or more image files.");
           return;
         }
 
-        const oldImage = state.images[index];
+        const replacements = [];
+        for (const file of files) {
+          const image = await decodeFile(file);
+          if (image) replacements.push(image);
+        }
+        if (!replacements.length) {
+          announce("The selected images could not be opened.");
+          return;
+        }
+
+        const oldItem = state.layout?.items[index];
+        const zoom = state.zoom;
         const wasFitted = state.fitted;
         const wasDefaultZoom = state.defaultZoom;
-        const progress = getScrollProgress();
-        state.images[index] = replacement;
-        if (state.referenceImage === oldImage) state.referenceImage = replacement;
-        URL.revokeObjectURL(oldImage.url);
+        const oldLeft = oldItem ? state.translateX + oldItem.x * zoom : null;
+        const oldTop = oldItem ? state.translateY + oldItem.y * zoom : null;
+        const [removed] = state.images.splice(index, 1, ...replacements);
+        if (state.referenceImage === removed) state.referenceImage = replacements[0];
+        URL.revokeObjectURL(removed.url);
         renderLayout({ recenter: false });
 
-        if (wasFitted) {
-          state.zoom = getFitZoom();
-          state.fitted = true;
-          state.defaultZoom = false;
-        } else if (wasDefaultZoom) {
-          state.zoom = getDefaultZoom();
-          state.fitted = false;
-          state.defaultZoom = true;
+        state.zoom = zoom;
+        if (state.images.length === 1) {
+          centerContent();
+        } else {
+          const replacementItem = state.layout.items.find((item) => item.image === replacements[0]);
+          if (replacementItem && oldLeft !== null && oldTop !== null) {
+            state.translateX = oldLeft - replacementItem.x * state.zoom;
+            state.translateY = oldTop - replacementItem.y * state.zoom;
+          }
+          clampTranslation({ centerCrossAxis: false });
         }
-        setScrollProgress(progress);
+        const tolerance = Math.max(1, state.zoom) * 0.0001;
+        state.fitted = wasFitted && Math.abs(state.zoom - getFitZoom()) <= tolerance;
+        state.defaultZoom = wasDefaultZoom && Math.abs(state.zoom - getDefaultZoom()) <= tolerance;
         applyTransform();
         updateControls();
-        announce(`Image ${index + 1} replaced.`);
+        announce(`${replacements.length} image${replacements.length === 1 ? "" : "s"} placed from position ${index + 1}.`);
       }
 
       function removeImage(index) {
         if (document.fullscreenElement || !state.images[index]) return;
+        const zoom = state.zoom;
         const wasFitted = state.fitted;
         const wasDefaultZoom = state.defaultZoom;
-        const progress = getScrollProgress();
+        const anchorImage = state.images[index + 1] || state.images[index - 1] || null;
+        const anchorItem = state.layout?.items.find((item) => item.image === anchorImage);
+        const anchorLeft = anchorItem ? state.translateX + anchorItem.x * zoom : null;
+        const anchorTop = anchorItem ? state.translateY + anchorItem.y * zoom : null;
         const [removed] = state.images.splice(index, 1);
         if (state.referenceImage === removed) state.referenceImage = state.images[0] || null;
         URL.revokeObjectURL(removed.url);
@@ -1152,16 +1330,20 @@
         }
 
         renderLayout({ recenter: false });
-        if (wasFitted) {
-          state.zoom = getFitZoom();
-          state.fitted = true;
-          state.defaultZoom = false;
-        } else if (wasDefaultZoom) {
-          state.zoom = getDefaultZoom();
-          state.fitted = false;
-          state.defaultZoom = true;
+        state.zoom = zoom;
+        if (state.images.length === 1) {
+          centerContent();
+        } else {
+          const nextAnchorItem = state.layout.items.find((item) => item.image === anchorImage);
+          if (nextAnchorItem && anchorLeft !== null && anchorTop !== null) {
+            state.translateX = anchorLeft - nextAnchorItem.x * state.zoom;
+            state.translateY = anchorTop - nextAnchorItem.y * state.zoom;
+          }
+          clampTranslation({ centerCrossAxis: false });
         }
-        setScrollProgress(progress);
+        const tolerance = Math.max(1, state.zoom) * 0.0001;
+        state.fitted = wasFitted && Math.abs(state.zoom - getFitZoom()) <= tolerance;
+        state.defaultZoom = wasDefaultZoom && Math.abs(state.zoom - getDefaultZoom()) <= tolerance;
         applyTransform();
         updateControls();
         announce(`Image ${index + 1} removed.`);
@@ -1199,6 +1381,33 @@
         announce(`Image moved to position ${insertionIndex + 1}.`);
       }
 
+      function reverseImageOrder() {
+        if (!state.layout || state.images.length < 2 || document.fullscreenElement) return;
+        const horizontal = state.orientation === "horizontal";
+        const viewportCenter = horizontal ? window.innerWidth / 2 : window.innerHeight / 2;
+        const anchorItem = state.layout.items.reduce((nearest, item) => {
+          const rect = getDisplayedItemRect(item);
+          const center = horizontal ? (rect.left + rect.right) / 2 : (rect.top + rect.bottom) / 2;
+          if (!nearest || Math.abs(center - viewportCenter) < nearest.distance) {
+            return { item, distance: Math.abs(center - viewportCenter) };
+          }
+          return nearest;
+        }, null).item;
+        const anchorLeft = state.translateX + anchorItem.x * state.zoom;
+        const anchorTop = state.translateY + anchorItem.y * state.zoom;
+        const anchorImage = anchorItem.image;
+
+        state.images.reverse();
+        renderLayout({ recenter: false });
+        const reversedAnchorItem = state.layout.items.find((item) => item.image === anchorImage);
+        state.translateX = anchorLeft - reversedAnchorItem.x * state.zoom;
+        state.translateY = anchorTop - reversedAnchorItem.y * state.zoom;
+        clampTranslation({ centerCrossAxis: false });
+        applyTransform();
+        updateControls();
+        announce("Image order reversed.");
+      }
+
       async function replaceAllImages(fileList) {
         const files = Array.from(fileList).filter((file) => file.type.startsWith("image/"));
         if (!files.length) return;
@@ -1227,6 +1436,9 @@
         state.fitted = fitted;
         state.defaultZoom = defaultZoom;
         renderLayout({ recenter: false });
+        const tolerance = Math.max(1, state.zoom) * 0.0001;
+        state.fitted = fitted && Math.abs(state.zoom - getFitZoom()) <= tolerance;
+        state.defaultZoom = defaultZoom && Math.abs(state.zoom - getDefaultZoom()) <= tolerance;
         setScrollProgress(progress);
         applyTransform();
         updateControls();
@@ -1276,7 +1488,7 @@
         const fitZoom = getFitZoom();
         const currentZoom = state.zoom;
         const maximumZoom = Math.max(MAX_ZOOM, getDefaultZoom(), fitZoom);
-        let zoom = Math.max(MIN_ZOOM, Math.min(maximumZoom, nextZoom));
+        let zoom = Math.max(getMinimumZoom(), Math.min(maximumZoom, nextZoom));
         const tolerance = Math.max(1, fitZoom) * 0.0001;
         const atFit = Math.abs(currentZoom - fitZoom) <= tolerance;
         const reachesFit = Math.abs(zoom - fitZoom) <= tolerance;
@@ -1537,7 +1749,7 @@
       function openFilePicker(direction, replaceIndex = null) {
         state.pendingDirection = direction;
         state.replaceIndex = replaceIndex;
-        fileInput.multiple = replaceIndex === null;
+        fileInput.multiple = true;
         fileInput.value = "";
         fileInput.click();
       }
@@ -1576,7 +1788,7 @@
         if (fileInput.files?.length) {
           if (state.pendingDirection === "new") await replaceAllImages(fileInput.files);
           else if (state.replaceIndex === null) await addFiles(fileInput.files, state.pendingDirection);
-          else await replaceImage(state.replaceIndex, fileInput.files[0]);
+          else await replaceImages(state.replaceIndex, fileInput.files);
         }
         state.pendingDirection = "initial";
         state.replaceIndex = null;
@@ -1585,6 +1797,7 @@
       });
 
       fitBtn.addEventListener("click", fitToScreen);
+      reverseBtn.addEventListener("click", reverseImageOrder);
       orientationBtn.addEventListener("click", () => {
         const wasFitted = state.fitted;
         const wasDefaultZoom = state.defaultZoom;
@@ -1608,7 +1821,7 @@
             state.defaultZoom = true;
           } else {
             state.zoom = Math.max(
-              MIN_ZOOM,
+              getMinimumZoom(),
               Math.min(Math.max(MAX_ZOOM, getDefaultZoom()), getDefaultZoom() * zoomRatio),
             );
             state.fitted = false;
@@ -1731,6 +1944,20 @@
           image.style.removeProperty("--drag-opacity");
         }
         reorderIndicator.hidden = true;
+        deleteIndicator.hidden = true;
+      }
+
+      function positionDeleteIndicator() {
+        if (!state.reorder) {
+          deleteIndicator.hidden = true;
+          return;
+        }
+        const rect = state.reorder.source.getBoundingClientRect();
+        deleteIndicator.style.left = `${rect.left}px`;
+        deleteIndicator.style.top = `${rect.top}px`;
+        deleteIndicator.style.width = `${rect.width}px`;
+        deleteIndicator.style.height = `${rect.height}px`;
+        deleteIndicator.hidden = rect.width < 1 || rect.height < 1;
       }
 
       function positionReorderIndicator(target, placeAfter) {
@@ -1795,6 +2022,7 @@
           placeAfter: false,
           active: false,
           source: image,
+          sourceRect: imageRect,
           deleteDistance: Math.max(1, (state.orientation === "horizontal" ? imageRect.height : imageRect.width) / 2),
           deleteReady: false,
         };
@@ -1810,23 +2038,38 @@
           mediaStrip.setPointerCapture(event.pointerId);
         }
         event.preventDefault();
-        const deleteDragDistance = Math.max(
-          0,
+        state.reorder.clientX = event.clientX;
+        state.reorder.clientY = event.clientY;
+        updateAutoScroll("reorder", event.clientX, event.clientY);
+        const inSourceLane =
           state.orientation === "horizontal"
-            ? state.reorder.startY - event.clientY
-            : state.reorder.startX - event.clientX,
-        );
+            ? event.clientX >= state.reorder.sourceRect.left && event.clientX <= state.reorder.sourceRect.right
+            : event.clientY >= state.reorder.sourceRect.top && event.clientY <= state.reorder.sourceRect.bottom;
+        const deleteDragDistance = inSourceLane
+          ? Math.max(
+              0,
+              state.orientation === "horizontal"
+                ? state.reorder.startY - event.clientY
+                : state.reorder.startX - event.clientX,
+            )
+          : 0;
         const remainingOpacity = Math.max(0, 1 - deleteDragDistance / state.reorder.deleteDistance);
         state.reorder.source.style.setProperty("--drag-opacity", String(0.55 * remainingOpacity));
-        state.reorder.deleteReady = remainingOpacity === 0;
-        if (state.reorder.deleteReady) reorderIndicator.hidden = true;
-        else updateReorderTarget(event.clientX, event.clientY);
+        state.reorder.deleteReady = inSourceLane && remainingOpacity === 0;
+        if (state.reorder.deleteReady) {
+          reorderIndicator.hidden = true;
+          positionDeleteIndicator();
+        } else {
+          deleteIndicator.hidden = true;
+          updateReorderTarget(event.clientX, event.clientY);
+        }
       });
 
       function endImageReorder(event, commit) {
         if (!state.reorder || state.reorder.pointerId !== event.pointerId) return;
         const reorder = state.reorder;
         state.reorder = null;
+        stopAutoScroll("reorder");
         if (mediaStrip.hasPointerCapture(event.pointerId)) mediaStrip.releasePointerCapture(event.pointerId);
         clearReorderVisuals();
         if (!reorder.active || !commit) return;
@@ -1848,12 +2091,14 @@
         const direction = getDropDirection(event.clientX, event.clientY);
         event.dataTransfer.dropEffect = direction ? "copy" : "none";
         showDropIndicator(direction);
+        updateAutoScroll("external", event.clientX, event.clientY);
       });
 
       workspace.addEventListener("drop", async (event) => {
         if (!hasDraggedFiles(event)) return;
         event.preventDefault();
         const direction = getDropDirection(event.clientX, event.clientY);
+        stopAutoScroll("external");
         hideDropIndicator();
         if (!direction) {
           announce("Drop beside the images in the current arrangement direction.");
@@ -1863,11 +2108,19 @@
       });
 
       workspace.addEventListener("dragleave", (event) => {
-        if (!event.relatedTarget || !workspace.contains(event.relatedTarget)) hideDropIndicator();
+        if (!event.relatedTarget || !workspace.contains(event.relatedTarget)) {
+          stopAutoScroll("external");
+          hideDropIndicator();
+        }
       });
 
-      window.addEventListener("dragend", hideDropIndicator);
-      window.addEventListener("drop", hideDropIndicator);
+      function endExternalDrag() {
+        stopAutoScroll("external");
+        hideDropIndicator();
+      }
+
+      window.addEventListener("dragend", endExternalDrag);
+      window.addEventListener("drop", endExternalDrag);
 
       window.addEventListener("keydown", (event) => {
         if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || state.images.length < 2) return;
