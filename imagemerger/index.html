@@ -1941,6 +1941,17 @@
         fileInput.value = "";
       });
 
+      window.addEventListener("paste", async (event) => {
+        const files = Array.from(event.clipboardData?.items || [])
+          .filter((item) => item.kind === "file" && item.type.startsWith("image/"))
+          .map((item) => item.getAsFile())
+          .filter(Boolean);
+        if (!files.length) return;
+        event.preventDefault();
+        const direction = !state.images.length ? "initial" : state.orientation === "vertical" ? "bottom" : "right";
+        await addFiles(files, direction);
+      });
+
       fitBtn.addEventListener("click", fitToScreen);
       reverseBtn.addEventListener("click", reverseImageOrder);
       orientationBtn.addEventListener("click", () => {
