@@ -38,113 +38,8 @@
     />
     <link rel="preload" href="https://pvinis.github.io/iosevka-webfont/3.4.1/iosevka.css" as="style" />
     <link rel="stylesheet" href="https://pvinis.github.io/iosevka-webfont/3.4.1/iosevka.css" />
+    <link rel="stylesheet" href="./shared.css" />
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
-
-      /* Theme tokens */
-      :root {
-        --font-sans: "Inter", "Noto Sans JP", sans-serif;
-        --font-mono: Iosevka Web, "Courier New", monospace;
-        --color-black: #000;
-        --color-white: #fff;
-        --color-panel: rgb(18, 18, 18);
-        --color-online: rgb(67, 162, 90);
-        --color-insta-start: #d300c5;
-        --color-insta-end: #ffca00;
-        --color-download-hover: #d0d6e0;
-        --color-download-glow: color-mix(in srgb, #edecec, transparent 80%);
-        --color-text-dim: rgba(255, 255, 255, 0.4);
-        --color-text-soft: rgba(255, 255, 255, 0.6);
-        --color-text-muted: rgba(255, 255, 255, 0.7);
-        --color-text-option: rgba(255, 255, 255, 0.75);
-        --color-white-00: rgba(255, 255, 255, 0);
-        --color-white-10: rgba(255, 255, 255, 0.1);
-        --color-white-15: rgba(255, 255, 255, 0.15);
-        --color-white-25: rgba(255, 255, 255, 0.25);
-        --color-white-50: rgba(255, 255, 255, 0.5);
-        --color-white-75: rgba(255, 255, 255, 0.75);
-        --color-shadow-solid: rgba(0, 0, 0, 1);
-        --text-xs: 0.7rem;
-        --text-sm: 0.85rem;
-        --text-md: 0.9rem;
-        --text-base: 1rem;
-        --text-title: 1.3rem;
-        --text-title-mobile: 1.2rem;
-        --line-tight: 1rem;
-        --line-message: 1.4rem;
-        --line-link: 1.5rem;
-        --line-title: 1.5;
-        --space-3xs: 0.2rem;
-        --space-2xs: 0.25rem;
-        --space-xs: 0.3rem;
-        --space-sm: 0.4rem;
-        --space-md: 0.5rem;
-        --space-lg: 0.6rem;
-        --space-xl: 0.75rem;
-        --space-2xl: 1rem;
-        --space-3xl: 1.25rem;
-        --space-5xl: 2rem;
-        --space-6xl: 2.5rem;
-        --space-7xl: 3rem;
-        --space-link-brand-left: 1.9rem;
-        --space-frame-label-left: 3.3rem;
-        --size-main: 52rem;
-        --size-full: 100%;
-        --size-half: 50%;
-        --size-cropper: 500px;
-        --size-cropper-mobile: 300px;
-        --size-social-avatar: 4.25rem;
-        --size-message-avatar: 2.8rem;
-        --size-insta-ring: 5rem;
-        --size-control-height: 1.6rem;
-        --size-button-height: 2rem;
-        --size-icon-xs: 1rem;
-        --size-icon-sm: 1.1rem;
-        --size-icon-md: 1.25rem;
-        --size-icon-lg: 1.5rem;
-        --size-thumb-width: 1rem;
-        --size-thumb-height: 1.8rem;
-        --size-range-fill-min: 0.2rem;
-        --size-range-marker-width: 2px;
-        --size-frame: 120%;
-        --size-download-firefox: 72%;
-        --size-new-file-firefox: 25%;
-        --size-shine-width: 30%;
-        --radius-none: 0;
-        --radius-xs: 0.1rem;
-        --radius-sm: 0.25rem;
-        --radius-full: 50%;
-        --radius-pill: 9999px;
-        --border-transparent: solid 1px var(--color-white-00);
-        --border-soft: solid 1px var(--color-white-10);
-        --border-panel: solid 1px var(--color-white-15);
-        --border-muted: solid 1px var(--color-white-25);
-        --border-strong: solid 1px var(--color-white-50);
-        --border-crop: 1px dashed var(--color-white-25);
-        --border-crop-hover: 1px dashed var(--color-white-75);
-        --border-hint: 1px solid var(--color-white);
-        --shadow-menu: 0 var(--space-2xs) var(--space-2xl) var(--color-shadow-solid);
-        --shadow-online: 0 0 0 var(--space-sm) var(--color-black);
-        --offset-frame: -10%;
-        --offset-insta-ring: -0.375rem;
-        --offset-shine-start: -50%;
-        --offset-shine-end: 120%;
-        --line-placeholder: 0.5px;
-        --position-quarter: 25%;
-        --position-center: 50%;
-        --duration-fast: 0.2s;
-        --duration-medium: 0.5s;
-        --duration-shine: 2s;
-        --ease-out: ease-out;
-        --ease-shine: cubic-bezier(0.5, 0, 1, 1);
-        --transition-background: background var(--duration-fast);
-        --transition-border: border var(--duration-fast);
-        --transition-color: color var(--duration-fast);
-        --transition-opacity: opacity var(--duration-fast);
-        --transition-transform: transform var(--duration-fast);
-        --transition-box-shadow: box-shadow var(--duration-fast);
-      }
-
       /* Reset */
       * {
         box-sizing: border-box;
@@ -268,55 +163,12 @@
         gap: var(--space-xl);
         margin-bottom: var(--space-6xl);
       }
-      .page-title-group {
-        display: flex;
-        align-items: stretch;
-        gap: var(--space-md);
-      }
       .container {
         position: relative;
         flex-wrap: wrap;
       }
 
       /* Header */
-      #page-title {
-        width: auto;
-        gap: var(--space-md);
-        background: var(--color-black);
-        color: inherit;
-        font-family: inherit;
-        font-size: var(--text-title-mobile);
-        font-weight: 400;
-        line-height: var(--line-title);
-        border: var(--border-muted);
-        padding: 0 var(--space-xs);
-        transition: var(--transition-border);
-      }
-      #page-title:hover {
-        border: var(--border-strong);
-      }
-      #page-title svg {
-        height: var(--size-icon-md);
-      }
-      .page-switcher {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 var(--space-xs);
-        border: var(--border-muted);
-        border-radius: var(--radius-sm);
-        background: var(--color-black);
-        color: inherit;
-        cursor: pointer;
-        transition: var(--transition-opacity), var(--transition-border);
-      }
-      .page-switcher:hover {
-        border: var(--border-strong);
-      }
-      .page-switcher svg {
-        width: auto;
-        height: var(--size-icon-md);
-      }
       #links {
         gap: var(--space-md);
         color: var(--color-text-dim);
@@ -363,23 +215,6 @@
         width: var(--size-cropper);
         height: var(--size-cropper);
         pointer-events: none;
-      }
-      #placeholder {
-        background:
-          linear-gradient(
-            to top right,
-            transparent calc(var(--position-center) - var(--line-placeholder)),
-            var(--color-white-25) var(--position-center),
-            transparent calc(var(--position-center) + var(--line-placeholder))
-          ),
-          linear-gradient(
-            to bottom right,
-            transparent calc(var(--position-center) - var(--line-placeholder)),
-            var(--color-white-25) var(--position-center),
-            transparent calc(var(--position-center) + var(--line-placeholder))
-          );
-        background-size: var(--size-full) var(--size-full);
-        background-repeat: no-repeat;
       }
       #cropper-border {
         border: var(--border-crop);
@@ -577,7 +412,6 @@
         transition: var(--transition-color), var(--transition-transform), var(--transition-background);
       }
       .frame-url-toggle:hover,
-      .frame-url-option:hover,
       .icon-btn:hover {
         background: var(--color-white-10);
       }
@@ -587,27 +421,8 @@
       .frame-url-select.is-open .frame-url-toggle svg {
         transform: rotate(180deg);
       }
-      .frame-url-menu {
-        top: calc(100% + var(--space-2xs));
-        right: 0;
-        left: 0;
-        z-index: 5;
-        display: none;
-        padding: var(--space-3xs);
-        border: var(--border-panel);
-        background: var(--color-panel);
-        box-shadow: var(--shadow-menu);
-      }
-      .frame-url-select.is-open .frame-url-menu,
-      .frame-url-option {
+      .frame-url-select.is-open .frame-url-menu {
         display: block;
-      }
-      .frame-url-option {
-        padding: 0 var(--space-sm);
-        background: transparent;
-        color: var(--color-text-option);
-        font: inherit;
-        text-align: left;
       }
       .flip-buttons {
         height: var(--size-full);
@@ -747,16 +562,6 @@
           opacity: 0;
         }
       }
-      @keyframes shine {
-        0% {
-          left: var(--offset-shine-start);
-        }
-        50%,
-        100% {
-          left: var(--offset-shine-end);
-        }
-      }
-
       /* Browser fixes */
       @supports (-moz-appearance: none) {
         .range-control {
@@ -778,7 +583,6 @@
         #page-title {
           align-items: flex-start;
           flex-direction: column;
-          font-size: var(--text-title-mobile);
         }
         .mobile-break {
           display: inline;
@@ -821,12 +625,11 @@
     <main>
       <div class="header-row u-flex u-between u-center u-wrap u-full">
         <div class="page-title-group">
-          <button
-            type="button"
+          <a
             id="page-title"
-            class="u-flex u-center u-clickable u-transition-opacity u-radius-sm"
+            class="page-title-link"
+            href="./"
             aria-label="Reset Square Image Cropper"
-            onclick="location.reload()"
           >
             <svg xmlns="http://www.w3.org/2000/svg" id="crop-icon" data-name="Layer 1" viewBox="0 0 27.68 27.68">
               <path
@@ -847,14 +650,13 @@
               />
             </svg>
             Square Image Cropper for PFP
-          </button>
-          <button
-            type="button"
+          </a>
+          <a
             id="image-merger-link"
             class="page-switcher"
+            href="./imagemerger/"
             aria-label="Open Image Merger"
             title="Image Merger"
-            onclick="location.href = './imagemerger/'"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 53.35 27.68" aria-hidden="true">
               <path
@@ -873,7 +675,7 @@
                 stroke-miterlimit="10"
               />
             </svg>
-          </button>
+          </a>
         </div>
         <p id="links" class="u-flex">
           <a
@@ -910,7 +712,7 @@
       </div>
 
       <div class="container u-flex">
-        <div id="placeholder" class="u-absolute"></div>
+        <div id="placeholder" class="cross-lines u-absolute"></div>
         <div id="cropper" class="cropper-area u-relative u-flex u-center u-overflow-hidden u-clickable">
           <p id="upload-prompt">Drop or click to upload image</p>
           <img id="preview-image" class="u-absolute" alt="Preview" />
@@ -987,7 +789,7 @@
                     <path d="M6 9l6 6l6 -6" />
                   </svg>
                 </button>
-                <div class="frame-url-menu u-absolute u-radius-sm" id="frame-url-menu"></div>
+                <div class="frame-url-menu popup-menu" id="frame-url-menu"></div>
               </div>
               <div class="flip-buttons u-flex u-control-bg u-radius-sm u-overflow-hidden">
                 <button
@@ -1240,7 +1042,7 @@
         frameUrlPresets.forEach((preset) => {
           const option = document.createElement("button");
           option.type = "button";
-          option.className = "frame-url-option u-full u-no-border u-radius-xs u-clickable";
+          option.className = "frame-url-option popup-menu-option";
           option.textContent = preset.name;
           option.addEventListener("click", () => {
             input.value = preset.url;

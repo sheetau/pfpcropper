@@ -19,10 +19,11 @@
     <link
       rel="icon"
       type="image/svg+xml"
-      href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27.68 27.68"%3E%3Cpath d="M11 1H4.64A3.64 3.64 0 0 0 1 4.64V11M1 16.68v8.18c0 1 .81 1.82 1.82 1.82H11M26.68 11V6.45A5.45 5.45 0 0 0 21.23 1h-4.55M16.68 26.68c5.52 0 10-4.48 10-10" fill="none" stroke="%23fff" stroke-miterlimit="10" stroke-width="2"/%3E%3Cpath d="M21.03 11.38v4.91M10.4 16.24c.04-1.79 1.13-4.71 2.93-4.71 1.36 0 2.01 1.84 2.15 4.77" fill="none" stroke="%23fff" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2"/%3E%3C/svg%3E'
+      href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" id="right-icon" viewBox="0 0 27.68 27.68" aria-hidden="true"%3E%3Cpath d="M1 16.68v6c0 2.21 1.79 4 4 4h6M11 1h-6c-2.21 0-4 1.79-4 4v6M26.68 11v-6c0-2.21-1.79-4-4-4h-6M16.68 26.68h6c2.21 0 4-1.79 4-4v-6" fill="none" stroke="%23fff" stroke-width="2" stroke-miterlimit="10"/%3E%3Cpath d="M23.44 14.36c-.08.68-.56 1.31-1.36 1.31s-1.29-.66-1.36-1.34M11.7 14.59c1.58 1.58 4.15 1.58 5.73 0" fill="none" stroke="%23fff" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10"/%3E%3C/svg%3E'
     />
     <link rel="preload" href="https://pvinis.github.io/iosevka-webfont/3.4.1/iosevka.css" as="style" />
     <link rel="stylesheet" href="https://pvinis.github.io/iosevka-webfont/3.4.1/iosevka.css" />
+    <link rel="stylesheet" href="../shared.css" />
     <link rel="canonical" href="https://sheetau.github.io/pfpcropper/imagemerger/" />
     <meta property="og:title" content="Image Merger" />
     <meta
@@ -33,80 +34,32 @@
     <meta property="og:url" content="https://sheetau.github.io/pfpcropper/imagemerger/" />
     <title>Image Merger</title>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
-
       :root {
-        --font-sans: "Inter", "Noto Sans JP", sans-serif;
-        --font-mono: Iosevka Web, "Courier New", monospace;
-        --color-black: #000;
-        --color-white: #fff;
-        --color-panel: rgb(18, 18, 18);
-        --color-download-hover: #d0d6e0;
-        --color-download-glow: color-mix(in srgb, #edecec, transparent 80%);
-        --color-text-dim: rgba(255, 255, 255, 0.4);
-        --color-text-muted: rgba(255, 255, 255, 0.7);
-        --color-white-00: rgba(255, 255, 255, 0);
-        --color-white-10: rgba(255, 255, 255, 0.1);
-        --color-white-15: rgba(255, 255, 255, 0.15);
-        --color-white-25: rgba(255, 255, 255, 0.25);
-        --color-white-50: rgba(255, 255, 255, 0.5);
-        --color-white-75: rgba(255, 255, 255, 0.75);
-        --color-black-00: rgba(0, 0, 0, 0);
-        --color-black-10: rgba(0, 0, 0, 0.1);
-        --color-black-15: rgba(0, 0, 0, 0.15);
-        --color-black-25: rgba(0, 0, 0, 0.25);
-        --color-black-50: rgba(0, 0, 0, 0.5);
-        --color-black-75: rgba(0, 0, 0, 0.75);
         --color-add-icon: #666;
-        --text-sm: 0.85rem;
-        --text-title: 1.3rem;
-        --text-title-mobile: 1.2rem;
-        --space-xs: 0.3rem;
-        --space-sm: 0.4rem;
-        --space-md: 0.5rem;
-        --space-lg: 0.6rem;
-        --space-xl: 0.75rem;
-        --space-2xl: 1rem;
-        --space-3xl: 1.25rem;
-        --space-5xl: 2rem;
         --size-drop: 500px;
-        --size-control-height: 1.6rem;
-        --size-button-height: 2rem;
-        --size-icon-xs: 1rem;
-        --size-icon-sm: 1.1rem;
-        --size-icon-md: 1.25rem;
-        --size-icon-lg: 1.5rem;
         --size-add-icon: 2rem;
+        --size-insert-control: 3rem;
         --size-reorder-indicator: 4px;
-        --offset-add: 2rem;
-        --radius-sm: 0.25rem;
-        --border-transparent: solid 1px var(--color-white-00);
-        --border-soft: solid 1px var(--color-white-10);
-        --border-muted: solid 1px var(--color-white-25);
-        --border-strong: solid 1px var(--color-white-50);
-        --border-drop: 1px dashed var(--color-white-25);
-        --border-drop-hover: 1px dashed var(--color-white-75);
+        --length-reorder-indicator: 90%;
         --shadow-header: 0 0 0.7rem rgba(0, 0, 0, 0.85);
-        --shadow-indicator: 0 0 0.5rem rgba(0, 0, 0, 1);
-        --line-placeholder: 0.5px;
-        --position-center: 50%;
-        --duration-fast: 0.2s;
-        --transition-border: border var(--duration-fast);
-        --duration-shine: 2s;
-        --ease-shine: cubic-bezier(0.5, 0, 1, 1);
+        --shadow-indicator: 0 0 0.5rem var(--color-shadow-solid);
+        --color-control-background: color-mix(in srgb, var(--color-white) 10%, var(--color-black) 90%);
+        --size-touch-target: 2.75rem;
       }
 
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-      }
-      *:focus-visible {
-        outline: none;
+        -webkit-user-drag: none;
       }
 
-      img {
-        -webkit-user-drag: none;
+      [hidden] {
+        display: none !important;
+      }
+
+      *:focus-visible {
+        outline: none;
       }
 
       html,
@@ -140,6 +93,27 @@
         justify-content: space-between;
         gap: var(--space-xl);
         pointer-events: none;
+        transition:
+          opacity var(--duration-fast),
+          visibility 0s linear 0s;
+      }
+
+      body.is-ui-auto-hidden :is(.app-header, #navigator) {
+        visibility: hidden;
+        opacity: 0;
+        transition:
+          opacity var(--duration-fast),
+          visibility 0s linear var(--duration-fast);
+      }
+
+      body.is-ui-auto-hidden.is-ui-revealed :is(.app-header, #navigator),
+      body.is-ui-auto-hidden:has(.app-header :focus-visible) :is(.app-header, #navigator),
+      body.is-ui-auto-hidden:has(.order-menu-control.is-open) :is(.app-header, #navigator),
+      body.is-ui-auto-hidden:has(#navigator:hover) :is(.app-header, #navigator),
+      body.is-ui-auto-hidden:has(#navigator:focus-visible) :is(.app-header, #navigator) {
+        visibility: visible;
+        opacity: 1;
+        transition-delay: 0s;
       }
 
       .app-header > * {
@@ -147,56 +121,7 @@
       }
 
       .page-title-group {
-        display: flex;
-        align-items: stretch;
-        gap: var(--space-md);
         pointer-events: auto;
-      }
-
-      #page-title {
-        display: flex;
-        align-items: center;
-        gap: var(--space-md);
-        border: var(--border-muted);
-        background: transparent;
-        font-size: var(--text-title-mobile);
-        font-weight: 400;
-        line-height: 1.5;
-        cursor: pointer;
-        pointer-events: auto;
-        transition:
-          opacity var(--duration-fast),
-          var(--transition-border);
-        border-radius: var(--radius-sm);
-        padding: 0 var(--space-xs);
-        background: var(--color-black);
-      }
-
-      #page-title:hover {
-        border: var(--border-strong);
-      }
-
-      .page-switcher {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 var(--space-xs);
-        border: var(--border-muted);
-        border-radius: var(--radius-sm);
-        background: var(--color-black);
-        cursor: pointer;
-        transition:
-          opacity var(--duration-fast),
-          var(--transition-border);
-      }
-
-      .page-switcher:hover {
-        border: var(--border-strong);
-      }
-
-      .page-switcher svg {
-        width: auto;
-        height: var(--size-icon-md);
       }
 
       #merge-icon {
@@ -213,16 +138,42 @@
         pointer-events: auto;
       }
 
-      #tools[hidden] {
+      #reading-tools {
+        position: absolute;
+        left: 50%;
         display: none;
+        align-items: center;
+        pointer-events: auto;
+        transform: translateX(-50%);
+      }
+
+      body.is-reading #reading-tools {
+        display: flex;
+      }
+
+      .control-group {
+        height: var(--size-control-height);
+        overflow: hidden;
+        border-radius: var(--radius-sm);
+        background: var(--color-control-background);
       }
 
       .icon-group {
         display: flex;
+      }
+
+      .order-menu-control {
+        position: relative;
+      }
+
+      .order-menu-control.is-open .order-menu {
+        display: block;
+      }
+
+      .order-menu-option {
         height: var(--size-control-height);
-        overflow: hidden;
-        border-radius: var(--radius-sm);
-        background: color-mix(in srgb, var(--color-white) 10%, var(--color-black) 90%);
+        font-size: var(--text-sm);
+        white-space: nowrap;
       }
 
       .icon-btn {
@@ -234,11 +185,40 @@
         border: 0;
         background: transparent;
         cursor: pointer;
-        transition: background var(--duration-fast);
+        transition: var(--transition-background);
       }
 
       .icon-btn:hover {
         background: var(--color-white-15);
+      }
+
+      .icon-btn:focus-visible {
+        outline: 0;
+      }
+
+      .icon-btn.is-active {
+        background: var(--color-white-25);
+      }
+
+      #zoom-btn {
+        width: var(--size-control-height);
+        overflow: hidden;
+        cursor: ew-resize;
+        font-variant-numeric: tabular-nums;
+        text-align: center;
+        touch-action: none;
+        user-select: none;
+        font-size: var(--text-xs);
+      }
+
+      body.is-adjusting-zoom,
+      body.is-adjusting-zoom * {
+        cursor: ew-resize !important;
+      }
+
+      .icon-btn:disabled {
+        cursor: default;
+        opacity: 0.35;
       }
 
       .icon-btn svg {
@@ -247,7 +227,8 @@
       }
 
       #fit-btn .icon-minimize,
-      #orientation-btn .icon-horizontal {
+      #orientation-btn .icon-horizontal,
+      #reading-page-mode-btn .icon-spread {
         display: none;
       }
 
@@ -257,8 +238,13 @@
       }
 
       #fit-btn[data-fitted="true"] .icon-minimize,
-      #orientation-btn[data-orientation="vertical"] .icon-horizontal {
+      #orientation-btn[data-orientation="vertical"] .icon-horizontal,
+      #reading-page-mode-btn[data-spread="false"] .icon-spread {
         display: block;
+      }
+
+      #reading-page-mode-btn[data-spread="false"] .icon-single {
+        display: none;
       }
 
       .action-btn {
@@ -276,9 +262,7 @@
         border: 0;
         background: var(--color-white);
         color: var(--color-black);
-        transition:
-          background var(--duration-fast),
-          box-shadow var(--duration-fast);
+        transition: var(--transition-background), var(--transition-box-shadow);
       }
 
       #download-btn:hover {
@@ -290,10 +274,10 @@
         content: "";
         position: absolute;
         top: 0;
-        left: -50%;
+        left: var(--offset-shine-start);
         display: none;
-        width: 30%;
-        height: 100%;
+        width: var(--size-shine-width);
+        height: var(--size-full);
         background: var(--color-white-50);
         pointer-events: none;
         transform: skewX(-30deg);
@@ -312,7 +296,7 @@
       #new-file-btn {
         border: var(--border-muted);
         background: var(--color-black);
-        transition: border var(--duration-fast);
+        transition: var(--transition-border);
       }
 
       #new-file-btn:hover {
@@ -341,22 +325,17 @@
         left: 50%;
         width: min(var(--size-drop), calc(100vw - 4rem), calc(100vh - 8rem));
         aspect-ratio: 1;
-        border: var(--border-drop);
+        border: var(--border-crop);
         background: transparent;
         color: var(--color-white);
         cursor: pointer;
         transform: translate(-50%, -50%);
-        transition: border var(--duration-fast);
+        transition: var(--transition-border);
       }
 
       #initial-drop:hover,
-      #initial-drop.is-drag-target,
-      #workspace[data-hover-axis] #initial-drop {
-        border: var(--border-drop-hover);
-      }
-
-      #initial-drop[hidden] {
-        display: none;
+      #initial-drop.is-drag-target {
+        border: var(--border-crop-hover);
       }
 
       #initial-drop span {
@@ -375,7 +354,6 @@
         left: 0;
         display: none;
         transform-origin: 0 0;
-        will-change: transform;
         outline: none;
       }
 
@@ -394,6 +372,15 @@
         user-select: none;
         pointer-events: auto;
         cursor: pointer;
+        transition: var(--transition-opacity);
+      }
+
+      #media-strip img.is-placeholder {
+        opacity: 0;
+      }
+
+      #media-strip img.no-page-transition {
+        transition: none;
       }
 
       #media-strip[data-reorderable="true"] img {
@@ -414,52 +401,66 @@
         pointer-events: none;
       }
 
-      #reorder-indicator[data-orientation="horizontal"] {
+      #reorder-indicator::before {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        border-radius: var(--radius-pill);
         background: var(--color-white);
-        filter: drop-shadow(var(--shadow-indicator));
+        box-shadow: 0 0 1rem 0.2rem var(--color-black);
+        content: "";
+        transform: translate(-50%, -50%);
       }
 
-      #reorder-indicator[data-orientation="vertical"] {
-        background: var(--color-white);
-        filter: drop-shadow(var(--shadow-indicator));
+      #reorder-indicator[data-orientation="horizontal"]::before {
+        width: var(--size-reorder-indicator);
+        height: var(--length-reorder-indicator);
       }
 
-      #reorder-indicator[hidden] {
-        display: none;
+      #reorder-indicator[data-orientation="vertical"]::before {
+        width: var(--length-reorder-indicator);
+        height: var(--size-reorder-indicator);
       }
 
       #delete-indicator {
         position: absolute;
         z-index: 7;
         pointer-events: none;
-        background:
-          linear-gradient(
-            to top right,
-            transparent calc(var(--position-center) - var(--line-placeholder)),
-            var(--color-white-25) var(--position-center),
-            transparent calc(var(--position-center) + var(--line-placeholder))
-          ),
-          linear-gradient(
-            to bottom right,
-            transparent calc(var(--position-center) - var(--line-placeholder)),
-            var(--color-white-25) var(--position-center),
-            transparent calc(var(--position-center) + var(--line-placeholder))
-          );
       }
 
-      #delete-indicator[hidden] {
-        display: none;
+      #image-tooltip {
+        position: fixed;
+        z-index: 9;
+        max-width: min(24rem, calc(100vw - var(--space-5xl)));
+        padding: var(--space-2xs) var(--space-sm);
+        overflow: hidden;
+        border: var(--border-panel);
+        border-radius: var(--radius-sm);
+        visibility: hidden;
+        background: var(--color-panel);
+        box-shadow: var(--shadow-menu);
+        color: var(--color-text-option);
+        font-size: var(--text-xs);
+        opacity: 0;
+        pointer-events: none;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
-      body.is-fullscreen #media-strip img {
+      #image-tooltip.is-visible {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      body:is(.is-fullscreen, .is-reading) #media-strip img {
         cursor: grab;
       }
 
-      body.is-fullscreen #workspace.is-panning #media-strip img {
+      body:is(.is-fullscreen, .is-reading) #workspace.is-panning #media-strip img {
         cursor: grabbing;
       }
 
-      body.is-fullscreen.is-cursor-hidden #media-strip img {
+      body:is(.is-fullscreen, .is-reading).is-cursor-hidden #media-strip img {
         cursor: none;
       }
 
@@ -482,15 +483,20 @@
         stroke: currentColor;
         stroke-width: 1;
         transform: translate(-50%, -50%);
-        transition: color var(--duration-fast);
+        transition: var(--transition-color);
       }
 
       .add-btn:hover .add-icon,
-      .add-btn:focus-visible .add-icon,
-      #workspace[data-hover-axis="horizontal"] .add-btn[data-direction="left"] .add-icon,
-      #workspace[data-hover-axis="horizontal"] .add-btn[data-direction="right"] .add-icon,
-      #workspace[data-hover-axis="vertical"] .add-btn[data-direction="top"] .add-icon,
-      #workspace[data-hover-axis="vertical"] .add-btn[data-direction="bottom"] .add-icon {
+      .add-btn:focus-visible .add-icon {
+        color: var(--color-white);
+      }
+
+      #workspace:has(#initial-drop:not([hidden])):has(.add-btn[data-axis="horizontal"]:is(:hover, :focus-visible))
+        .add-btn[data-axis="horizontal"]
+        .add-icon,
+      #workspace:has(#initial-drop:not([hidden])):has(.add-btn[data-axis="vertical"]:is(:hover, :focus-visible))
+        .add-btn[data-axis="vertical"]
+        .add-icon {
         color: var(--color-white);
       }
 
@@ -498,20 +504,20 @@
         outline: 0;
       }
 
-      .add-btn[hidden] {
-        display: none;
-      }
-
-      #insert-btn {
+      #insert-btn,
+      .touch-insert-btn {
         position: absolute;
         z-index: 8;
-        width: 3rem;
-        height: 3rem;
+        width: var(--size-insert-control);
+        height: var(--size-insert-control);
         border: 0;
-        border-radius: 50%;
+        border-radius: var(--radius-full);
         background: var(--color-black-75);
         cursor: pointer;
         transform: translate(-50%, -50%);
+      }
+
+      #insert-btn {
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
@@ -527,6 +533,18 @@
         transition-delay: 0s;
       }
 
+      #touch-insert-controls {
+        display: none;
+      }
+
+      .touch-insert-btn {
+        filter: drop-shadow(var(--shadow-indicator));
+        transition:
+          opacity var(--duration-fast),
+          visibility 0s linear 0s;
+      }
+
+      .touch-insert-btn .add-icon,
       #insert-btn .add-icon {
         top: 50%;
         left: 50%;
@@ -541,17 +559,13 @@
         position: absolute;
         z-index: 5;
         border: 0;
-        outline: var(--border-drop-hover);
+        outline: var(--border-crop-hover);
         outline-offset: -1px;
         background: var(--color-white-10);
         color: var(--color-text-muted);
         font-size: var(--text-sm);
         text-align: center;
         pointer-events: none;
-      }
-
-      #drop-indicator[hidden] {
-        display: none;
       }
 
       #drop-indicator .add-icon {
@@ -564,6 +578,105 @@
       #workspace[data-drag-direction="top"] .add-btn[data-direction="top"] .add-icon,
       #workspace[data-drag-direction="bottom"] .add-btn[data-direction="bottom"] .add-icon {
         opacity: 0;
+      }
+
+      #navigator {
+        --navigator-expanded-height: var(--size-control-height);
+        --navigator-bottom-offset: var(--space-5xl);
+        position: fixed;
+        bottom: calc(var(--navigator-bottom-offset) + var(--navigator-expanded-height) / 2);
+        left: 50%;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: var(--navigator-width, 8rem);
+        max-width: calc(100vw - var(--space-5xl) * 2);
+        height: calc(var(--navigator-expanded-height) - var(--radius-sm) * 2);
+        background: var(--color-control-background);
+        padding: 4px;
+        border-radius: calc(var(--radius-sm) * 2);
+        cursor: pointer;
+        filter: drop-shadow(var(--shadow-header));
+        transform: translate(-50%, 50%);
+        transition:
+          height var(--duration-fast) ease,
+          opacity var(--duration-fast),
+          visibility 0s linear 0s;
+      }
+
+      #navigator:hover,
+      #navigator:focus-visible {
+        height: var(--navigator-expanded-height);
+      }
+
+      .navigator-range {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--color-white-50);
+        transition:
+          background-color var(--duration-fast) ease,
+          color var(--duration-fast) ease;
+      }
+
+      body.is-reading .navigator-range {
+        transition:
+          flex-grow var(--duration-fast) ease,
+          background-color var(--duration-fast) ease,
+          color var(--duration-fast) ease;
+      }
+
+      #navigator-before {
+        justify-content: flex-start;
+        flex: var(--navigator-before-grow, 0) 1 0;
+      }
+
+      #navigator-after {
+        justify-content: flex-end;
+        flex: var(--navigator-after-grow, 1) 1 0;
+      }
+
+      .navigator-value {
+        padding: 0 var(--space-xs);
+        font-size: var(--text-sm);
+        line-height: 1;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--duration-fast) ease;
+      }
+
+      #navigator-thumb {
+        flex: none;
+        width: 2px;
+        height: max(calc(100% - var(--radius-sm)), calc(var(--navigator-expanded-height) / 2 - var(--radius-sm)));
+        border-radius: 999px;
+        background: var(--color-white);
+        box-shadow: 0 0 0.5rem black;
+      }
+
+      #navigator:hover .navigator-range,
+      #navigator:focus-visible .navigator-range {
+        background: var(--color-white-15);
+        color: var(--color-white-75);
+      }
+
+      #navigator:hover .navigator-value,
+      #navigator:focus-visible .navigator-value {
+        opacity: 1;
+      }
+
+      body.is-ui-auto-hidden #navigator {
+        transition:
+          height var(--duration-fast) ease,
+          opacity var(--duration-fast),
+          visibility 0s linear var(--duration-fast);
       }
 
       #file-input {
@@ -585,19 +698,20 @@
       body.is-fullscreen #initial-drop,
       body.is-fullscreen .add-btn,
       body.is-fullscreen #insert-btn,
+      body.is-fullscreen #touch-insert-controls,
+      body.is-fullscreen #navigator,
       body.is-fullscreen #drop-indicator,
       body.is-fullscreen #status {
         display: none;
       }
 
-      @keyframes shine {
-        0% {
-          left: -50%;
-        }
-        50%,
-        100% {
-          left: 120%;
-        }
+      body.is-reading .add-btn,
+      body.is-reading #insert-btn,
+      body.is-reading #touch-insert-controls,
+      body.is-reading #drop-indicator,
+      body.is-reading #reorder-indicator,
+      body.is-reading #delete-indicator {
+        display: none;
       }
 
       @media (max-width: 900px) {
@@ -609,31 +723,132 @@
           flex-direction: column;
         }
 
-        #page-title {
-          font-size: var(--text-title-mobile);
+        #reading-tools {
+          position: static;
+          order: 3;
+          align-self: center;
+          height: var(--size-touch-target);
+          transform: none;
         }
 
         #tools {
+          width: 100%;
+          height: auto;
           max-width: 100%;
           flex-wrap: wrap;
+        }
+
+        .icon-group {
+          height: var(--size-touch-target);
+        }
+
+        .order-menu-option {
+          height: var(--size-touch-target);
+        }
+
+        .icon-btn {
+          width: var(--size-touch-target);
+        }
+
+        .action-btn {
+          height: var(--size-touch-target);
         }
 
         #initial-drop {
           width: min(var(--size-drop), calc(100vw - 2.5rem), calc(100vh - 10rem));
         }
+
+        #navigator {
+          --navigator-expanded-height: var(--size-touch-target);
+          --navigator-bottom-offset: var(--space-3xl);
+        }
       }
 
       @media (max-width: 520px) {
-        .action-btn {
-          padding: 0 var(--space-md);
+        .app-header {
+          top: var(--space-xl);
+          right: var(--space-xl);
+          left: var(--space-xl);
+          gap: var(--space-sm);
         }
 
-        #page-title {
-          gap: var(--space-md);
+        .page-title-group {
+          max-width: 100%;
+        }
+
+        #tools {
+          gap: var(--space-sm);
+        }
+
+        #tools .order-menu-control {
+          flex: 1 1 100%;
+        }
+
+        #tools .icon-group {
+          width: 100%;
+        }
+
+        #tools .icon-btn {
+          flex: 1;
+        }
+
+        .action-btn {
+          flex: 1;
+          padding: 0 var(--space-md);
+          text-align: center;
         }
 
         #merge-icon {
           height: var(--size-icon-sm);
+        }
+
+        #reading-tools {
+          width: 100%;
+        }
+
+        #reading-tools .icon-btn {
+          flex: 1;
+        }
+      }
+
+      @media (hover: none), (pointer: coarse) {
+        #fullscreen-btn {
+          display: none;
+        }
+
+        #touch-insert-controls {
+          display: contents;
+        }
+
+        body.is-mobile-ui-auto-hidden .app-header,
+        body.is-mobile-ui-auto-hidden #navigator,
+        body.is-mobile-ui-auto-hidden .touch-insert-btn {
+          visibility: hidden;
+          opacity: 0;
+          transition:
+            opacity var(--duration-fast),
+            visibility 0s linear var(--duration-fast);
+        }
+
+        body.is-mobile-ui-auto-hidden #navigator {
+          transition:
+            height var(--duration-fast) ease,
+            opacity var(--duration-fast),
+            visibility 0s linear var(--duration-fast);
+        }
+
+        body.is-mobile-ui-auto-hidden.is-mobile-ui-revealed .app-header,
+        body.is-mobile-ui-auto-hidden.is-mobile-ui-revealed #navigator,
+        body.is-mobile-ui-auto-hidden.is-mobile-ui-revealed .touch-insert-btn,
+        body.is-mobile-ui-auto-hidden .app-header:has(:focus-visible),
+        body.is-mobile-ui-auto-hidden .app-header:has(.order-menu-control.is-open),
+        body.is-mobile-ui-auto-hidden:has(.order-menu-control.is-open) #navigator,
+        body.is-mobile-ui-auto-hidden:has(.order-menu-control.is-open) .touch-insert-btn,
+        body.is-mobile-ui-auto-hidden #navigator:focus-visible,
+        body.is-mobile-ui-auto-hidden .touch-insert-btn:focus-visible {
+          visibility: visible;
+          opacity: 1;
+          transition-delay: 0s;
         }
       }
 
@@ -652,13 +867,12 @@
   <body>
     <header class="app-header">
       <div class="page-title-group">
-        <button
-          type="button"
+        <a
           id="cropper-link"
           class="page-switcher"
+          href="../"
           aria-label="Open Square Image Cropper"
           title="Square Image Cropper"
-          onclick="location.href = '../'"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27.68 27.68" aria-hidden="true">
             <path
@@ -677,8 +891,8 @@
               stroke-miterlimit="10"
             />
           </svg>
-        </button>
-        <button type="button" id="page-title" aria-label="Reset Image Merger">
+        </a>
+        <a id="page-title" class="page-title-link" href="./" aria-label="Reset Image Merger">
           <svg xmlns="http://www.w3.org/2000/svg" id="merge-icon" viewBox="0 0 53.35 27.68" aria-hidden="true">
             <path
               d="M1 16.68v6c0 2.21 1.79 4 4 4h6M11 1H5C2.79 1 1 2.79 1 5v6M26.68 11V5c0-2.21-1.79-4-4-4h-6M16.68 26.68h6c2.21 0 4-1.79 4-4v-6M26.68 16.68v6c0 2.21 1.79 4 4 4h6M36.68 1h-6c-2.21 0-4 1.79-4 4v6M52.35 11V5c0-2.21-1.79-4-4-4h-6M42.35 26.68h6c2.21 0 4-1.79 4-4v-6"
@@ -697,119 +911,269 @@
             />
           </svg>
           <span>Image Merger</span>
+        </a>
+      </div>
+
+      <div id="reading-tools" class="control-group" role="group" aria-label="Reading controls">
+        <button type="button" id="reading-next-btn" class="icon-btn" aria-label="Next page" title="Next page">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M15 6l-6 6l6 6" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          id="reading-page-mode-btn"
+          class="icon-btn"
+          data-spread="true"
+          aria-label="Show a single page"
+          title="Single page"
+        >
+          <svg
+            class="icon-single"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M5 5a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2l0 -14" />
+            <path d="M9 7l6 0M9 11l6 0M9 15l4 0" />
+          </svg>
+          <svg
+            class="icon-spread"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path
+              d="M10 19h-6a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1h6a2 2 0 0 1 2 2a2 2 0 0 1 2 -2h6a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-6a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2"
+            />
+            <path d="M12 5v16M7 7h1M7 11h1M16 7h1M16 11h1M16 15h1" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          id="reading-offset-btn"
+          class="icon-btn"
+          aria-label="Start with a single first page"
+          title="Offset full spread"
+          aria-pressed="false"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M4 12v-6a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v6" />
+            <path d="M10 18h-7M21 18h-7M6 15l-3 3l3 3M18 15l3 3l-3 3" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          id="reading-previous-btn"
+          class="icon-btn"
+          aria-label="Previous page"
+          title="Previous page"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M9 6l6 6l-6 6" />
+          </svg>
         </button>
       </div>
 
       <div id="tools" hidden>
-        <div class="icon-group">
-          <button
-            type="button"
-            id="fit-btn"
-            class="icon-btn"
-            data-fitted="false"
-            aria-label="Fit to screen"
-            title="Fit to screen"
-          >
-            <svg
-              class="icon-maximize"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
+        <div id="order-menu-control" class="order-menu-control">
+          <div class="control-group icon-group">
+            <button
+              type="button"
+              id="reading-mode-btn"
+              class="icon-btn"
+              aria-label="Enable reading mode"
+              title="Reading mode"
+              aria-pressed="false"
             >
-              <path d="M4 8V6a2 2 0 0 1 2-2h2M4 16v2a2 2 0 0 0 2 2h2M16 4h2a2 2 0 0 1 2 2v2M16 20h2a2 2 0 0 0 2-2v-2" />
-            </svg>
-            <svg
-              class="icon-minimize"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6v13M12 6v13M21 6v13" />
+              </svg>
+            </button>
+            <button type="button" id="zoom-btn" class="icon-btn" aria-label="Zoom 100%" title="Zoom 100%">100</button>
+            <button
+              type="button"
+              id="fit-btn"
+              class="icon-btn"
+              data-fitted="false"
+              aria-label="Fit to screen"
+              title="Fit to screen"
             >
-              <path d="M15 19v-2a2 2 0 0 1 2-2h2M15 5v2a2 2 0 0 0 2 2h2M5 15h2a2 2 0 0 1 2 2v2M5 9h2a2 2 0 0 0 2-2V5" />
-            </svg>
-          </button>
-          <button type="button" id="fullscreen-btn" class="icon-btn" aria-label="Open fullscreen" title="Fullscreen">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
+              <svg
+                class="icon-maximize"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M4 8V6a2 2 0 0 1 2-2h2M4 16v2a2 2 0 0 0 2 2h2M16 4h2a2 2 0 0 1 2 2v2M16 20h2a2 2 0 0 0 2-2v-2"
+                />
+              </svg>
+              <svg
+                class="icon-minimize"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M15 19v-2a2 2 0 0 1 2-2h2M15 5v2a2 2 0 0 0 2 2h2M5 15h2a2 2 0 0 1 2 2v2M5 9h2a2 2 0 0 0 2-2V5"
+                />
+              </svg>
+            </button>
+            <button type="button" id="fullscreen-btn" class="icon-btn" aria-label="Open fullscreen" title="Fullscreen">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M16 4h4v4M14 10l6-6M8 20H4v-4M4 20l6-6M16 20h4v-4M14 14l6 6M8 4H4v4M4 4l6 6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              id="orientation-btn"
+              class="icon-btn"
+              data-orientation="horizontal"
+              aria-label="Arrange vertically"
+              title="Arrange vertically"
             >
-              <path d="M16 4h4v4M14 10l6-6M8 20H4v-4M4 20l6-6M16 20h4v-4M14 14l6 6M8 4H4v4M4 4l6 6" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            id="orientation-btn"
-            class="icon-btn"
-            data-orientation="horizontal"
-            aria-label="Arrange vertically"
-            title="Arrange vertically"
-          >
-            <svg
-              class="icon-vertical"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
+              <svg
+                class="icon-vertical"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M19 8v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1M7 22v-1a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v1M17 2v1a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V2"
+                />
+              </svg>
+              <svg
+                class="icon-horizontal"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M7 6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V6M22 17h-1a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h1M2 17h1a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H2"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              id="order-menu-btn"
+              class="icon-btn"
+              aria-label="Change image order"
+              title="Change image order"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              aria-controls="order-menu"
             >
-              <path
-                d="M19 8v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1M7 22v-1a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v1M17 2v1a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V2"
-              />
-            </svg>
-            <svg
-              class="icon-horizontal"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-arrows-sort"
+                aria-hidden="true"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M3 9l4 -4l4 4m-4 -4v14" />
+                <path d="M21 15l-4 4l-4 -4m4 4v-14" />
+              </svg>
+            </button>
+          </div>
+          <div id="order-menu" class="order-menu popup-menu" role="menu" aria-label="Change image order">
+            <button type="button" class="order-menu-option popup-menu-option" role="menuitem" data-order-action="name">
+              Name
+            </button>
+            <button
+              type="button"
+              class="order-menu-option popup-menu-option"
+              role="menuitem"
+              data-order-action="modified"
             >
-              <path
-                d="M7 6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V6M22 17h-1a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h1M2 17h1a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H2"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            id="reverse-btn"
-            class="icon-btn"
-            aria-label="Reverse image order"
-            title="Reverse image order"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-arrows-sort"
-              aria-hidden="true"
+              Last modified
+            </button>
+            <button
+              type="button"
+              class="order-menu-option popup-menu-option"
+              role="menuitem"
+              data-order-action="reverse"
             >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M3 9l4 -4l4 4m-4 -4v14" />
-              <path d="M21 15l-4 4l-4 -4m4 4v-14" />
-            </svg>
-          </button>
+              Reverse order
+            </button>
+          </div>
         </div>
         <button type="button" id="download-btn" class="action-btn">Download</button>
         <button type="button" id="new-file-btn" class="action-btn">New file</button>
@@ -822,55 +1186,97 @@
       </button>
       <div id="media-strip" role="group" aria-label="Merged image preview"></div>
       <div id="reorder-indicator" hidden></div>
-      <div id="delete-indicator" hidden></div>
-      <button
-        type="button"
-        id="insert-btn"
-        aria-label="Add images between"
-        title="Add images between"
-        aria-hidden="true"
-      >
+      <div id="delete-indicator" class="cross-lines" hidden></div>
+      <div id="image-tooltip" role="tooltip" aria-hidden="true"></div>
+      <button type="button" id="insert-btn" aria-label="Add images between" title="Add images between">
         <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
       </button>
+      <div id="touch-insert-controls"></div>
       <div id="drop-indicator" hidden>
         <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
       </div>
-      <button type="button" class="add-btn" data-direction="left" aria-label="Add images to the left">
+      <button
+        type="button"
+        class="add-btn"
+        data-direction="left"
+        data-axis="horizontal"
+        aria-label="Add images to the left"
+      >
         <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
       </button>
-      <button type="button" class="add-btn" data-direction="right" aria-label="Add images to the right">
+      <button
+        type="button"
+        class="add-btn"
+        data-direction="right"
+        data-axis="horizontal"
+        aria-label="Add images to the right"
+      >
         <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
       </button>
-      <button type="button" class="add-btn" data-direction="top" aria-label="Add images above">
+      <button type="button" class="add-btn" data-direction="top" data-axis="vertical" aria-label="Add images above">
         <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
       </button>
-      <button type="button" class="add-btn" data-direction="bottom" aria-label="Add images below">
+      <button type="button" class="add-btn" data-direction="bottom" data-axis="vertical" aria-label="Add images below">
         <svg class="add-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
       </button>
     </main>
+
+    <div
+      id="navigator"
+      role="slider"
+      tabindex="0"
+      aria-label="Scroll position"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+      hidden
+    >
+      <div id="navigator-before" class="navigator-range">
+        <span id="navigator-before-value" class="navigator-value"></span>
+      </div>
+      <span id="navigator-thumb"></span>
+      <div id="navigator-after" class="navigator-range">
+        <span id="navigator-after-value" class="navigator-value"></span>
+      </div>
+    </div>
 
     <input type="file" id="file-input" accept="image/*" multiple />
     <p id="status" role="status" aria-live="polite"></p>
 
     <script>
+      const appHeader = document.querySelector(".app-header");
       const workspace = document.getElementById("workspace");
       const initialDrop = document.getElementById("initial-drop");
       const mediaStrip = document.getElementById("media-strip");
       const reorderIndicator = document.getElementById("reorder-indicator");
       const deleteIndicator = document.getElementById("delete-indicator");
+      const imageTooltip = document.getElementById("image-tooltip");
       const insertBtn = document.getElementById("insert-btn");
+      const touchInsertControls = document.getElementById("touch-insert-controls");
       const dropIndicator = document.getElementById("drop-indicator");
       const addButtons = Array.from(document.querySelectorAll(".add-btn"));
       const fileInput = document.getElementById("file-input");
       const tools = document.getElementById("tools");
-      const pageTitle = document.getElementById("page-title");
       const fullscreenBtn = document.getElementById("fullscreen-btn");
+      const zoomBtn = document.getElementById("zoom-btn");
       const fitBtn = document.getElementById("fit-btn");
       const orientationBtn = document.getElementById("orientation-btn");
-      const reverseBtn = document.getElementById("reverse-btn");
+      const orderMenuControl = document.getElementById("order-menu-control");
+      const orderMenuBtn = document.getElementById("order-menu-btn");
+      const orderMenu = document.getElementById("order-menu");
+      const readingModeBtn = document.getElementById("reading-mode-btn");
+      const readingTools = document.getElementById("reading-tools");
+      const readingNextBtn = document.getElementById("reading-next-btn");
+      const readingPreviousBtn = document.getElementById("reading-previous-btn");
+      const readingPageModeBtn = document.getElementById("reading-page-mode-btn");
+      const readingOffsetBtn = document.getElementById("reading-offset-btn");
       const downloadBtn = document.getElementById("download-btn");
       const newFileBtn = document.getElementById("new-file-btn");
       const status = document.getElementById("status");
+      const navigator = document.getElementById("navigator");
+      const navigatorThumb = document.getElementById("navigator-thumb");
+      const navigatorBeforeValue = document.getElementById("navigator-before-value");
+      const navigatorAfterValue = document.getElementById("navigator-after-value");
 
       const MAX_ZOOM = 8;
       const MIN_ZOOM = 0.05;
@@ -882,6 +1288,33 @@
       const INSERT_HOVER_DISTANCE = 32;
       const EDGE_SCROLL_ZONE = 72;
       const EDGE_SCROLL_MAX_SPEED = 14;
+      const HEADER_REVEAL_ZONE = 96;
+      const NAVIGATOR_REVEAL_ZONE = 96;
+      const NAVIGATOR_MAX_WIDTH = 640;
+      const NAVIGATOR_MAX_STEP_WIDTH = 48;
+      const MOBILE_UI_TIMEOUT = 4000;
+      const TOOLTIP_OFFSET = 12;
+      const TOOLTIP_DELAY = 600;
+      const ZOOM_KEY_FACTOR = 1.1;
+      const ZOOM_DRAG_SENSITIVITY = 0.01;
+      const ZOOM_SNAP_RATIO = 0.035;
+      const ZOOM_EPSILON = 0.0001;
+      const DIRECTION_AXIS = Object.freeze({
+        left: "horizontal",
+        right: "horizontal",
+        top: "vertical",
+        bottom: "vertical",
+      });
+      const compactViewportQuery = window.matchMedia("(max-width: 900px)");
+      const finePointerQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+      const touchInsertionQuery = window.matchMedia("(hover: none), (pointer: coarse)");
+      const fileNameCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+      const ORDER_ACTIONS = Object.freeze({
+        name: sortImagesByName,
+        modified: sortImagesByLastModified,
+        reverse: reverseImageOrder,
+      });
+      const imageElements = new WeakMap();
 
       const state = {
         images: [],
@@ -906,7 +1339,70 @@
         insertHover: null,
         suppressImageClick: false,
         fullscreenCursorTimer: null,
+        readingMode: false,
+        readingSpread: true,
+        readingOffset: false,
+        readingPage: 0,
+        readingOffsetOriginPage: null,
+        beforeReading: null,
+        pointerY: null,
+        navigatorPointerId: null,
+        mobileUiTimer: null,
+        mobileUiGesture: null,
+        tooltipTarget: null,
+        tooltipTimer: null,
+        zoomControl: null,
       };
+
+      function isZoomClose(left, right) {
+        return Math.abs(left - right) <= Math.max(1, left, right) * ZOOM_EPSILON;
+      }
+
+      function getDirectionAxis(direction) {
+        return DIRECTION_AXIS[direction] || null;
+      }
+
+      function updatePreservedZoomModes(wasFitted, wasDefaultZoom) {
+        state.fitted = wasFitted && isZoomClose(state.zoom, getFitZoom());
+        state.defaultZoom = wasDefaultZoom && isZoomClose(state.zoom, getDefaultZoom());
+      }
+
+      function loadImageElement(image) {
+        return new Promise((resolve, reject) => {
+          const element = new Image();
+          element.decoding = "async";
+          element.addEventListener("load", () => resolve(element), { once: true });
+          element.addEventListener("error", () => reject(new Error("Image could not be decoded")), { once: true });
+          element.src = image.url;
+        });
+      }
+
+      function loadDisplayImage(element) {
+        const image = imageElements.get(element);
+        if (!image || element.getAttribute("src") === image.url) return;
+        element.classList.add("is-placeholder");
+        element.addEventListener("load", () => element.classList.remove("is-placeholder"), { once: true });
+        element.src = image.url;
+      }
+
+      function unloadDisplayImage(element) {
+        if (!element.hasAttribute("src")) return;
+        element.classList.add("is-placeholder");
+        element.removeAttribute("src");
+      }
+
+      const imageObserver =
+        "IntersectionObserver" in window
+          ? new IntersectionObserver(
+              (entries) => {
+                for (const entry of entries) {
+                  if (entry.isIntersecting) loadDisplayImage(entry.target);
+                  else unloadDisplayImage(entry.target);
+                }
+              },
+              { root: workspace, rootMargin: "50%" },
+            )
+          : null;
 
       function announce(message) {
         clearTimeout(state.statusTimer);
@@ -917,7 +1413,7 @@
 
       function getViewportBounds() {
         const fullscreen = Boolean(document.fullscreenElement);
-        const headerBottom = fullscreen ? 0 : document.querySelector(".app-header").getBoundingClientRect().bottom;
+        const headerBottom = fullscreen ? 0 : appHeader.getBoundingClientRect().bottom;
         const gutter = fullscreen ? 0 : 32;
         return {
           left: gutter,
@@ -928,7 +1424,7 @@
       }
 
       function getDefaultDisplaySize() {
-        const compact = window.matchMedia("(max-width: 900px)").matches;
+        const compact = compactViewportQuery.matches;
         const widthGutter = compact ? 40 : 64;
         const heightGutter = compact ? 160 : 128;
         return Math.max(
@@ -937,27 +1433,82 @@
         );
       }
 
+      function getLayoutOrientation() {
+        return state.readingMode && state.readingSpread ? "horizontal" : state.orientation;
+      }
+
+      function getReadingPageStarts() {
+        if (!state.images.length) return [];
+        if (!state.readingSpread) return state.images.map((_, index) => index);
+        const starts = [0];
+        for (let index = state.readingOffset ? 1 : 2; index < state.images.length; index += 2) starts.push(index);
+        return starts;
+      }
+
+      function normalizeReadingPage() {
+        const starts = getReadingPageStarts();
+        if (!starts.length) {
+          state.readingPage = 0;
+          return;
+        }
+        state.readingPage = starts.reduce((nearest, start) =>
+          Math.abs(start - state.readingPage) < Math.abs(nearest - state.readingPage) ? start : nearest,
+        );
+      }
+
+      function getReadingPageIndices() {
+        normalizeReadingPage();
+        if (!state.readingSpread || (state.readingOffset && state.readingPage === 0)) return [state.readingPage];
+        return [state.readingPage, state.readingPage + 1].filter((index) => index < state.images.length);
+      }
+
+      function getLayoutEntries({ allImages = false } = {}) {
+        if (!state.readingMode || allImages) {
+          return state.images.map((image, sourceIndex) => ({ image, sourceIndex }));
+        }
+        const entries = getReadingPageIndices().map((sourceIndex) => ({
+          image: state.images[sourceIndex],
+          sourceIndex,
+        }));
+        return state.readingSpread ? entries.reverse() : entries;
+      }
+
+      function getReadingFitZoom() {
+        if (!state.layout) return 1;
+        return Math.max(
+          Number.EPSILON,
+          Math.min(window.innerWidth / state.layout.width, window.innerHeight / state.layout.height),
+        );
+      }
+
       function getSingleImageMarginZoom() {
         if (!state.layout || state.images.length !== 1) return Infinity;
         const bounds = getActiveBounds();
-        const mainAxisSize = state.orientation === "horizontal" ? state.layout.width : state.layout.height;
-        const availableMainAxis =
-          state.orientation === "horizontal"
-            ? bounds.right - bounds.left - MIN_END_MARGIN * 2
-            : bounds.bottom - bounds.top - MIN_END_MARGIN * 2;
+        const horizontal = getLayoutOrientation() === "horizontal";
+        const mainAxisSize = horizontal ? state.layout.width : state.layout.height;
+        const availableMainAxis = horizontal
+          ? bounds.right - bounds.left - MIN_END_MARGIN * 2
+          : bounds.bottom - bounds.top - MIN_END_MARGIN * 2;
         return Math.max(Number.EPSILON, availableMainAxis / mainAxisSize);
       }
 
       function getMinimumZoom() {
+        if (state.readingMode) return getReadingFitZoom();
         return Math.min(MIN_ZOOM, getSingleImageMarginZoom());
       }
 
       function getDefaultZoom() {
         if (!state.layout) return 1;
-        const crossSize = state.orientation === "horizontal" ? state.layout.height : state.layout.width;
+        if (state.readingMode) return getReadingFitZoom();
+        const crossSize = getLayoutOrientation() === "horizontal" ? state.layout.height : state.layout.width;
         const crossAxisZoom = getDefaultDisplaySize() / crossSize;
         const marginZoom = getSingleImageMarginZoom();
         return Math.max(getMinimumZoom(), Math.min(crossAxisZoom, marginZoom));
+      }
+
+      function getZoomPercentage() {
+        if (!state.layout) return 100;
+        return Math.max(1, Math.min(MAX_ZOOM * 100, Math.round((state.zoom / getDefaultZoom()) * 100)));
       }
 
       function resetToDefaultView() {
@@ -970,16 +1521,18 @@
         updateControls();
       }
 
-      function buildLayout() {
+      function buildLayout(options = {}) {
         if (!state.images.length) return null;
-        const horizontal = state.orientation === "horizontal";
-        const referenceImage = state.referenceImage || state.images[0];
+        const entries = getLayoutEntries(options);
+        const horizontal = (options.allImages ? state.orientation : getLayoutOrientation()) === "horizontal";
+        const useStableReference = options.allImages || !state.readingMode;
+        const referenceImage = useStableReference ? state.referenceImage || entries[0].image : entries[0].image;
         const crossSize = horizontal ? referenceImage.height : referenceImage.width;
         let cursor = 0;
-        const items = state.images.map((image) => {
+        const items = entries.map(({ image, sourceIndex }) => {
           const width = horizontal ? (image.width * crossSize) / image.height : crossSize;
           const height = horizontal ? crossSize : (image.height * crossSize) / image.width;
-          const item = { image, x: horizontal ? cursor : 0, y: horizontal ? 0 : cursor, width, height };
+          const item = { image, sourceIndex, x: horizontal ? cursor : 0, y: horizontal ? 0 : cursor, width, height };
           cursor += horizontal ? width : height;
           return item;
         });
@@ -997,7 +1550,7 @@
       function getScrollMetrics(zoom = state.zoom) {
         if (!state.layout || state.images.length < 2) return null;
         const bounds = getActiveBounds();
-        const horizontal = state.orientation === "horizontal";
+        const horizontal = getLayoutOrientation() === "horizontal";
         const viewportStart = horizontal ? bounds.left : bounds.top;
         const viewportEnd = horizontal ? bounds.right : bounds.bottom;
         const contentSize = (horizontal ? state.layout.width : state.layout.height) * zoom;
@@ -1044,11 +1597,145 @@
         }
       }
 
+      function getNavigatorData() {
+        if (!state.layout || document.fullscreenElement) return null;
+        if (state.readingMode) {
+          const starts = getReadingPageStarts();
+          if (starts.length < 2) return null;
+          const position = starts.indexOf(state.readingPage);
+          const maximum = starts.length - 1;
+          return {
+            maximum,
+            position,
+            progress: 1 - position / maximum,
+            widthBasis: 32 + (starts.length - 1) * NAVIGATOR_MAX_STEP_WIDTH,
+            valueText: `Page ${position + 1} of ${starts.length}`,
+          };
+        }
+        const metrics = getScrollMetrics();
+        if (!metrics || metrics.distance <= 0) return null;
+        const progress = getScrollProgress();
+        return {
+          maximum: 100,
+          position: Math.round(progress * 100),
+          progress,
+          widthBasis: 48 + Math.sqrt(metrics.distance) * 10,
+          valueText: `${Math.round(progress * 100)}%`,
+        };
+      }
+
+      function scheduleMobileUiHide() {
+        clearTimeout(state.mobileUiTimer);
+        document.body.classList.add("is-mobile-ui-revealed");
+        state.mobileUiTimer = setTimeout(() => {
+          state.mobileUiTimer = null;
+          document.body.classList.remove("is-mobile-ui-revealed");
+        }, MOBILE_UI_TIMEOUT);
+      }
+
+      function hideMobileUi() {
+        clearTimeout(state.mobileUiTimer);
+        state.mobileUiTimer = null;
+        document.body.classList.remove("is-mobile-ui-revealed");
+      }
+
+      function updateUiVisibility() {
+        const fitZoom = state.layout ? getFitZoom() : 1;
+        const desktopAutoHide =
+          Boolean(state.layout) &&
+          !document.fullscreenElement &&
+          finePointerQuery.matches &&
+          (state.zoom >= fitZoom || isZoomClose(state.zoom, fitZoom));
+        const pointerInRevealZone =
+          state.pointerY !== null &&
+          (state.pointerY <= HEADER_REVEAL_ZONE || state.pointerY >= window.innerHeight - NAVIGATOR_REVEAL_ZONE);
+        document.body.classList.toggle("is-ui-auto-hidden", desktopAutoHide);
+        document.body.classList.toggle("is-ui-revealed", desktopAutoHide && pointerInRevealZone);
+
+        const mobileAutoHide =
+          usesTouchInsertion() &&
+          Boolean(state.layout) &&
+          !document.fullscreenElement &&
+          (state.readingMode || state.fitted);
+        const wasMobileAutoHidden = document.body.classList.contains("is-mobile-ui-auto-hidden");
+        document.body.classList.toggle("is-mobile-ui-auto-hidden", mobileAutoHide);
+        if (mobileAutoHide && !wasMobileAutoHidden) scheduleMobileUiHide();
+        if (!mobileAutoHide) {
+          clearTimeout(state.mobileUiTimer);
+          state.mobileUiTimer = null;
+          document.body.classList.remove("is-mobile-ui-revealed");
+        }
+      }
+
+      function updateNavigator() {
+        const data = getNavigatorData();
+        navigator.hidden = !data;
+        if (!data) {
+          updateUiVisibility();
+          return;
+        }
+
+        const sideMargin = usesTouchInsertion() ? 40 : 64;
+        const availableWidth = Math.max(1, Math.min(NAVIGATOR_MAX_WIDTH, window.innerWidth - sideMargin));
+        const width = Math.min(availableWidth, Math.max(72, data.widthBasis));
+        navigator.style.setProperty("--navigator-width", `${width}px`);
+        navigator.style.setProperty("--navigator-before-grow", String(data.progress));
+        navigator.style.setProperty("--navigator-after-grow", String(1 - data.progress));
+        navigatorBeforeValue.textContent = String(state.readingMode ? data.maximum - data.position : data.position);
+        navigatorAfterValue.textContent = String(state.readingMode ? data.position : data.maximum - data.position);
+        navigator.setAttribute("aria-valuemax", String(data.maximum));
+        navigator.setAttribute("aria-valuenow", String(data.position));
+        navigator.setAttribute("aria-valuetext", data.valueText);
+        navigator.setAttribute("aria-label", state.readingMode ? "Reading page" : "Scroll position");
+
+        updateUiVisibility();
+      }
+
+      function getNavigatorTravelBounds() {
+        const rect = navigator.getBoundingClientRect();
+        const gap = Number.parseFloat(getComputedStyle(navigator).columnGap) || 0;
+        const thumbWidth = navigatorThumb.getBoundingClientRect().width;
+        const inset = gap + thumbWidth / 2;
+        return { left: rect.left + inset, width: Math.max(1, rect.width - inset * 2) };
+      }
+
+      function setNavigatorFromClientX(clientX) {
+        const data = getNavigatorData();
+        if (!data) return;
+        const travel = getNavigatorTravelBounds();
+        const progress = Math.max(0, Math.min(1, (clientX - travel.left) / travel.width));
+        if (state.readingMode) {
+          const starts = getReadingPageStarts();
+          const position = Math.round((1 - progress) * (starts.length - 1));
+          if (starts[position] === state.readingPage) return;
+          state.readingPage = starts[position];
+          if (state.readingOffset) state.readingOffsetOriginPage = null;
+          renderLayout({ recenter: false, animateImages: false });
+          resetReadingView();
+          return;
+        }
+        setScrollProgress(progress);
+        applyTransform();
+      }
+
       function clampTranslation({ centerCrossAxis = true } = {}) {
         if (!state.layout) return;
         const bounds = getActiveBounds();
         const centerX = (bounds.left + bounds.right) / 2;
         const centerY = (bounds.top + bounds.bottom) / 2;
+        if (state.readingMode) {
+          const width = state.layout.width * state.zoom;
+          const height = state.layout.height * state.zoom;
+          state.translateX =
+            width <= bounds.right - bounds.left
+              ? centerX - width / 2
+              : Math.max(bounds.right - width, Math.min(bounds.left, state.translateX));
+          state.translateY =
+            height <= bounds.bottom - bounds.top
+              ? centerY - height / 2
+              : Math.max(bounds.bottom - height, Math.min(bounds.top, state.translateY));
+          return;
+        }
         const metrics = getScrollMetrics();
 
         if (metrics?.axis === "x") {
@@ -1066,7 +1753,7 @@
       function centerContent({ fullViewport = false } = {}) {
         if (!state.layout) return;
         const bounds =
-          fullViewport || state.images.length === 1
+          fullViewport || state.images.length === 1 || state.readingMode
             ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight }
             : getViewportBounds();
         state.translateX = (bounds.left + bounds.right - state.layout.width * state.zoom) / 2;
@@ -1079,12 +1766,13 @@
         mediaStrip.style.width = `${state.layout.width}px`;
         mediaStrip.style.height = `${state.layout.height}px`;
         mediaStrip.style.transform = `translate3d(${state.translateX}px, ${state.translateY}px, 0) scale(${state.zoom})`;
-        workspace.dataset.orientation = state.orientation;
+        workspace.dataset.orientation = getLayoutOrientation();
         workspace.dataset.zoom = state.zoom.toFixed(4);
         workspace.dataset.translateX = state.translateX.toFixed(2);
         workspace.dataset.translateY = state.translateY.toFixed(2);
         updateAddControls();
-        if (state.insertHover) updateInsertButton(state.insertHover.clientX, state.insertHover.clientY);
+        if (usesTouchInsertion()) updateTouchInsertButtons();
+        else if (state.insertHover) updateInsertButton(state.insertHover.clientX, state.insertHover.clientY);
         if (state.autoScroll?.mode === "external") {
           const direction = getDropDirection(state.autoScroll.clientX, state.autoScroll.clientY);
           if (direction !== state.dragDirection) showDropIndicator(direction);
@@ -1100,6 +1788,7 @@
             updateReorderTarget(state.reorder.clientX, state.reorder.clientY);
           }
         }
+        updateNavigator();
       }
 
       function getEdgeScrollDelta(clientX, clientY) {
@@ -1148,60 +1837,170 @@
         }
       }
 
+      function updateReadingControls() {
+        document.body.classList.toggle("is-reading", state.readingMode);
+        readingModeBtn.classList.toggle("is-active", state.readingMode);
+        readingModeBtn.setAttribute("aria-pressed", String(state.readingMode));
+        readingModeBtn.setAttribute("aria-label", state.readingMode ? "Disable reading mode" : "Enable reading mode");
+        readingModeBtn.title = state.readingMode ? "Exit reading mode" : "Reading mode";
+        readingPageModeBtn.dataset.spread = String(state.readingSpread);
+        readingPageModeBtn.setAttribute(
+          "aria-label",
+          state.readingSpread ? "Show a single page" : "Show a full spread",
+        );
+        readingPageModeBtn.title = state.readingSpread ? "Single page" : "Full spread";
+        readingOffsetBtn.disabled = !state.readingSpread;
+        const offsetActive = state.readingOffset && state.readingSpread;
+        readingOffsetBtn.classList.toggle("is-active", offsetActive);
+        readingOffsetBtn.setAttribute("aria-pressed", String(offsetActive));
+        readingOffsetBtn.setAttribute(
+          "aria-label",
+          state.readingOffset ? "Start with a two-page first spread" : "Start with a single first page",
+        );
+        readingOffsetBtn.title = state.readingOffset ? "Remove spread offset" : "Offset full spread";
+
+        const starts = getReadingPageStarts();
+        const position = starts.indexOf(state.readingPage);
+        readingPreviousBtn.disabled = position <= 0;
+        readingNextBtn.disabled = position < 0 || position >= starts.length - 1;
+        readingTools.setAttribute("aria-hidden", String(!state.readingMode));
+      }
+
       function updateControls() {
         const hasImages = state.images.length > 0;
         tools.hidden = !hasImages;
         initialDrop.hidden = hasImages;
-        workspace.classList.toggle("has-images", state.images.length > 1);
+        workspace.classList.toggle("has-images", state.readingMode ? hasImages : state.images.length > 1);
         mediaStrip.classList.toggle("is-visible", hasImages);
-        mediaStrip.dataset.orientation = state.orientation;
+        mediaStrip.dataset.orientation = getLayoutOrientation();
+        const zoomPercentage = getZoomPercentage();
+        zoomBtn.textContent = String(zoomPercentage);
+        zoomBtn.setAttribute("aria-label", `Zoom ${zoomPercentage}%`);
+        zoomBtn.title = `Zoom ${zoomPercentage}%`;
         fitBtn.dataset.fitted = String(state.fitted);
         fitBtn.setAttribute("aria-label", state.fitted ? "Reset zoom" : "Fit to screen");
         fitBtn.title = state.fitted ? "Reset zoom" : "Fit to screen";
+        const readingMinimum = state.readingMode && isZoomClose(state.zoom, getReadingFitZoom());
+        fitBtn.disabled = readingMinimum;
         orientationBtn.dataset.orientation = state.orientation;
         const nextDirection = state.orientation === "horizontal" ? "vertically" : "horizontally";
         orientationBtn.setAttribute("aria-label", `Arrange ${nextDirection}`);
         orientationBtn.title = `Arrange ${nextDirection}`;
         workspace.dataset.imageCount = String(state.images.length);
-        if (state.images.length < 2) hideInsertButton();
+        fullscreenBtn.disabled = usesTouchInsertion();
+        if (state.images.length < 2 || state.readingMode) hideInsertButton();
+        updateReadingControls();
         updateAddControls();
+        updateNavigator();
       }
 
       function updateImageInteractions() {
         const fullscreen = Boolean(document.fullscreenElement);
-        const reorderable = state.images.length > 1 && !fullscreen;
+        const reorderable = state.images.length > 0 && !fullscreen && !state.readingMode;
         mediaStrip.dataset.reorderable = String(reorderable);
-        for (const image of mediaStrip.querySelectorAll("img")) {
+        for (const image of mediaStrip.children) {
           image.draggable = false;
           image.tabIndex = -1;
-          image.toggleAttribute("aria-disabled", fullscreen);
+          image.toggleAttribute("aria-disabled", fullscreen && !state.readingMode);
         }
       }
 
-      function renderLayout({ recenter = true } = {}) {
+      function hideImageTooltip() {
+        clearTimeout(state.tooltipTimer);
+        state.tooltipTimer = null;
+        state.tooltipTarget = null;
+        imageTooltip.classList.remove("is-visible");
+        imageTooltip.setAttribute("aria-hidden", "true");
+      }
+
+      function positionImageTooltip(clientX, clientY) {
+        imageTooltip.style.left = "0";
+        imageTooltip.style.top = "0";
+        const rect = imageTooltip.getBoundingClientRect();
+        const left = Math.max(
+          TOOLTIP_OFFSET,
+          Math.min(window.innerWidth - rect.width - TOOLTIP_OFFSET, clientX + TOOLTIP_OFFSET),
+        );
+        const top = Math.max(
+          TOOLTIP_OFFSET,
+          Math.min(window.innerHeight - rect.height - TOOLTIP_OFFSET, clientY + TOOLTIP_OFFSET),
+        );
+        imageTooltip.style.left = `${left}px`;
+        imageTooltip.style.top = `${top}px`;
+      }
+
+      function updateImageTooltip(event) {
+        const image = event.target instanceof Element ? event.target.closest("#media-strip img") : null;
+        hideImageTooltip();
+        if (!image || document.body.classList.contains("is-cursor-hidden") || state.reorder?.active || state.pan) {
+          return;
+        }
+        state.tooltipTarget = image;
+        const clientX = event.clientX;
+        const clientY = event.clientY;
+        state.tooltipTimer = setTimeout(() => {
+          state.tooltipTimer = null;
+          if (
+            state.tooltipTarget !== image ||
+            !image.isConnected ||
+            document.body.classList.contains("is-cursor-hidden") ||
+            state.reorder?.active ||
+            state.pan
+          ) {
+            hideImageTooltip();
+            return;
+          }
+          imageTooltip.textContent = imageElements.get(image)?.name || "";
+          imageTooltip.classList.add("is-visible");
+          imageTooltip.setAttribute("aria-hidden", "false");
+          positionImageTooltip(clientX, clientY);
+        }, TOOLTIP_DELAY);
+      }
+
+      function setCursorHidden(hidden) {
+        if (document.body.classList.contains("is-cursor-hidden") === hidden) return;
+        document.body.classList.toggle("is-cursor-hidden", hidden);
+        if (hidden) hideImageTooltip();
+      }
+
+      function renderLayout({ recenter = true, animateImages = true } = {}) {
         state.layout = buildLayout();
+        imageObserver?.disconnect();
+        hideImageTooltip();
         mediaStrip.replaceChildren();
         if (!state.layout) {
           updateControls();
           return;
         }
 
-        for (const [index, item] of state.layout.items.entries()) {
-          const image = item.image.element;
-          image.alt = `Image ${index + 1}: ${item.image.name}`;
-          image.setAttribute("role", "button");
-          image.setAttribute("aria-label", `Replace image ${index + 1}: ${item.image.name}`);
-          image.dataset.index = String(index);
-          image.onclick = () => {
-            if (state.suppressImageClick) return;
-            if (!document.fullscreenElement) openFilePicker("replace", index);
-          };
-          image.onkeydown = null;
+        const fragment = document.createDocumentFragment();
+        const renderedImages = [];
+        for (const item of state.layout.items) {
+          const image = document.createElement("img");
+          image.alt = `Image ${item.sourceIndex + 1}: ${item.image.name}`;
+          image.dataset.index = String(item.sourceIndex);
+          image.decoding = "async";
+          image.loading = "lazy";
+          image.classList.add("is-placeholder");
+          if (!animateImages) image.classList.add("no-page-transition");
+          imageElements.set(image, item.image);
+          if (state.readingMode) {
+            image.setAttribute("role", "img");
+          } else {
+            image.setAttribute("role", "button");
+            image.setAttribute("aria-label", `Replace image ${item.sourceIndex + 1}: ${item.image.name}`);
+          }
           image.width = Math.max(1, Math.round(item.width));
           image.height = Math.max(1, Math.round(item.height));
           image.style.width = `${item.width}px`;
           image.style.height = `${item.height}px`;
-          mediaStrip.append(image);
+          fragment.append(image);
+          renderedImages.push(image);
+        }
+        mediaStrip.append(fragment);
+        for (const image of renderedImages) {
+          if (imageObserver) imageObserver.observe(image);
+          else loadDisplayImage(image);
         }
 
         updateImageInteractions();
@@ -1211,7 +2010,89 @@
         updateControls();
       }
 
+      function resetReadingView() {
+        if (!state.readingMode || !state.layout) return;
+        state.zoom = getReadingFitZoom();
+        state.fitted = true;
+        state.defaultZoom = false;
+        centerContent({ fullViewport: true });
+        applyTransform();
+        updateControls();
+      }
+
+      function setReadingMode(enabled) {
+        if (enabled === state.readingMode || !state.images.length) return;
+        stopAutoScroll();
+        state.pan = null;
+        state.reorder = null;
+        clearReorderVisuals();
+        hideInsertButton();
+        hideDropIndicator();
+        if (enabled) {
+          state.beforeReading = {
+            zoom: state.zoom,
+            fitted: state.fitted,
+            defaultZoom: state.defaultZoom,
+            progress: getScrollProgress(),
+          };
+          state.readingMode = true;
+          state.readingSpread = true;
+          state.readingOffset = false;
+          state.readingPage = 0;
+          state.readingOffsetOriginPage = null;
+          renderLayout({ recenter: false });
+          resetReadingView();
+          announce("Reading mode enabled. Right-bound full spread.");
+          return;
+        }
+
+        const previousView = state.beforeReading;
+        state.readingMode = false;
+        clearTimeout(state.fullscreenCursorTimer);
+        state.fullscreenCursorTimer = null;
+        setCursorHidden(false);
+        state.beforeReading = null;
+        renderLayout({ recenter: false });
+        if (previousView) {
+          state.zoom = previousView.zoom;
+          state.fitted = previousView.fitted;
+          state.defaultZoom = previousView.defaultZoom;
+          setScrollProgress(previousView.progress);
+        } else {
+          state.zoom = getDefaultZoom();
+          state.fitted = false;
+          state.defaultZoom = true;
+          centerContent();
+        }
+        applyTransform();
+        updateControls();
+        announce("Reading mode disabled.");
+      }
+
+      function moveReadingPage(delta) {
+        if (!state.readingMode) return;
+        const starts = getReadingPageStarts();
+        const position = starts.indexOf(state.readingPage);
+        const nextPosition = Math.max(0, Math.min(starts.length - 1, position + delta));
+        if (position < 0 || nextPosition === position) return;
+        state.readingPage = starts[nextPosition];
+        if (state.readingOffset) state.readingOffsetOriginPage = null;
+        renderLayout({ recenter: false, animateImages: false });
+        resetReadingView();
+        const pages = getReadingPageIndices().map((index) => index + 1);
+        announce(`Page ${pages.join("–")} of ${state.images.length}.`);
+      }
+
+      function refreshReadingLayout() {
+        if (!state.readingMode) return;
+        normalizeReadingPage();
+        renderLayout({ recenter: false });
+        resetReadingView();
+      }
+
       function clearImages() {
+        imageObserver?.disconnect();
+        hideImageTooltip();
         for (const image of state.images) {
           URL.revokeObjectURL(image.url);
         }
@@ -1222,16 +2103,34 @@
         state.zoom = 1;
         state.fitted = false;
         state.defaultZoom = true;
+        state.fullscreenAutoFit = false;
         state.dragDirection = null;
         state.pendingDirection = "initial";
         state.pendingInsertIndex = null;
         state.replaceIndex = null;
         state.reorder = null;
+        state.readingMode = false;
+        state.readingSpread = true;
+        state.readingOffset = false;
+        state.readingPage = 0;
+        state.readingOffsetOriginPage = null;
+        state.beforeReading = null;
+        clearTimeout(state.mobileUiTimer);
+        state.mobileUiTimer = null;
+        state.mobileUiGesture = null;
         stopAutoScroll();
         state.suppressImageClick = false;
         mediaStrip.classList.remove("is-reordering");
         mediaStrip.replaceChildren();
         mediaStrip.removeAttribute("style");
+        document.body.classList.remove(
+          "is-reading",
+          "is-ui-auto-hidden",
+          "is-ui-revealed",
+          "is-mobile-ui-auto-hidden",
+          "is-mobile-ui-revealed",
+          "is-cursor-hidden",
+        );
         hideInsertButton();
         hideDropIndicator();
         updateControls();
@@ -1241,22 +2140,17 @@
         if (!file.type.startsWith("image/")) return null;
         const url = URL.createObjectURL(file);
         try {
-          const element = new Image();
-          element.decoding = "async";
-          await new Promise((resolve, reject) => {
-            element.addEventListener("load", resolve, { once: true });
-            element.addEventListener("error", () => reject(new Error("Image could not be decoded")), { once: true });
-            element.src = url;
-          });
+          const element = await loadImageElement({ url });
           if (!element.naturalWidth || !element.naturalHeight) throw new Error("Image has no dimensions");
-          return {
+          const image = {
             file,
             url,
-            element,
             width: element.naturalWidth,
             height: element.naturalHeight,
             name: file.name,
           };
+          element.removeAttribute("src");
+          return image;
         } catch (error) {
           URL.revokeObjectURL(url);
           console.error(`Could not open ${file.name}`, error);
@@ -1264,24 +2158,34 @@
         }
       }
 
-      async function addFiles(fileList, direction = "initial", insertIndex = null) {
-        const files = Array.from(fileList).filter((file) => file.type.startsWith("image/"));
-        if (!files.length) {
-          announce("Choose one or more image files.");
-          return;
-        }
+      function getImageFiles(fileList) {
+        return Array.from(fileList).filter((file) => file.type.startsWith("image/"));
+      }
 
+      async function decodeFiles(files) {
         const decoded = [];
         for (const file of files) {
           const image = await decodeFile(file);
           if (image) decoded.push(image);
         }
+        return decoded;
+      }
+
+      async function addFiles(fileList, direction = "initial", insertIndex = null) {
+        const files = getImageFiles(fileList);
+        if (!files.length) {
+          announce("Choose one or more image files.");
+          return;
+        }
+
+        const decoded = await decodeFiles(files);
         if (!decoded.length) {
           announce("The selected images could not be opened.");
           return;
         }
 
         const hadImages = state.images.length > 0;
+        const appendingAtEnd = !Number.isInteger(insertIndex) && (direction === "right" || direction === "bottom");
         const anchorImage = state.images[0] || null;
         const anchorItem = state.layout?.items.find((item) => item.image === anchorImage);
         const previousView = hadImages
@@ -1291,6 +2195,7 @@
               defaultZoom: state.defaultZoom,
               fullscreenAutoFit: state.fullscreenAutoFit,
               progress: getScrollProgress(),
+              keepEndVisible: appendingAtEnd && getScrollProgress() >= 0.999,
               anchorImage,
               anchorLeft: anchorItem ? state.translateX + anchorItem.x * state.zoom : null,
               anchorTop: anchorItem ? state.translateY + anchorItem.y * state.zoom : null,
@@ -1300,10 +2205,10 @@
         if (!hadImages) {
           state.images.push(...decoded);
           state.referenceImage = decoded[0];
-          state.orientation = direction === "top" || direction === "bottom" ? "vertical" : "horizontal";
+          state.orientation = getDirectionAxis(direction) || "horizontal";
         } else {
           if (state.images.length === 1 && !Number.isInteger(insertIndex)) {
-            state.orientation = direction === "top" || direction === "bottom" ? "vertical" : "horizontal";
+            state.orientation = getDirectionAxis(direction) || state.orientation;
           }
           if (Number.isInteger(insertIndex)) {
             const safeIndex = Math.max(1, Math.min(state.images.length - 1, insertIndex));
@@ -1319,16 +2224,16 @@
           state.zoom = previousView.zoom;
           state.fullscreenAutoFit = previousView.fullscreenAutoFit;
           const nextAnchorItem = state.layout.items.find((item) => item.image === previousView.anchorImage);
-          if (nextAnchorItem && previousView.anchorLeft !== null && previousView.anchorTop !== null) {
+          if (previousView.keepEndVisible) {
+            setScrollProgress(1);
+          } else if (nextAnchorItem && previousView.anchorLeft !== null && previousView.anchorTop !== null) {
             state.translateX = previousView.anchorLeft - nextAnchorItem.x * state.zoom;
             state.translateY = previousView.anchorTop - nextAnchorItem.y * state.zoom;
           } else {
             setScrollProgress(previousView.progress);
           }
           clampTranslation({ centerCrossAxis: false });
-          const tolerance = Math.max(1, state.zoom) * 0.0001;
-          state.fitted = previousView.fitted && Math.abs(state.zoom - getFitZoom()) <= tolerance;
-          state.defaultZoom = previousView.defaultZoom && Math.abs(state.zoom - getDefaultZoom()) <= tolerance;
+          updatePreservedZoomModes(previousView.fitted, previousView.defaultZoom);
           applyTransform();
           updateControls();
         }
@@ -1336,17 +2241,13 @@
       }
 
       async function replaceImages(index, fileList) {
-        const files = Array.from(fileList).filter((file) => file.type.startsWith("image/"));
+        const files = getImageFiles(fileList);
         if (!files.length || !state.images[index]) {
           announce("Choose one or more image files.");
           return;
         }
 
-        const replacements = [];
-        for (const file of files) {
-          const image = await decodeFile(file);
-          if (image) replacements.push(image);
-        }
+        const replacements = await decodeFiles(files);
         if (!replacements.length) {
           announce("The selected images could not be opened.");
           return;
@@ -1374,9 +2275,7 @@
           }
           clampTranslation({ centerCrossAxis: false });
         }
-        const tolerance = Math.max(1, state.zoom) * 0.0001;
-        state.fitted = wasFitted && Math.abs(state.zoom - getFitZoom()) <= tolerance;
-        state.defaultZoom = wasDefaultZoom && Math.abs(state.zoom - getDefaultZoom()) <= tolerance;
+        updatePreservedZoomModes(wasFitted, wasDefaultZoom);
         applyTransform();
         updateControls();
         announce(
@@ -1385,7 +2284,7 @@
       }
 
       function removeImage(index) {
-        if (document.fullscreenElement || !state.images[index]) return;
+        if (document.fullscreenElement || state.readingMode || !state.images[index]) return;
         const zoom = state.zoom;
         const wasFitted = state.fitted;
         const wasDefaultZoom = state.defaultZoom;
@@ -1413,11 +2312,9 @@
             state.translateX = anchorLeft - nextAnchorItem.x * state.zoom;
             state.translateY = anchorTop - nextAnchorItem.y * state.zoom;
           }
-          clampTranslation({ centerCrossAxis: false });
+          clampTranslation();
         }
-        const tolerance = Math.max(1, state.zoom) * 0.0001;
-        state.fitted = wasFitted && Math.abs(state.zoom - getFitZoom()) <= tolerance;
-        state.defaultZoom = wasDefaultZoom && Math.abs(state.zoom - getDefaultZoom()) <= tolerance;
+        updatePreservedZoomModes(wasFitted, wasDefaultZoom);
         applyTransform();
         updateControls();
         announce(`Image ${index + 1} removed.`);
@@ -1455,8 +2352,16 @@
         announce(`Image moved to position ${insertionIndex + 1}.`);
       }
 
-      function reverseImageOrder() {
+      function reorderImages(reorder, message) {
         if (!state.layout || state.images.length < 2 || document.fullscreenElement) return;
+        if (state.readingMode) {
+          reorder();
+          state.readingPage = 0;
+          renderLayout({ recenter: false });
+          resetReadingView();
+          announce(`${message}. Reading starts from page 1.`);
+          return;
+        }
         const horizontal = state.orientation === "horizontal";
         const viewportCenter = horizontal ? window.innerWidth / 2 : window.innerHeight / 2;
         const anchorItem = state.layout.items.reduce((nearest, item) => {
@@ -1471,48 +2376,76 @@
         const anchorTop = state.translateY + anchorItem.y * state.zoom;
         const anchorImage = anchorItem.image;
 
-        state.images.reverse();
+        reorder();
         renderLayout({ recenter: false });
-        const reversedAnchorItem = state.layout.items.find((item) => item.image === anchorImage);
-        state.translateX = anchorLeft - reversedAnchorItem.x * state.zoom;
-        state.translateY = anchorTop - reversedAnchorItem.y * state.zoom;
+        const reorderedAnchorItem = state.layout.items.find((item) => item.image === anchorImage);
+        state.translateX = anchorLeft - reorderedAnchorItem.x * state.zoom;
+        state.translateY = anchorTop - reorderedAnchorItem.y * state.zoom;
         clampTranslation({ centerCrossAxis: false });
         applyTransform();
         updateControls();
-        announce("Image order reversed.");
+        announce(`${message}.`);
+      }
+
+      function sortImagesByName() {
+        reorderImages(
+          () => state.images.sort((left, right) => fileNameCollator.compare(left.name, right.name)),
+          "Images sorted by name",
+        );
+      }
+
+      function sortImagesByLastModified() {
+        reorderImages(
+          () => state.images.sort((left, right) => right.file.lastModified - left.file.lastModified),
+          "Images sorted by last modified date, newest first",
+        );
+      }
+
+      function reverseImageOrder() {
+        reorderImages(() => state.images.reverse(), "Image order reversed");
+      }
+
+      function closeOrderMenu() {
+        orderMenuControl.classList.remove("is-open");
+        orderMenuBtn.setAttribute("aria-expanded", "false");
+      }
+
+      function toggleOrderMenu() {
+        const isOpen = orderMenuControl.classList.toggle("is-open");
+        orderMenuBtn.setAttribute("aria-expanded", String(isOpen));
       }
 
       async function replaceAllImages(fileList) {
-        const files = Array.from(fileList).filter((file) => file.type.startsWith("image/"));
+        const files = getImageFiles(fileList);
         if (!files.length) return;
 
-        const decoded = [];
-        for (const file of files) {
-          const image = await decodeFile(file);
-          if (image) decoded.push(image);
-        }
+        const decoded = await decodeFiles(files);
         if (!decoded.length) {
           announce("The selected images could not be opened.");
           return;
         }
 
         const previousImages = state.images;
-        const progress = getScrollProgress();
+        const previousView = state.readingMode ? state.beforeReading : null;
+        const progress = previousView?.progress ?? getScrollProgress();
         const orientation = state.orientation;
-        const zoom = state.zoom;
-        const fitted = state.fitted;
-        const defaultZoom = state.defaultZoom;
+        const zoom = previousView?.zoom ?? state.zoom;
+        const fitted = previousView?.fitted ?? state.fitted;
+        const defaultZoom = previousView?.defaultZoom ?? state.defaultZoom;
 
         state.images = decoded;
         state.referenceImage = decoded[0];
+        state.readingMode = false;
+        state.readingSpread = true;
+        state.readingOffset = false;
+        state.readingPage = 0;
+        state.beforeReading = null;
         state.orientation = orientation;
         state.zoom = zoom;
         state.fitted = fitted;
         state.defaultZoom = defaultZoom;
         renderLayout({ recenter: false });
-        const tolerance = Math.max(1, state.zoom) * 0.0001;
-        state.fitted = fitted && Math.abs(state.zoom - getFitZoom()) <= tolerance;
-        state.defaultZoom = defaultZoom && Math.abs(state.zoom - getDefaultZoom()) <= tolerance;
+        updatePreservedZoomModes(fitted, defaultZoom);
         setScrollProgress(progress);
         applyTransform();
         updateControls();
@@ -1522,16 +2455,20 @@
 
       function getFitZoom() {
         if (!state.layout) return 1;
+        if (state.readingMode) return getReadingFitZoom();
+        const horizontal = getLayoutOrientation() === "horizontal";
         return Math.max(
           MIN_ZOOM,
-          state.orientation === "horizontal"
-            ? window.innerHeight / state.layout.height
-            : window.innerWidth / state.layout.width,
+          horizontal ? window.innerHeight / state.layout.height : window.innerWidth / state.layout.width,
         );
       }
 
       function fitToScreen() {
         if (!state.layout) return;
+        if (state.readingMode) {
+          resetReadingView();
+          return;
+        }
         const progress = getScrollProgress();
         if (state.fitted) {
           state.zoom = getDefaultZoom();
@@ -1552,7 +2489,8 @@
         state.zoom = getFitZoom();
         state.defaultZoom = false;
         state.fullscreenAutoFit = true;
-        setScrollProgress(progress);
+        if (state.readingMode) centerContent({ fullViewport: true });
+        else setScrollProgress(progress);
         applyTransform();
       }
 
@@ -1561,18 +2499,18 @@
         const progress = getScrollProgress();
         const fitZoom = getFitZoom();
         const currentZoom = state.zoom;
-        const maximumZoom = Math.max(MAX_ZOOM, getDefaultZoom(), fitZoom);
+        const maximumZoom = Math.max(getDefaultZoom() * MAX_ZOOM, fitZoom);
         let zoom = Math.max(getMinimumZoom(), Math.min(maximumZoom, nextZoom));
-        const tolerance = Math.max(1, fitZoom) * 0.0001;
-        const atFit = Math.abs(currentZoom - fitZoom) <= tolerance;
-        const reachesFit = Math.abs(zoom - fitZoom) <= tolerance;
+        const atFit = isZoomClose(currentZoom, fitZoom);
+        const reachesFit = isZoomClose(zoom, fitZoom);
         const crossesFit = (currentZoom < fitZoom && zoom > fitZoom) || (currentZoom > fitZoom && zoom < fitZoom);
         if (!atFit && (reachesFit || crossesFit)) zoom = fitZoom;
         state.zoom = zoom;
-        state.fitted = Math.abs(zoom - fitZoom) <= tolerance;
+        state.fitted = isZoomClose(zoom, fitZoom);
         state.defaultZoom = false;
         state.fullscreenAutoFit = false;
-        setScrollProgress(progress);
+        if (state.readingMode) centerContent({ fullViewport: true });
+        else setScrollProgress(progress);
         applyTransform();
         updateControls();
       }
@@ -1590,11 +2528,60 @@
         state.insertHover = null;
         if (document.activeElement === insertBtn) insertBtn.blur();
         insertBtn.classList.remove("is-visible");
-        insertBtn.setAttribute("aria-hidden", "true");
         delete insertBtn.dataset.index;
+        touchInsertControls.replaceChildren();
+      }
+
+      function usesTouchInsertion() {
+        return touchInsertionQuery.matches;
+      }
+
+      function updateTouchInsertButtons() {
+        if (!usesTouchInsertion() || !state.layout || state.images.length < 2 || state.readingMode) {
+          hideInsertButton();
+          return;
+        }
+        const horizontal = getLayoutOrientation() === "horizontal";
+        const buttons = new Map(Array.from(touchInsertControls.children, (button) => [button.dataset.index, button]));
+        const visibleIndices = new Set();
+        for (let index = 1; index < state.layout.items.length; index += 1) {
+          const previous = getDisplayedItemRect(state.layout.items[index - 1]);
+          const next = getDisplayedItemRect(state.layout.items[index]);
+          const boundary = horizontal ? (previous.right + next.left) / 2 : (previous.bottom + next.top) / 2;
+          const crossStart = horizontal ? Math.max(previous.top, next.top) : Math.max(previous.left, next.left);
+          const crossEnd = horizontal ? Math.min(previous.bottom, next.bottom) : Math.min(previous.right, next.right);
+          const crossCenter = (crossStart + crossEnd) / 2;
+          const inViewport = horizontal
+            ? boundary >= 0 && boundary <= window.innerWidth && crossCenter >= 0 && crossCenter <= window.innerHeight
+            : boundary >= 0 && boundary <= window.innerHeight && crossCenter >= 0 && crossCenter <= window.innerWidth;
+          if (!inViewport) continue;
+          const key = String(index);
+          visibleIndices.add(key);
+          let button = buttons.get(key);
+          if (!button) {
+            button = insertBtn.cloneNode(true);
+            button.removeAttribute("id");
+            button.className = "touch-insert-btn";
+            button.dataset.index = key;
+            touchInsertControls.append(button);
+          }
+          const left = Math.max(24, Math.min(window.innerWidth - 24, horizontal ? boundary : crossCenter));
+          const top = Math.max(24, Math.min(window.innerHeight - 24, horizontal ? crossCenter : boundary));
+          button.style.left = `${left}px`;
+          button.style.top = `${top}px`;
+        }
+        for (const [index, button] of buttons) {
+          if (!visibleIndices.has(index)) button.remove();
+        }
+        state.insertHover = null;
+        insertBtn.classList.remove("is-visible");
       }
 
       function updateInsertButton(clientX, clientY) {
+        if (usesTouchInsertion()) {
+          updateTouchInsertButtons();
+          return;
+        }
         if (
           !state.layout ||
           state.images.length < 2 ||
@@ -1644,7 +2631,6 @@
         insertBtn.style.left = `${nearest.left}px`;
         insertBtn.style.top = `${nearest.top}px`;
         insertBtn.classList.add("is-visible");
-        insertBtn.setAttribute("aria-hidden", "false");
       }
 
       function getReferenceRect(item) {
@@ -1670,6 +2656,19 @@
         };
       }
 
+      function setElementRect(element, rect) {
+        element.style.left = `${rect.left}px`;
+        element.style.top = `${rect.top}px`;
+        element.style.width = `${rect.width}px`;
+        element.style.height = `${rect.height}px`;
+      }
+
+      function setAddGeometry(element, rect) {
+        setElementRect(element, rect);
+        element.style.setProperty("--add-left", `${rect.addLeft}px`);
+        element.style.setProperty("--add-top", `${rect.addTop}px`);
+      }
+
       function getInitialBaseRect() {
         const size = getDefaultDisplaySize();
         const left = (window.innerWidth - size) / 2;
@@ -1677,29 +2676,55 @@
         return { left, top, right: left + size, bottom: top + size, width: size, height: size };
       }
 
+      function positionInitialDrop(direction) {
+        const axis = getDirectionAxis(direction);
+        if (!axis) {
+          initialDrop.removeAttribute("style");
+          return;
+        }
+        const rect = getInitialBaseRect();
+        const horizontal = axis === "horizontal";
+        const vertical = axis === "vertical";
+        initialDrop.style.left = horizontal ? "0" : `${rect.left}px`;
+        initialDrop.style.top = vertical ? "0" : `${rect.top}px`;
+        initialDrop.style.width = horizontal ? "100vw" : `${rect.width}px`;
+        initialDrop.style.height = vertical ? "100vh" : `${rect.height}px`;
+        initialDrop.style.aspectRatio = horizontal || vertical ? "auto" : "1";
+        initialDrop.style.transform = horizontal || vertical ? "none" : "translate(-50%, -50%)";
+      }
+
       function getAdditionGeometry(direction) {
         const firstDisplayed = state.images.length ? getDisplayedItemRect(state.layout.items[0]) : getInitialBaseRect();
         const lastDisplayed = state.images.length
           ? getDisplayedItemRect(state.layout.items[state.layout.items.length - 1])
           : firstDisplayed;
+        const initial = !state.images.length;
+        const outerLeft = initial ? Math.max(0, firstDisplayed.left - MIN_END_MARGIN) : 0;
+        const outerRight = initial
+          ? Math.min(window.innerWidth, lastDisplayed.right + MIN_END_MARGIN)
+          : window.innerWidth;
+        const outerTop = initial ? Math.max(0, firstDisplayed.top - MIN_END_MARGIN) : 0;
+        const outerBottom = initial
+          ? Math.min(window.innerHeight, lastDisplayed.bottom + MIN_END_MARGIN)
+          : window.innerHeight;
         let rect;
         let addX;
         let addY;
 
         if (direction === "left") {
-          rect = makeRect(0, firstDisplayed.top, firstDisplayed.left, firstDisplayed.bottom);
+          rect = makeRect(outerLeft, firstDisplayed.top, firstDisplayed.left, firstDisplayed.bottom);
           addX = firstDisplayed.left - ADD_CONTROL_OFFSET;
           addY = (firstDisplayed.top + firstDisplayed.bottom) / 2;
         } else if (direction === "right") {
-          rect = makeRect(lastDisplayed.right, lastDisplayed.top, window.innerWidth, lastDisplayed.bottom);
+          rect = makeRect(lastDisplayed.right, lastDisplayed.top, outerRight, lastDisplayed.bottom);
           addX = lastDisplayed.right + ADD_CONTROL_OFFSET;
           addY = (lastDisplayed.top + lastDisplayed.bottom) / 2;
         } else if (direction === "top") {
-          rect = makeRect(firstDisplayed.left, 0, firstDisplayed.right, firstDisplayed.top);
+          rect = makeRect(firstDisplayed.left, outerTop, firstDisplayed.right, firstDisplayed.top);
           addX = (firstDisplayed.left + firstDisplayed.right) / 2;
           addY = firstDisplayed.top - ADD_CONTROL_OFFSET;
         } else {
-          rect = makeRect(lastDisplayed.left, lastDisplayed.bottom, lastDisplayed.right, window.innerHeight);
+          rect = makeRect(lastDisplayed.left, lastDisplayed.bottom, lastDisplayed.right, outerBottom);
           addX = (lastDisplayed.left + lastDisplayed.right) / 2;
           addY = lastDisplayed.bottom + ADD_CONTROL_OFFSET;
         }
@@ -1713,35 +2738,29 @@
 
       function canAddInDirection(direction) {
         if (state.images.length < 2) return true;
-        return state.orientation === "horizontal"
-          ? direction === "left" || direction === "right"
-          : direction === "top" || direction === "bottom";
+        return getDirectionAxis(direction) === state.orientation;
       }
 
       function updateAddControls() {
-        const dragAxis =
-          state.dragDirection === "left" || state.dragDirection === "right"
-            ? "horizontal"
-            : state.dragDirection === "top" || state.dragDirection === "bottom"
-              ? "vertical"
-              : null;
-
+        if (state.readingMode) {
+          for (const button of addButtons) button.hidden = true;
+          return;
+        }
         for (const button of addButtons) {
           const direction = button.dataset.direction;
-          const axis = direction === "left" || direction === "right" ? "horizontal" : "vertical";
+          if (!canAddInDirection(direction)) {
+            button.hidden = true;
+            continue;
+          }
           const rect = getAdditionGeometry(direction);
-          const hiddenForInitialDrag = !state.images.length && dragAxis === axis;
-          button.hidden = !canAddInDirection(direction) || hiddenForInitialDrag || rect.width < 1 || rect.height < 1;
-          button.style.left = `${rect.left}px`;
-          button.style.top = `${rect.top}px`;
-          button.style.width = `${rect.width}px`;
-          button.style.height = `${rect.height}px`;
-          button.style.setProperty("--add-left", `${rect.addLeft}px`);
-          button.style.setProperty("--add-top", `${rect.addTop}px`);
+          button.hidden = rect.width < 1 || rect.height < 1;
+          if (button.hidden) continue;
+          setAddGeometry(button, rect);
         }
       }
 
       function getDropDirection(clientX, clientY) {
+        if (state.readingMode) return null;
         if (!state.images.length) {
           const rect = getInitialBaseRect();
           if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
@@ -1778,34 +2797,21 @@
           return;
         }
         const rect = getAdditionGeometry(direction);
-        dropIndicator.style.left = `${rect.left}px`;
-        dropIndicator.style.top = `${rect.top}px`;
-        dropIndicator.style.width = `${rect.width}px`;
-        dropIndicator.style.height = `${rect.height}px`;
-        dropIndicator.style.setProperty("--add-left", `${rect.addLeft}px`);
-        dropIndicator.style.setProperty("--add-top", `${rect.addTop}px`);
+        setAddGeometry(dropIndicator, rect);
         dropIndicator.hidden = rect.width < 1 || rect.height < 1;
       }
 
       function showDropIndicator(direction) {
+        if (state.readingMode) return;
         state.dragDirection = direction;
         initialDrop.classList.toggle("is-drag-target", Boolean(direction) && !state.images.length);
         workspace.dataset.dragDirection = direction || "";
         if (!state.images.length) {
-          const rect = getInitialBaseRect();
-          const horizontal = direction === "left" || direction === "right";
-          const vertical = direction === "top" || direction === "bottom";
-          initialDrop.style.left = horizontal ? "0" : `${rect.left}px`;
-          initialDrop.style.top = vertical ? "0" : `${rect.top}px`;
-          initialDrop.style.width = horizontal ? "100vw" : `${rect.width}px`;
-          initialDrop.style.height = vertical ? "100vh" : `${rect.height}px`;
-          initialDrop.style.aspectRatio = horizontal || vertical ? "auto" : "1";
-          initialDrop.style.transform = "none";
+          positionInitialDrop(direction);
           dropIndicator.hidden = true;
           updateAddControls();
           return;
         }
-        updateAddControls();
         if (!direction || direction === "initial" || !state.layout) {
           dropIndicator.hidden = true;
           return;
@@ -1814,12 +2820,13 @@
       }
 
       function hideDropIndicator() {
+        const initial = !state.images.length;
         state.dragDirection = null;
         initialDrop.classList.remove("is-drag-target");
         initialDrop.removeAttribute("style");
         workspace.dataset.dragDirection = "";
         dropIndicator.hidden = true;
-        updateAddControls();
+        if (initial) updateAddControls();
       }
 
       function hasDraggedFiles(event) {
@@ -1840,23 +2847,29 @@
         downloadBtn.disabled = true;
         downloadBtn.textContent = "Preparing...";
         try {
-          const outputScale = getOutputScale(state.layout.width, state.layout.height);
+          const outputLayout = buildLayout({ allImages: true });
+          const outputScale = getOutputScale(outputLayout.width, outputLayout.height);
           const canvas = document.createElement("canvas");
-          canvas.width = Math.max(1, Math.round(state.layout.width * outputScale));
-          canvas.height = Math.max(1, Math.round(state.layout.height * outputScale));
+          canvas.width = Math.max(1, Math.round(outputLayout.width * outputScale));
+          canvas.height = Math.max(1, Math.round(outputLayout.height * outputScale));
           const context = canvas.getContext("2d");
           if (!context) throw new Error("Canvas is unavailable");
           context.imageSmoothingEnabled = true;
           context.imageSmoothingQuality = "high";
 
-          for (const item of state.layout.items) {
-            context.drawImage(
-              item.image.element,
-              item.x * outputScale,
-              item.y * outputScale,
-              item.width * outputScale,
-              item.height * outputScale,
-            );
+          for (const item of outputLayout.items) {
+            const source = await loadImageElement(item.image);
+            try {
+              context.drawImage(
+                source,
+                item.x * outputScale,
+                item.y * outputScale,
+                item.width * outputScale,
+                item.height * outputScale,
+              );
+            } finally {
+              source.removeAttribute("src");
+            }
           }
 
           const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
@@ -1882,6 +2895,7 @@
       }
 
       function openFilePicker(direction, replaceIndex = null, insertIndex = null) {
+        if (state.readingMode && direction !== "new") return;
         state.pendingDirection = direction;
         state.pendingInsertIndex = insertIndex;
         state.replaceIndex = replaceIndex;
@@ -1890,27 +2904,20 @@
         fileInput.click();
       }
 
-      pageTitle.addEventListener("click", () => location.reload());
       initialDrop.addEventListener("click", () => openFilePicker("initial"));
       for (const button of addButtons) {
         const direction = button.dataset.direction;
-        const axis = direction === "left" || direction === "right" ? "horizontal" : "vertical";
-        const showPair = () => {
-          if (state.images.length) {
-            workspace.removeAttribute("data-hover-axis");
-            showDropIndicator(direction);
-          } else {
-            workspace.dataset.hoverAxis = axis;
-          }
+        const showAddPreview = () => {
+          if (!state.images.length) return;
+          showDropIndicator(direction);
         };
-        const hidePair = () => {
-          workspace.removeAttribute("data-hover-axis");
-          if (state.images.length && state.dragDirection === direction) hideDropIndicator();
+        const hideAddPreview = () => {
+          if (state.dragDirection === direction) hideDropIndicator();
         };
-        button.addEventListener("pointerenter", showPair);
-        button.addEventListener("pointerleave", hidePair);
-        button.addEventListener("focus", showPair);
-        button.addEventListener("blur", hidePair);
+        button.addEventListener("pointerenter", showAddPreview);
+        button.addEventListener("pointerleave", hideAddPreview);
+        button.addEventListener("focus", showAddPreview);
+        button.addEventListener("blur", hideAddPreview);
         button.addEventListener("click", () => {
           hideDropIndicator();
           openFilePicker(direction);
@@ -1924,6 +2931,14 @@
         const insertIndex = Number(insertBtn.dataset.index);
         if (!Number.isInteger(insertIndex)) return;
         hideInsertButton();
+        openFilePicker("insert", null, insertIndex);
+      });
+      touchInsertControls.addEventListener("click", (event) => {
+        const button = event.target.closest(".touch-insert-btn");
+        if (!button) return;
+        event.stopPropagation();
+        const insertIndex = Number(button.dataset.index);
+        if (!Number.isInteger(insertIndex)) return;
         openFilePicker("insert", null, insertIndex);
       });
 
@@ -1948,13 +2963,113 @@
           .filter(Boolean);
         if (!files.length) return;
         event.preventDefault();
+        if (state.readingMode) {
+          announce("Exit reading mode before adding images.");
+          return;
+        }
         const direction = !state.images.length ? "initial" : state.orientation === "vertical" ? "bottom" : "right";
         await addFiles(files, direction);
       });
 
+      zoomBtn.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0 || !state.layout) return;
+        event.preventDefault();
+        hideImageTooltip();
+        state.zoomControl = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startZoom: state.zoom,
+        };
+        zoomBtn.setPointerCapture(event.pointerId);
+        document.body.classList.add("is-adjusting-zoom");
+      });
+      zoomBtn.addEventListener("pointermove", (event) => {
+        const control = state.zoomControl;
+        if (!control || control.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        let nextZoom = control.startZoom * Math.exp((event.clientX - control.startX) * ZOOM_DRAG_SENSITIVITY);
+        const fitZoom = getFitZoom();
+        if (Math.abs(Math.log(nextZoom / fitZoom)) <= ZOOM_SNAP_RATIO) nextZoom = fitZoom;
+        setZoomAt(nextZoom);
+      });
+      const endZoomAdjustment = (event) => {
+        if (!state.zoomControl || state.zoomControl.pointerId !== event.pointerId) return;
+        state.zoomControl = null;
+        if (zoomBtn.hasPointerCapture(event.pointerId)) zoomBtn.releasePointerCapture(event.pointerId);
+        document.body.classList.remove("is-adjusting-zoom");
+      };
+      zoomBtn.addEventListener("pointerup", endZoomAdjustment);
+      zoomBtn.addEventListener("pointercancel", endZoomAdjustment);
+      zoomBtn.addEventListener("lostpointercapture", endZoomAdjustment);
+      zoomBtn.addEventListener("dblclick", (event) => {
+        event.preventDefault();
+        resetToDefaultView();
+      });
+
       fitBtn.addEventListener("click", fitToScreen);
-      reverseBtn.addEventListener("click", reverseImageOrder);
+      orderMenuBtn.addEventListener("click", toggleOrderMenu);
+      orderMenu.addEventListener("click", (event) => {
+        const option = event.target.closest("[data-order-action]");
+        if (!option) return;
+        closeOrderMenu();
+        ORDER_ACTIONS[option.dataset.orderAction]?.();
+      });
+      document.addEventListener("click", (event) => {
+        if (!orderMenuControl.contains(event.target)) closeOrderMenu();
+      });
+      function handleEscapeKey(event) {
+        if (event.key !== "Escape" && event.key !== "Esc" && event.code !== "Escape") return;
+        closeOrderMenu();
+        if (!cancelImageReorder()) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+      window.addEventListener("keydown", handleEscapeKey, true);
+      window.addEventListener("keyup", handleEscapeKey, true);
+
+      function handleZoomShortcut(event) {
+        if (!event.ctrlKey || event.altKey || event.metaKey) return;
+        let action = null;
+        if (event.code === "Equal" || event.code === "NumpadAdd") action = "in";
+        else if (event.code === "Minus" || event.code === "NumpadSubtract") action = "out";
+        else if (event.key === "0" || event.code === "Numpad0") action = "reset";
+        if (!action) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (!state.layout) return;
+        hideImageTooltip();
+        if (action === "reset") resetToDefaultView();
+        else setZoomAt(state.zoom * (action === "in" ? ZOOM_KEY_FACTOR : 1 / ZOOM_KEY_FACTOR));
+      }
+      window.addEventListener("keydown", handleZoomShortcut, true);
+
+      readingModeBtn.addEventListener("click", () => setReadingMode(!state.readingMode));
+      readingNextBtn.addEventListener("click", () => moveReadingPage(1));
+      readingPreviousBtn.addEventListener("click", () => moveReadingPage(-1));
+      readingPageModeBtn.addEventListener("click", () => {
+        state.readingSpread = !state.readingSpread;
+        state.readingOffsetOriginPage = null;
+        refreshReadingLayout();
+      });
+      readingOffsetBtn.addEventListener("click", () => {
+        if (!state.readingSpread) return;
+        if (state.readingOffset) {
+          state.readingOffset = false;
+          if (state.readingOffsetOriginPage !== null) state.readingPage = state.readingOffsetOriginPage;
+          state.readingOffsetOriginPage = null;
+        } else {
+          state.readingOffsetOriginPage = state.readingPage;
+          state.readingOffset = true;
+        }
+        refreshReadingLayout();
+      });
       orientationBtn.addEventListener("click", () => {
+        if (state.readingMode) {
+          state.orientation = state.orientation === "horizontal" ? "vertical" : "horizontal";
+          refreshReadingLayout();
+          announce(`Page movement set to ${state.orientation}.`);
+          return;
+        }
         const wasFitted = state.fitted;
         const wasDefaultZoom = state.defaultZoom;
         const zoomRatio = state.zoom / getDefaultZoom();
@@ -1978,7 +3093,7 @@
           } else {
             state.zoom = Math.max(
               getMinimumZoom(),
-              Math.min(Math.max(MAX_ZOOM, getDefaultZoom()), getDefaultZoom() * zoomRatio),
+              Math.min(Math.max(getDefaultZoom() * MAX_ZOOM, getFitZoom()), getDefaultZoom() * zoomRatio),
             );
             state.fitted = false;
             state.defaultZoom = false;
@@ -1990,7 +3105,7 @@
       });
 
       fullscreenBtn.addEventListener("click", async () => {
-        if (!state.layout || document.fullscreenElement) return;
+        if (!state.layout || document.fullscreenElement || usesTouchInsertion()) return;
         state.beforeFullscreen = {
           zoom: state.zoom,
           fitted: state.fitted,
@@ -2013,7 +3128,7 @@
         if (!fullscreen) {
           clearTimeout(state.fullscreenCursorTimer);
           state.fullscreenCursorTimer = null;
-          document.body.classList.remove("is-cursor-hidden");
+          setCursorHidden(false);
         }
         if (fullscreen) {
           const progress = state.beforeFullscreen?.scrollProgress ?? getScrollProgress();
@@ -2025,7 +3140,8 @@
           state.defaultZoom = previousView.defaultZoom;
           state.beforeFullscreen = null;
           state.fullscreenAutoFit = false;
-          setScrollProgress(previousView.scrollProgress);
+          if (state.readingMode) centerContent({ fullViewport: true });
+          else setScrollProgress(previousView.scrollProgress);
           applyTransform();
           updateControls();
         }
@@ -2041,6 +3157,14 @@
             event.preventDefault();
             const factor = Math.exp(-event.deltaY * 0.0015);
             setZoomAt(state.zoom * factor);
+            return;
+          }
+          if (state.readingMode) {
+            event.preventDefault();
+            state.translateX -= event.deltaX;
+            state.translateY -= event.deltaY;
+            clampTranslation();
+            applyTransform();
             return;
           }
           if (state.images.length < 2) return;
@@ -2062,23 +3186,38 @@
       });
 
       workspace.addEventListener("pointerdown", (event) => {
-        if (state.images.length < 2 || event.button !== 0) return;
-        if (event.target.closest(".add-btn, #insert-btn")) return;
-        if (event.target.closest("#media-strip") && !document.fullscreenElement) return;
+        if ((!state.readingMode && state.images.length < 2) || !state.layout || event.button !== 0) return;
+        if (event.target.closest(".add-btn, #insert-btn, .touch-insert-btn")) return;
+        if (event.target.closest("#media-strip") && !document.fullscreenElement && !state.readingMode) return;
+        const readingMinimum = state.readingMode ? getReadingFitZoom() : 0;
         state.pan = {
           pointerId: event.pointerId,
           x: event.clientX,
           y: event.clientY,
           translateX: state.translateX,
           translateY: state.translateY,
+          reading: state.readingMode,
+          pointerType: event.pointerType,
+          canPan: state.readingMode && state.zoom > readingMinimum && !isZoomClose(state.zoom, readingMinimum),
+          moved: false,
         };
         workspace.setPointerCapture(event.pointerId);
-        workspace.classList.add("is-panning");
+        if (!state.readingMode) workspace.classList.add("is-panning");
       });
 
       workspace.addEventListener("pointermove", (event) => {
         if (!state.pan || state.pan.pointerId !== event.pointerId) return;
-        if (state.orientation === "horizontal") {
+        const distance = Math.hypot(event.clientX - state.pan.x, event.clientY - state.pan.y);
+        if (distance >= 6) state.pan.moved = true;
+        if (state.pan.reading && !state.pan.canPan) {
+          event.preventDefault();
+          return;
+        }
+        if (state.pan.reading) {
+          if (state.pan.moved) workspace.classList.add("is-panning");
+          state.translateX = state.pan.translateX + event.clientX - state.pan.x;
+          state.translateY = state.pan.translateY + event.clientY - state.pan.y;
+        } else if (state.orientation === "horizontal") {
           state.translateX = state.pan.translateX + event.clientX - state.pan.x;
         } else {
           state.translateY = state.pan.translateY + event.clientY - state.pan.y;
@@ -2089,9 +3228,27 @@
 
       function endPan(event) {
         if (!state.pan || state.pan.pointerId !== event.pointerId) return;
+        const pan = state.pan;
         state.pan = null;
         workspace.classList.remove("is-panning");
         if (workspace.hasPointerCapture(event.pointerId)) workspace.releasePointerCapture(event.pointerId);
+        if (!pan.reading || event.type === "pointercancel") return;
+
+        const deltaX = event.clientX - pan.x;
+        const deltaY = event.clientY - pan.y;
+        if (!pan.canPan && pan.moved) {
+          const mainDelta = state.orientation === "horizontal" ? deltaX : deltaY;
+          const crossDelta = state.orientation === "horizontal" ? deltaY : deltaX;
+          if (Math.abs(mainDelta) >= 48 && Math.abs(mainDelta) > Math.abs(crossDelta) * 1.2) {
+            const forward = state.orientation === "horizontal" ? mainDelta > 0 : mainDelta < 0;
+            moveReadingPage(forward ? 1 : -1);
+          }
+          return;
+        }
+        if (pan.moved) return;
+        if (pan.pointerType === "touch") return;
+        if (state.orientation === "horizontal") moveReadingPage(event.clientX < window.innerWidth / 2 ? 1 : -1);
+        else moveReadingPage(event.clientY < window.innerHeight / 2 ? -1 : 1);
       }
 
       workspace.addEventListener("pointerup", endPan);
@@ -2099,12 +3256,44 @@
 
       function clearReorderVisuals() {
         mediaStrip.classList.remove("is-reordering");
-        for (const image of mediaStrip.querySelectorAll("img")) {
+        for (const image of mediaStrip.children) {
           image.classList.remove("is-drag-source");
           image.style.removeProperty("--drag-opacity");
         }
         reorderIndicator.hidden = true;
         deleteIndicator.hidden = true;
+      }
+
+      function restoreReorderStart(reorder) {
+        state.translateX = reorder.translateX;
+        state.translateY = reorder.translateY;
+        clampTranslation();
+        applyTransform();
+      }
+
+      function cancelImageReorder() {
+        const reorder = state.reorder;
+        if (!reorder) return false;
+        state.reorder = null;
+        clearTimeout(reorder.longPressTimer);
+        stopAutoScroll("reorder");
+        if (mediaStrip.hasPointerCapture(reorder.pointerId)) mediaStrip.releasePointerCapture(reorder.pointerId);
+        clearReorderVisuals();
+        restoreReorderStart(reorder);
+        hideInsertButton();
+        hideImageTooltip();
+        state.suppressImageClick = true;
+        const releaseClickSuppression = (event) => {
+          if (event.pointerId !== reorder.pointerId) return;
+          window.removeEventListener("pointerup", releaseClickSuppression, true);
+          window.removeEventListener("pointercancel", releaseClickSuppression, true);
+          setTimeout(() => {
+            state.suppressImageClick = false;
+          });
+        };
+        window.addEventListener("pointerup", releaseClickSuppression, true);
+        window.addEventListener("pointercancel", releaseClickSuppression, true);
+        return true;
       }
 
       function positionDeleteIndicator() {
@@ -2113,10 +3302,7 @@
           return;
         }
         const rect = state.reorder.source.getBoundingClientRect();
-        deleteIndicator.style.left = `${rect.left}px`;
-        deleteIndicator.style.top = `${rect.top}px`;
-        deleteIndicator.style.width = `${rect.width}px`;
-        deleteIndicator.style.height = `${rect.height}px`;
+        setElementRect(deleteIndicator, rect);
         deleteIndicator.hidden = rect.width < 1 || rect.height < 1;
       }
 
@@ -2140,7 +3326,7 @@
       }
 
       function updateReorderTarget(clientX, clientY) {
-        const images = Array.from(mediaStrip.querySelectorAll("img[data-index]"));
+        const images = mediaStrip.children;
         if (!state.reorder || !images.length) return;
         const coordinate = state.orientation === "horizontal" ? clientX : clientY;
         let target = images[images.length - 1];
@@ -2167,13 +3353,21 @@
         }
       }
 
+      mediaStrip.addEventListener("click", (event) => {
+        const image = event.target.closest("img[data-index]");
+        if (!image || state.suppressImageClick || document.fullscreenElement || state.readingMode) return;
+        openFilePicker("replace", Number(image.dataset.index));
+      });
+
       mediaStrip.addEventListener("pointerdown", (event) => {
         const image = event.target.closest("img[data-index]");
-        if (!image || event.button !== 0 || state.images.length < 2 || document.fullscreenElement) {
+        if (!image || event.button !== 0 || !state.images.length || document.fullscreenElement || state.readingMode) {
           return;
         }
         const imageRect = image.getBoundingClientRect();
-        state.reorder = {
+        const touch = event.pointerType === "touch";
+        if (!touch) event.preventDefault();
+        const reorder = {
           pointerId: event.pointerId,
           fromIndex: Number(image.dataset.index),
           startX: event.clientX,
@@ -2185,13 +3379,46 @@
           sourceRect: imageRect,
           deleteDistance: Math.max(1, (state.orientation === "horizontal" ? imageRect.height : imageRect.width) / 2),
           deleteReady: false,
+          touch,
+          touchScrolling: false,
+          longPressTimer: null,
+          translateX: state.translateX,
+          translateY: state.translateY,
         };
+        state.reorder = reorder;
+        if (touch) {
+          mediaStrip.setPointerCapture(event.pointerId);
+          reorder.longPressTimer = setTimeout(() => {
+            if (state.reorder !== reorder || reorder.touchScrolling) return;
+            reorder.active = true;
+            reorder.source.classList.add("is-drag-source");
+            mediaStrip.classList.add("is-reordering");
+          }, 400);
+        }
       });
 
       mediaStrip.addEventListener("pointermove", (event) => {
         if (!state.reorder || state.reorder.pointerId !== event.pointerId) return;
+        const distance = Math.hypot(event.clientX - state.reorder.startX, event.clientY - state.reorder.startY);
+        if (state.reorder.touch && !state.reorder.active) {
+          if (!state.reorder.touchScrolling && distance < 6) return;
+          if (!state.reorder.touchScrolling) {
+            clearTimeout(state.reorder.longPressTimer);
+            state.reorder.longPressTimer = null;
+            state.reorder.touchScrolling = true;
+          }
+          event.preventDefault();
+          if (state.orientation === "horizontal") {
+            state.translateX = state.reorder.translateX + event.clientX - state.reorder.startX;
+          } else {
+            state.translateY = state.reorder.translateY + event.clientY - state.reorder.startY;
+          }
+          clampTranslation();
+          applyTransform();
+          return;
+        }
         if (!state.reorder.active) {
-          if (Math.hypot(event.clientX - state.reorder.startX, event.clientY - state.reorder.startY) < 6) return;
+          if (distance < 6) return;
           state.reorder.active = true;
           state.reorder.source.classList.add("is-drag-source");
           mediaStrip.classList.add("is-reordering");
@@ -2229,10 +3456,23 @@
         if (!state.reorder || state.reorder.pointerId !== event.pointerId) return;
         const reorder = state.reorder;
         state.reorder = null;
+        clearTimeout(reorder.longPressTimer);
         stopAutoScroll("reorder");
         if (mediaStrip.hasPointerCapture(event.pointerId)) mediaStrip.releasePointerCapture(event.pointerId);
         clearReorderVisuals();
-        if (!reorder.active || !commit) return;
+        if (!commit) {
+          restoreReorderStart(reorder);
+          return;
+        }
+        if (reorder.touchScrolling) {
+          event.preventDefault();
+          state.suppressImageClick = true;
+          setTimeout(() => {
+            state.suppressImageClick = false;
+          });
+          return;
+        }
+        if (!reorder.active) return;
         event.preventDefault();
         state.suppressImageClick = true;
         setTimeout(() => {
@@ -2243,11 +3483,20 @@
       }
 
       mediaStrip.addEventListener("pointerup", (event) => endImageReorder(event, true));
-      mediaStrip.addEventListener("pointercancel", (event) => endImageReorder(event, false));
+      window.addEventListener("pointercancel", (event) => endImageReorder(event, false), true);
+      mediaStrip.addEventListener("lostpointercapture", (event) => {
+        if (state.reorder?.pointerId === event.pointerId) cancelImageReorder();
+      });
+
+      document.addEventListener("dragstart", (event) => event.preventDefault());
 
       workspace.addEventListener("dragover", (event) => {
         if (!hasDraggedFiles(event)) return;
         event.preventDefault();
+        if (state.readingMode) {
+          event.dataTransfer.dropEffect = "none";
+          return;
+        }
         hideInsertButton();
         const direction = getDropDirection(event.clientX, event.clientY);
         event.dataTransfer.dropEffect = direction ? "copy" : "none";
@@ -2258,6 +3507,10 @@
       workspace.addEventListener("drop", async (event) => {
         if (!hasDraggedFiles(event)) return;
         event.preventDefault();
+        if (state.readingMode) {
+          announce("Exit reading mode before adding images.");
+          return;
+        }
         const direction = getDropDirection(event.clientX, event.clientY);
         stopAutoScroll("external");
         hideDropIndicator();
@@ -2284,13 +3537,28 @@
       window.addEventListener("drop", endExternalDrag);
 
       window.addEventListener("keydown", (event) => {
-        if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || state.images.length < 2) return;
+        if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
         if (
           event.target instanceof Element &&
           event.target.matches("input, textarea, select, [contenteditable='true']")
         )
           return;
         const key = event.key.toLowerCase();
+        if (state.readingMode) {
+          let pageDelta = 0;
+          if (state.orientation === "horizontal") {
+            if (event.key === "ArrowLeft" || key === "a") pageDelta = 1;
+            else if (event.key === "ArrowRight" || key === "d") pageDelta = -1;
+          } else {
+            if (event.key === "ArrowDown" || key === "s") pageDelta = 1;
+            else if (event.key === "ArrowUp" || key === "w") pageDelta = -1;
+          }
+          if (!pageDelta) return;
+          event.preventDefault();
+          moveReadingPage(pageDelta);
+          return;
+        }
+        if (state.images.length < 2) return;
         let delta = 0;
         if (state.orientation === "horizontal") {
           if (event.key === "ArrowLeft" || key === "a") delta = 80;
@@ -2308,22 +3576,141 @@
         applyTransform();
       });
 
+      workspace.addEventListener("pointerdown", hideImageTooltip);
+
       workspace.addEventListener("pointermove", (event) => {
-        if (!document.fullscreenElement) return;
-        clearTimeout(state.fullscreenCursorTimer);
-        state.fullscreenCursorTimer = null;
-        document.body.classList.remove("is-cursor-hidden");
-        if (!event.target.closest("#media-strip img")) return;
+        const immersive = Boolean(document.fullscreenElement) || state.readingMode;
+        if (immersive) {
+          clearTimeout(state.fullscreenCursorTimer);
+          state.fullscreenCursorTimer = null;
+          setCursorHidden(false);
+        }
+        updateImageTooltip(event);
+        if (!immersive || !event.target.closest("#media-strip img")) return;
         state.fullscreenCursorTimer = setTimeout(() => {
-          if (document.fullscreenElement) document.body.classList.add("is-cursor-hidden");
+          if (document.fullscreenElement || state.readingMode) setCursorHidden(true);
         }, 2500);
       });
 
       workspace.addEventListener("pointerleave", () => {
         hideInsertButton();
+        hideImageTooltip();
         clearTimeout(state.fullscreenCursorTimer);
         state.fullscreenCursorTimer = null;
-        document.body.classList.remove("is-cursor-hidden");
+        setCursorHidden(false);
+      });
+
+      window.addEventListener("pointermove", (event) => {
+        state.pointerY = event.clientY;
+        if (document.body.classList.contains("is-ui-auto-hidden")) {
+          document.body.classList.toggle(
+            "is-ui-revealed",
+            event.clientY <= HEADER_REVEAL_ZONE || event.clientY >= window.innerHeight - NAVIGATOR_REVEAL_ZONE,
+          );
+        }
+      });
+
+      document.addEventListener(
+        "pointerdown",
+        (event) => {
+          if (event.target.closest(".app-header, #navigator")) scheduleMobileUiHide();
+        },
+        true,
+      );
+
+      window.addEventListener(
+        "pointerdown",
+        (event) => {
+          if (event.pointerType !== "touch") return;
+          state.mobileUiGesture = {
+            pointerId: event.pointerId,
+            x: event.clientX,
+            y: event.clientY,
+            triggered: false,
+          };
+        },
+        true,
+      );
+
+      window.addEventListener(
+        "pointermove",
+        (event) => {
+          const gesture = state.mobileUiGesture;
+          if (
+            !gesture ||
+            gesture.pointerId !== event.pointerId ||
+            gesture.triggered ||
+            !document.body.classList.contains("is-mobile-ui-auto-hidden")
+          ) {
+            return;
+          }
+          const deltaX = event.clientX - gesture.x;
+          const deltaY = event.clientY - gesture.y;
+          if (Math.abs(deltaY) >= 48 && Math.abs(deltaY) > Math.abs(deltaX) * 1.2) {
+            gesture.triggered = true;
+            if (deltaY < 0) hideMobileUi();
+            else scheduleMobileUiHide();
+          }
+        },
+        true,
+      );
+
+      const endMobileUiGesture = (event) => {
+        const gesture = state.mobileUiGesture;
+        if (!gesture || gesture.pointerId !== event.pointerId) return;
+        state.mobileUiGesture = null;
+        if (
+          event.type === "pointerup" &&
+          state.readingMode &&
+          !event.target.closest(".app-header, #navigator") &&
+          Math.hypot(event.clientX - gesture.x, event.clientY - gesture.y) < 6
+        ) {
+          if (document.body.classList.contains("is-mobile-ui-revealed")) hideMobileUi();
+          else scheduleMobileUiHide();
+        }
+      };
+      window.addEventListener("pointerup", endMobileUiGesture, true);
+      window.addEventListener("pointercancel", endMobileUiGesture, true);
+
+      navigator.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        navigator.focus({ preventScroll: true });
+        state.navigatorPointerId = event.pointerId;
+        navigator.setPointerCapture(event.pointerId);
+        setNavigatorFromClientX(event.clientX);
+        scheduleMobileUiHide();
+      });
+
+      navigator.addEventListener("pointermove", (event) => {
+        if (state.navigatorPointerId !== event.pointerId) return;
+        setNavigatorFromClientX(event.clientX);
+        scheduleMobileUiHide();
+      });
+
+      const endNavigatorDrag = (event) => {
+        if (state.navigatorPointerId !== event.pointerId) return;
+        state.navigatorPointerId = null;
+        if (navigator.hasPointerCapture(event.pointerId)) navigator.releasePointerCapture(event.pointerId);
+      };
+      navigator.addEventListener("pointerup", endNavigatorDrag);
+      navigator.addEventListener("pointercancel", endNavigatorDrag);
+
+      navigator.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        const data = getNavigatorData();
+        if (!data) return;
+        let progress = data.progress;
+        if (event.key === "Home") progress = 0;
+        else if (event.key === "End") progress = 1;
+        else {
+          const step = state.readingMode ? 1 / data.maximum : 0.05;
+          progress += event.key === "ArrowLeft" ? -step : step;
+        }
+        const travel = getNavigatorTravelBounds();
+        setNavigatorFromClientX(travel.left + Math.max(0, Math.min(1, progress)) * travel.width);
+        scheduleMobileUiHide();
       });
 
       window.addEventListener("resize", () => {
@@ -2331,7 +3718,15 @@
           updateAddControls();
           return;
         }
-        if (document.fullscreenElement && state.fullscreenAutoFit) fitFullscreenCrossAxis();
+        if (state.readingMode) {
+          const wasFitted = state.fitted;
+          const minimumZoom = getReadingFitZoom();
+          state.zoom = wasFitted ? minimumZoom : Math.max(state.zoom, minimumZoom);
+          state.fitted = isZoomClose(state.zoom, minimumZoom);
+          centerContent({ fullViewport: true });
+          applyTransform();
+          updateControls();
+        } else if (document.fullscreenElement && state.fullscreenAutoFit) fitFullscreenCrossAxis();
         else if (state.fitted) {
           state.fitted = false;
           fitToScreen();
