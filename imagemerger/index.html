@@ -258,16 +258,22 @@
         text-align: left;
       }
 
-      #download-btn {
+      #download-btn,
+      #mobile-download-btn {
         border: 0;
         background: var(--color-white);
         color: var(--color-black);
         transition: var(--transition-background), var(--transition-box-shadow);
       }
 
-      #download-btn:hover {
+      #download-btn:hover,
+      #mobile-download-btn:hover {
         background: var(--color-download-hover);
         box-shadow: 0 0 var(--space-5xl) var(--color-download-glow);
+      }
+
+      #mobile-download-btn {
+        display: none;
       }
 
       #download-btn::before {
@@ -288,7 +294,8 @@
         animation: shine var(--duration-shine) var(--ease-shine) infinite;
       }
 
-      #download-btn:disabled {
+      #download-btn:disabled,
+      #mobile-download-btn:disabled {
         cursor: wait;
         opacity: 0.65;
       }
@@ -812,8 +819,21 @@
       }
 
       @media (hover: none), (pointer: coarse) {
+        #download-btn,
+        #new-file-btn {
+          display: none;
+        }
+
+        #mobile-download-btn {
+          display: flex;
+        }
+
         #fullscreen-btn {
           display: none;
+        }
+
+        #media-strip img {
+          -webkit-touch-callout: none;
         }
 
         #touch-insert-controls {
@@ -821,8 +841,7 @@
         }
 
         body.is-mobile-ui-auto-hidden .app-header,
-        body.is-mobile-ui-auto-hidden #navigator,
-        body.is-mobile-ui-auto-hidden .touch-insert-btn {
+        body.is-mobile-ui-auto-hidden #navigator {
           visibility: hidden;
           opacity: 0;
           transition:
@@ -839,13 +858,10 @@
 
         body.is-mobile-ui-auto-hidden.is-mobile-ui-revealed .app-header,
         body.is-mobile-ui-auto-hidden.is-mobile-ui-revealed #navigator,
-        body.is-mobile-ui-auto-hidden.is-mobile-ui-revealed .touch-insert-btn,
         body.is-mobile-ui-auto-hidden .app-header:has(:focus-visible),
         body.is-mobile-ui-auto-hidden .app-header:has(.order-menu-control.is-open),
         body.is-mobile-ui-auto-hidden:has(.order-menu-control.is-open) #navigator,
-        body.is-mobile-ui-auto-hidden:has(.order-menu-control.is-open) .touch-insert-btn,
-        body.is-mobile-ui-auto-hidden #navigator:focus-visible,
-        body.is-mobile-ui-auto-hidden .touch-insert-btn:focus-visible {
+        body.is-mobile-ui-auto-hidden #navigator:focus-visible {
           visibility: visible;
           opacity: 1;
           transition-delay: 0s;
@@ -1152,6 +1168,25 @@
                 <path d="M21 15l-4 4l-4 -4m4 4v-14" />
               </svg>
             </button>
+            <button type="button" id="mobile-download-btn" class="icon-btn" aria-label="Download" title="Download">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                <path d="M7 11l5 5l5 -5" />
+                <path d="M12 4l0 12" />
+              </svg>
+            </button>
           </div>
           <div id="order-menu" class="order-menu popup-menu" role="menu" aria-label="Change image order">
             <button type="button" class="order-menu-option popup-menu-option" role="menuitem" data-order-action="name">
@@ -1271,6 +1306,7 @@
       const readingPageModeBtn = document.getElementById("reading-page-mode-btn");
       const readingOffsetBtn = document.getElementById("reading-offset-btn");
       const downloadBtn = document.getElementById("download-btn");
+      const mobileDownloadBtn = document.getElementById("mobile-download-btn");
       const newFileBtn = document.getElementById("new-file-btn");
       const status = document.getElementById("status");
       const navigator = document.getElementById("navigator");
@@ -1299,6 +1335,9 @@
       const ZOOM_DRAG_SENSITIVITY = 0.01;
       const ZOOM_SNAP_RATIO = 0.035;
       const ZOOM_EPSILON = 0.0001;
+      const PAN_MOMENTUM_FRICTION = 0.9;
+      const PAN_MOMENTUM_MIN_SPEED = 0.02;
+      const SWIPE_PROJECTION_TIME = 120;
       const DIRECTION_AXIS = Object.freeze({
         left: "horizontal",
         right: "horizontal",
@@ -1352,6 +1391,9 @@
         tooltipTarget: null,
         tooltipTimer: null,
         zoomControl: null,
+        touchPoints: new Map(),
+        pinch: null,
+        panMomentum: null,
       };
 
       function isZoomClose(left, right) {
@@ -1513,6 +1555,7 @@
 
       function resetToDefaultView() {
         if (!state.layout) return;
+        stopPanMomentum();
         state.zoom = getDefaultZoom();
         state.fitted = false;
         state.defaultZoom = true;
@@ -1888,7 +1931,8 @@
         orientationBtn.title = `Arrange ${nextDirection}`;
         workspace.dataset.imageCount = String(state.images.length);
         fullscreenBtn.disabled = usesTouchInsertion();
-        if (state.images.length < 2 || state.readingMode) hideInsertButton();
+        if (usesTouchInsertion()) updateTouchInsertButtons();
+        else if (state.images.length < 2 || state.readingMode) hideInsertButton();
         updateReadingControls();
         updateAddControls();
         updateNavigator();
@@ -1964,6 +2008,7 @@
       }
 
       function renderLayout({ recenter = true, animateImages = true } = {}) {
+        stopPanMomentum();
         state.layout = buildLayout();
         imageObserver?.disconnect();
         hideImageTooltip();
@@ -2118,6 +2163,9 @@
         clearTimeout(state.mobileUiTimer);
         state.mobileUiTimer = null;
         state.mobileUiGesture = null;
+        state.touchPoints.clear();
+        state.pinch = null;
+        stopPanMomentum();
         stopAutoScroll();
         state.suppressImageClick = false;
         mediaStrip.classList.remove("is-reordering");
@@ -2465,6 +2513,7 @@
 
       function fitToScreen() {
         if (!state.layout) return;
+        stopPanMomentum();
         if (state.readingMode) {
           resetReadingView();
           return;
@@ -2494,11 +2543,14 @@
         applyTransform();
       }
 
-      function setZoomAt(nextZoom) {
+      function setZoomAt(nextZoom, focus = null) {
         if (!state.layout) return;
+        stopPanMomentum();
         const progress = getScrollProgress();
         const fitZoom = getFitZoom();
         const currentZoom = state.zoom;
+        const contentX = focus?.contentX ?? (focus ? (focus.clientX - state.translateX) / currentZoom : 0);
+        const contentY = focus?.contentY ?? (focus ? (focus.clientY - state.translateY) / currentZoom : 0);
         const maximumZoom = Math.max(getDefaultZoom() * MAX_ZOOM, fitZoom);
         let zoom = Math.max(getMinimumZoom(), Math.min(maximumZoom, nextZoom));
         const atFit = isZoomClose(currentZoom, fitZoom);
@@ -2509,7 +2561,11 @@
         state.fitted = isZoomClose(zoom, fitZoom);
         state.defaultZoom = false;
         state.fullscreenAutoFit = false;
-        if (state.readingMode) centerContent({ fullViewport: true });
+        if (focus) {
+          state.translateX = focus.clientX - contentX * zoom;
+          state.translateY = focus.clientY - contentY * zoom;
+          clampTranslation({ centerCrossAxis: !state.readingMode });
+        } else if (state.readingMode) centerContent({ fullViewport: true });
         else setScrollProgress(progress);
         applyTransform();
         updateControls();
@@ -2529,7 +2585,6 @@
         if (document.activeElement === insertBtn) insertBtn.blur();
         insertBtn.classList.remove("is-visible");
         delete insertBtn.dataset.index;
-        touchInsertControls.replaceChildren();
       }
 
       function usesTouchInsertion() {
@@ -2537,8 +2592,17 @@
       }
 
       function updateTouchInsertButtons() {
-        if (!usesTouchInsertion() || !state.layout || state.images.length < 2 || state.readingMode) {
+        const fitZoom = state.layout ? getFitZoom() : 1;
+        if (
+          !usesTouchInsertion() ||
+          !state.layout ||
+          state.images.length < 2 ||
+          state.readingMode ||
+          state.zoom > fitZoom ||
+          isZoomClose(state.zoom, fitZoom)
+        ) {
           hideInsertButton();
+          touchInsertControls.replaceChildren();
           return;
         }
         const horizontal = getLayoutOrientation() === "horizontal";
@@ -2565,8 +2629,8 @@
             button.dataset.index = key;
             touchInsertControls.append(button);
           }
-          const left = Math.max(24, Math.min(window.innerWidth - 24, horizontal ? boundary : crossCenter));
-          const top = Math.max(24, Math.min(window.innerHeight - 24, horizontal ? crossCenter : boundary));
+          const left = horizontal ? boundary : Math.max(24, Math.min(window.innerWidth - 24, crossCenter));
+          const top = horizontal ? Math.max(24, Math.min(window.innerHeight - 24, crossCenter)) : boundary;
           button.style.left = `${left}px`;
           button.style.top = `${top}px`;
         }
@@ -2845,7 +2909,9 @@
       async function downloadMergedImage() {
         if (!state.layout || downloadBtn.disabled) return;
         downloadBtn.disabled = true;
+        mobileDownloadBtn.disabled = true;
         downloadBtn.textContent = "Preparing...";
+        mobileDownloadBtn.setAttribute("aria-label", "Preparing download");
         try {
           const outputLayout = buildLayout({ allImages: true });
           const outputScale = getOutputScale(outputLayout.width, outputLayout.height);
@@ -2890,7 +2956,9 @@
           announce("The merged image could not be downloaded.");
         } finally {
           downloadBtn.disabled = false;
+          mobileDownloadBtn.disabled = false;
           downloadBtn.textContent = "Download";
+          mobileDownloadBtn.setAttribute("aria-label", "Download");
         }
       }
 
@@ -3148,6 +3216,7 @@
       });
 
       downloadBtn.addEventListener("click", downloadMergedImage);
+      mobileDownloadBtn.addEventListener("click", downloadMergedImage);
 
       workspace.addEventListener(
         "wheel",
@@ -3185,7 +3254,116 @@
         updateInsertButton(event.clientX, event.clientY);
       });
 
+      function getPinchGeometry(pointerIds) {
+        const [first, second] = pointerIds.map((pointerId) => state.touchPoints.get(pointerId));
+        if (!first || !second) return null;
+        return {
+          clientX: (first.x + second.x) / 2,
+          clientY: (first.y + second.y) / 2,
+          distance: Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)),
+        };
+      }
+
+      function cancelPan() {
+        if (!state.pan) return;
+        const pointerId = state.pan.pointerId;
+        state.pan = null;
+        workspace.classList.remove("is-panning");
+        if (workspace.hasPointerCapture(pointerId)) workspace.releasePointerCapture(pointerId);
+      }
+
+      function stopPanMomentum() {
+        if (!state.panMomentum) return;
+        cancelAnimationFrame(state.panMomentum.frame);
+        state.panMomentum = null;
+      }
+
+      function startPanMomentum(velocityX, velocityY) {
+        stopPanMomentum();
+        if (Math.hypot(velocityX, velocityY) < PAN_MOMENTUM_MIN_SPEED) return;
+        const momentum = {
+          velocityX,
+          velocityY,
+          lastTime: performance.now(),
+          frame: null,
+        };
+        state.panMomentum = momentum;
+        const step = (time) => {
+          if (state.panMomentum !== momentum) return;
+          const elapsed = Math.min(32, Math.max(1, time - momentum.lastTime));
+          momentum.lastTime = time;
+          const previousX = state.translateX;
+          const previousY = state.translateY;
+          state.translateX += momentum.velocityX * elapsed;
+          state.translateY += momentum.velocityY * elapsed;
+          clampTranslation({ centerCrossAxis: !state.readingMode });
+          applyTransform();
+          const decay = Math.pow(PAN_MOMENTUM_FRICTION, elapsed / (1000 / 60));
+          momentum.velocityX *= decay;
+          momentum.velocityY *= decay;
+          const stopped = isZoomClose(previousX, state.translateX) && isZoomClose(previousY, state.translateY);
+          if (stopped || Math.hypot(momentum.velocityX, momentum.velocityY) < PAN_MOMENTUM_MIN_SPEED) {
+            state.panMomentum = null;
+            return;
+          }
+          momentum.frame = requestAnimationFrame(step);
+        };
+        momentum.frame = requestAnimationFrame(step);
+      }
+
+      window.addEventListener(
+        "pointerdown",
+        (event) => {
+          if (event.pointerType !== "touch" || !workspace.contains(event.target)) return;
+          stopPanMomentum();
+          state.touchPoints.set(event.pointerId, { x: event.clientX, y: event.clientY });
+          if (state.touchPoints.size !== 2 || !state.layout) return;
+          cancelImageReorder();
+          cancelPan();
+          const pointerIds = Array.from(state.touchPoints.keys());
+          const geometry = getPinchGeometry(pointerIds);
+          if (!geometry) return;
+          state.pinch = {
+            pointerIds,
+            startDistance: geometry.distance,
+            startZoom: state.zoom,
+            contentX: (geometry.clientX - state.translateX) / state.zoom,
+            contentY: (geometry.clientY - state.translateY) / state.zoom,
+          };
+          hideImageTooltip();
+        },
+        true,
+      );
+
+      window.addEventListener(
+        "pointermove",
+        (event) => {
+          if (!state.touchPoints.has(event.pointerId)) return;
+          state.touchPoints.set(event.pointerId, { x: event.clientX, y: event.clientY });
+          const pinch = state.pinch;
+          if (!pinch || !pinch.pointerIds.includes(event.pointerId)) return;
+          const geometry = getPinchGeometry(pinch.pointerIds);
+          if (!geometry) return;
+          event.preventDefault();
+          setZoomAt(state.pinch.startZoom * (geometry.distance / pinch.startDistance), {
+            clientX: geometry.clientX,
+            clientY: geometry.clientY,
+            contentX: pinch.contentX,
+            contentY: pinch.contentY,
+          });
+        },
+        { capture: true, passive: false },
+      );
+
+      const endTouchPointer = (event) => {
+        if (!state.touchPoints.delete(event.pointerId)) return;
+        if (state.pinch?.pointerIds.includes(event.pointerId)) state.pinch = null;
+      };
+      window.addEventListener("pointerup", endTouchPointer, true);
+      window.addEventListener("pointercancel", endTouchPointer, true);
+
       workspace.addEventListener("pointerdown", (event) => {
+        if (state.pinch) return;
         if ((!state.readingMode && state.images.length < 2) || !state.layout || event.button !== 0) return;
         if (event.target.closest(".add-btn, #insert-btn, .touch-insert-btn")) return;
         if (event.target.closest("#media-strip") && !document.fullscreenElement && !state.readingMode) return;
@@ -3200,6 +3378,11 @@
           pointerType: event.pointerType,
           canPan: state.readingMode && state.zoom > readingMinimum && !isZoomClose(state.zoom, readingMinimum),
           moved: false,
+          lastX: event.clientX,
+          lastY: event.clientY,
+          lastTime: event.timeStamp,
+          velocityX: 0,
+          velocityY: 0,
         };
         workspace.setPointerCapture(event.pointerId);
         if (!state.readingMode) workspace.classList.add("is-panning");
@@ -3209,6 +3392,12 @@
         if (!state.pan || state.pan.pointerId !== event.pointerId) return;
         const distance = Math.hypot(event.clientX - state.pan.x, event.clientY - state.pan.y);
         if (distance >= 6) state.pan.moved = true;
+        const elapsed = Math.max(1, event.timeStamp - state.pan.lastTime);
+        state.pan.velocityX = (event.clientX - state.pan.lastX) / elapsed;
+        state.pan.velocityY = (event.clientY - state.pan.lastY) / elapsed;
+        state.pan.lastX = event.clientX;
+        state.pan.lastY = event.clientY;
+        state.pan.lastTime = event.timeStamp;
         if (state.pan.reading && !state.pan.canPan) {
           event.preventDefault();
           return;
@@ -3232,20 +3421,37 @@
         state.pan = null;
         workspace.classList.remove("is-panning");
         if (workspace.hasPointerCapture(event.pointerId)) workspace.releasePointerCapture(event.pointerId);
-        if (!pan.reading || event.type === "pointercancel") return;
+        if (event.type === "pointercancel") return;
+
+        const releaseIsFresh = event.timeStamp - pan.lastTime < 80;
+        const velocityX = releaseIsFresh ? pan.velocityX : 0;
+        const velocityY = releaseIsFresh ? pan.velocityY : 0;
+        if (!pan.reading) {
+          if (pan.pointerType === "touch" && pan.moved) startPanMomentum(velocityX, velocityY);
+          return;
+        }
 
         const deltaX = event.clientX - pan.x;
         const deltaY = event.clientY - pan.y;
         if (!pan.canPan && pan.moved) {
-          const mainDelta = state.orientation === "horizontal" ? deltaX : deltaY;
-          const crossDelta = state.orientation === "horizontal" ? deltaY : deltaX;
+          const mainDelta =
+            state.orientation === "horizontal"
+              ? deltaX + velocityX * SWIPE_PROJECTION_TIME
+              : deltaY + velocityY * SWIPE_PROJECTION_TIME;
+          const crossDelta =
+            state.orientation === "horizontal"
+              ? deltaY + velocityY * SWIPE_PROJECTION_TIME
+              : deltaX + velocityX * SWIPE_PROJECTION_TIME;
           if (Math.abs(mainDelta) >= 48 && Math.abs(mainDelta) > Math.abs(crossDelta) * 1.2) {
             const forward = state.orientation === "horizontal" ? mainDelta > 0 : mainDelta < 0;
             moveReadingPage(forward ? 1 : -1);
           }
           return;
         }
-        if (pan.moved) return;
+        if (pan.moved) {
+          if (pan.pointerType === "touch") startPanMomentum(velocityX, velocityY);
+          return;
+        }
         if (pan.pointerType === "touch") return;
         if (state.orientation === "horizontal") moveReadingPage(event.clientX < window.innerWidth / 2 ? 1 : -1);
         else moveReadingPage(event.clientY < window.innerHeight / 2 ? -1 : 1);
@@ -3275,7 +3481,6 @@
         const reorder = state.reorder;
         if (!reorder) return false;
         state.reorder = null;
-        clearTimeout(reorder.longPressTimer);
         stopAutoScroll("reorder");
         if (mediaStrip.hasPointerCapture(reorder.pointerId)) mediaStrip.releasePointerCapture(reorder.pointerId);
         clearReorderVisuals();
@@ -3361,7 +3566,14 @@
 
       mediaStrip.addEventListener("pointerdown", (event) => {
         const image = event.target.closest("img[data-index]");
-        if (!image || event.button !== 0 || !state.images.length || document.fullscreenElement || state.readingMode) {
+        if (
+          state.pinch ||
+          !image ||
+          event.button !== 0 ||
+          !state.images.length ||
+          document.fullscreenElement ||
+          state.readingMode
+        ) {
           return;
         }
         const imageRect = image.getBoundingClientRect();
@@ -3381,20 +3593,16 @@
           deleteReady: false,
           touch,
           touchScrolling: false,
-          longPressTimer: null,
           translateX: state.translateX,
           translateY: state.translateY,
+          lastX: event.clientX,
+          lastY: event.clientY,
+          lastTime: event.timeStamp,
+          velocityX: 0,
+          velocityY: 0,
         };
         state.reorder = reorder;
-        if (touch) {
-          mediaStrip.setPointerCapture(event.pointerId);
-          reorder.longPressTimer = setTimeout(() => {
-            if (state.reorder !== reorder || reorder.touchScrolling) return;
-            reorder.active = true;
-            reorder.source.classList.add("is-drag-source");
-            mediaStrip.classList.add("is-reordering");
-          }, 400);
-        }
+        if (touch) mediaStrip.setPointerCapture(event.pointerId);
       });
 
       mediaStrip.addEventListener("pointermove", (event) => {
@@ -3403,19 +3611,39 @@
         if (state.reorder.touch && !state.reorder.active) {
           if (!state.reorder.touchScrolling && distance < 6) return;
           if (!state.reorder.touchScrolling) {
-            clearTimeout(state.reorder.longPressTimer);
-            state.reorder.longPressTimer = null;
-            state.reorder.touchScrolling = true;
+            const mainDelta =
+              state.orientation === "horizontal"
+                ? event.clientX - state.reorder.startX
+                : event.clientY - state.reorder.startY;
+            const deleteDelta =
+              state.orientation === "horizontal"
+                ? state.reorder.startY - event.clientY
+                : state.reorder.startX - event.clientX;
+            if (deleteDelta > 0 && deleteDelta >= Math.abs(mainDelta)) {
+              state.reorder.active = true;
+              state.reorder.source.classList.add("is-drag-source");
+              mediaStrip.classList.add("is-reordering");
+            } else {
+              state.reorder.touchScrolling = true;
+            }
           }
-          event.preventDefault();
-          if (state.orientation === "horizontal") {
-            state.translateX = state.reorder.translateX + event.clientX - state.reorder.startX;
-          } else {
-            state.translateY = state.reorder.translateY + event.clientY - state.reorder.startY;
+          if (state.reorder.touchScrolling) {
+            event.preventDefault();
+            const elapsed = Math.max(1, event.timeStamp - state.reorder.lastTime);
+            state.reorder.velocityX = (event.clientX - state.reorder.lastX) / elapsed;
+            state.reorder.velocityY = (event.clientY - state.reorder.lastY) / elapsed;
+            state.reorder.lastX = event.clientX;
+            state.reorder.lastY = event.clientY;
+            state.reorder.lastTime = event.timeStamp;
+            if (state.orientation === "horizontal") {
+              state.translateX = state.reorder.translateX + event.clientX - state.reorder.startX;
+            } else {
+              state.translateY = state.reorder.translateY + event.clientY - state.reorder.startY;
+            }
+            clampTranslation();
+            applyTransform();
+            return;
           }
-          clampTranslation();
-          applyTransform();
-          return;
         }
         if (!state.reorder.active) {
           if (distance < 6) return;
@@ -3456,7 +3684,6 @@
         if (!state.reorder || state.reorder.pointerId !== event.pointerId) return;
         const reorder = state.reorder;
         state.reorder = null;
-        clearTimeout(reorder.longPressTimer);
         stopAutoScroll("reorder");
         if (mediaStrip.hasPointerCapture(event.pointerId)) mediaStrip.releasePointerCapture(event.pointerId);
         clearReorderVisuals();
@@ -3470,6 +3697,12 @@
           setTimeout(() => {
             state.suppressImageClick = false;
           });
+          if (event.timeStamp - reorder.lastTime < 80) {
+            startPanMomentum(
+              state.orientation === "horizontal" ? reorder.velocityX : 0,
+              state.orientation === "vertical" ? reorder.velocityY : 0,
+            );
+          }
           return;
         }
         if (!reorder.active) return;
@@ -3675,6 +3908,7 @@
       navigator.addEventListener("pointerdown", (event) => {
         if (event.button !== 0) return;
         event.preventDefault();
+        stopPanMomentum();
         navigator.focus({ preventScroll: true });
         state.navigatorPointerId = event.pointerId;
         navigator.setPointerCapture(event.pointerId);
