@@ -1414,6 +1414,9 @@
       const ZOOM_EPSILON = 0.0001;
       const READING_DRAG_THRESHOLD = 6;
       const READING_DRAG_STEP = 12;
+      const READING_AXIS_EMA = 0.35;
+      const READING_AXIS_SWITCH_RATIO = 1.5;
+      const READING_AXIS_SWITCH_DISTANCE = 8;
       const MAX_READING_PAGE_COUNT = 5;
       const PAN_MOMENTUM_FRICTION = 0.9;
       const PAN_MOMENTUM_MIN_SPEED = 0.02;
@@ -3308,6 +3311,77 @@
         readingModeBtn.title = adjustingOffset ? `First spread: ${value}` : `Images per spread: ${value}`;
       }
 
+      function updateReadingAdjustmentAxis(control, deltaX, deltaY) {
+        const switchingToVertical = control.axis === "horizontal";
+        const currentDelta = Math.abs(switchingToVertical ? deltaX : deltaY);
+        const switchDelta = switchingToVertical ? deltaY : deltaX;
+        if (Math.abs(switchDelta) <= currentDelta * READING_AXIS_SWITCH_RATIO) {
+          control.switchDistance = 0;
+          control.switchSign = 0;
+          return false;
+        }
+
+        const switchSign = Math.sign(switchDelta);
+        if (!switchSign) return false;
+        if (switchSign !== control.switchSign) {
+          control.switchSign = switchSign;
+          control.switchDistance = Math.abs(switchDelta);
+        } else {
+          control.switchDistance += Math.abs(switchDelta);
+        }
+
+        const currentMotion = Math.abs(switchingToVertical ? control.motionX : control.motionY);
+        const switchMotion = Math.abs(switchingToVertical ? control.motionY : control.motionX);
+        if (
+          control.switchDistance < READING_AXIS_SWITCH_DISTANCE ||
+          switchMotion <= currentMotion * READING_AXIS_SWITCH_RATIO
+        ) {
+          return false;
+        }
+
+        control.axis = switchingToVertical ? "vertical" : "horizontal";
+        control.motionX = deltaX;
+        control.motionY = deltaY;
+        control.switchDistance = 0;
+        control.switchSign = 0;
+        control.residual = 0;
+        if (control.axis === "vertical") {
+          control.fullFirstPage = state.readingFirstPageCount === state.readingPageCount;
+        }
+        return true;
+      }
+
+      function applyReadingAdjustment(control, delta) {
+        control.residual += delta;
+        const steps =
+          control.residual > 0
+            ? Math.floor(control.residual / READING_DRAG_STEP)
+            : Math.ceil(control.residual / READING_DRAG_STEP);
+        if (!steps) return false;
+        control.residual -= steps * READING_DRAG_STEP;
+
+        if (control.axis === "horizontal") {
+          const nextCount = Math.max(1, Math.min(state.readingPageCount, state.readingFirstPageCount + steps));
+          if (nextCount === state.readingFirstPageCount) {
+            control.residual = 0;
+            return false;
+          }
+          state.readingFirstPageCount = nextCount;
+          return true;
+        }
+
+        const nextCount = Math.max(1, Math.min(MAX_READING_PAGE_COUNT, state.readingPageCount + steps));
+        if (nextCount === state.readingPageCount) {
+          control.residual = 0;
+          return false;
+        }
+        state.readingPageCount = nextCount;
+        state.readingFirstPageCount = control.fullFirstPage
+          ? nextCount
+          : Math.min(state.readingFirstPageCount, nextCount);
+        return true;
+      }
+
       readingModeBtn.addEventListener("pointerdown", (event) => {
         if (event.button !== 0) return;
         event.preventDefault();
@@ -3317,9 +3391,14 @@
           entering: !state.readingMode,
           startX: event.clientX,
           startY: event.clientY,
-          startPageCount: state.readingPageCount,
-          startFirstPageCount: state.readingFirstPageCount,
           fullFirstPage: state.readingFirstPageCount === state.readingPageCount,
+          lastX: event.clientX,
+          lastY: event.clientY,
+          motionX: 0,
+          motionY: 0,
+          switchDistance: 0,
+          switchSign: 0,
+          residual: 0,
           axis: null,
           moved: false,
         };
@@ -3341,32 +3420,29 @@
           document.body.classList.toggle("is-adjusting-reading-horizontal", Boolean(control.direction));
           return;
         }
+
+        const movementX = event.clientX - control.lastX;
+        const movementY = event.clientY - control.lastY;
+        control.lastX = event.clientX;
+        control.lastY = event.clientY;
+        control.motionX = control.motionX * (1 - READING_AXIS_EMA) + movementX * READING_AXIS_EMA;
+        control.motionY = control.motionY * (1 - READING_AXIS_EMA) + movementY * READING_AXIS_EMA;
+        let adjustmentDelta = 0;
         if (!control.axis) {
           if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < READING_DRAG_THRESHOLD) return;
           control.axis = Math.abs(deltaX) >= Math.abs(deltaY) ? "horizontal" : "vertical";
           control.moved = true;
+          adjustmentDelta = control.axis === "horizontal" ? deltaX : -deltaY;
+        } else if (updateReadingAdjustmentAxis(control, movementX, movementY)) {
+          event.preventDefault();
+          showReadingAdjustment(control.axis);
+          return;
+        } else {
+          adjustmentDelta = control.axis === "horizontal" ? movementX : -movementY;
         }
         event.preventDefault();
 
-        let changed = false;
-        if (control.axis === "horizontal") {
-          const step = Math.round(deltaX / READING_DRAG_STEP);
-          const nextCount = Math.max(1, Math.min(state.readingPageCount, control.startFirstPageCount + step));
-          if (nextCount !== state.readingFirstPageCount) {
-            state.readingFirstPageCount = nextCount;
-            changed = true;
-          }
-        } else {
-          const step = Math.round(-deltaY / READING_DRAG_STEP);
-          const nextCount = Math.max(1, Math.min(MAX_READING_PAGE_COUNT, control.startPageCount + step));
-          if (nextCount !== state.readingPageCount) {
-            state.readingPageCount = nextCount;
-            state.readingFirstPageCount = control.fullFirstPage
-              ? nextCount
-              : Math.min(control.startFirstPageCount, nextCount);
-            changed = true;
-          }
-        }
+        const changed = applyReadingAdjustment(control, adjustmentDelta);
         if (changed) {
           syncReadingSettings();
           refreshReadingLayout({ preserveZoom: true });
