@@ -153,7 +153,7 @@
       }
 
       body.is-reading #reading-tools {
-        display: flex;
+        display: none;
       }
 
       .control-group {
@@ -216,9 +216,62 @@
         font-size: var(--text-xs);
       }
 
+      #reading-mode-btn {
+        touch-action: none;
+        user-select: none;
+      }
+
+      #reading-mode-btn:not(.is-active):hover {
+        cursor: ew-resize;
+      }
+
+      #reading-mode-btn.is-active:not(.is-adjusting):hover {
+        cursor: move;
+      }
+
+      #reading-mode-btn .icon-reading-direction,
+      #reading-mode-btn .reading-value {
+        display: none;
+      }
+
+      #reading-mode-btn.is-active .icon-reading-outline,
+      #reading-mode-btn.is-direction-preview .icon-reading-outline {
+        display: none;
+      }
+
+      #reading-mode-btn.is-active .icon-reading-direction,
+      #reading-mode-btn.is-direction-preview .icon-reading-direction {
+        display: block;
+      }
+
+      #reading-mode-btn[data-reading-direction="left"] .icon-reading-direction {
+        transform: scaleX(-1);
+      }
+
+      #reading-mode-btn.is-adjusting .icon-reading-outline,
+      #reading-mode-btn.is-adjusting .icon-reading-direction {
+        display: none;
+      }
+
+      #reading-mode-btn.is-adjusting .reading-value {
+        display: inline;
+        font-size: var(--text-xs);
+        font-variant-numeric: tabular-nums;
+      }
+
       body.is-adjusting-zoom,
       body.is-adjusting-zoom * {
         cursor: ew-resize !important;
+      }
+
+      body.is-adjusting-reading-horizontal,
+      body.is-adjusting-reading-horizontal * {
+        cursor: ew-resize !important;
+      }
+
+      body.is-adjusting-reading-vertical,
+      body.is-adjusting-reading-vertical * {
+        cursor: ns-resize !important;
       }
 
       .icon-btn:disabled {
@@ -935,7 +988,7 @@
         </a>
       </div>
 
-      <div id="reading-tools" class="control-group" role="group" aria-label="Reading controls">
+      <div id="reading-tools" class="control-group" role="group" aria-label="Reading controls" aria-hidden="true" hidden>
         <button type="button" id="reading-next-btn" class="icon-btn" aria-label="Next page" title="Next page">
           <svg
             viewBox="0 0 24 24"
@@ -1045,6 +1098,7 @@
               aria-pressed="false"
             >
               <svg
+                class="icon-reading-outline"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -1056,6 +1110,23 @@
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6v13M12 6v13M21 6v13" />
               </svg>
+              <svg
+                class="icon-reading-direction"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M3 19c2.78 -1.61 6.22 -1.61 9 0" />
+                <path d="M3 6c2.78 -1.61 6.22 -1.61 9 0c2.78 -1.61 6.22 -1.61 9 0" />
+                <path d="M3 6v13M12 6v13M21 6v6.5" />
+                <path d="M18 20.83l3 -3l-3 -3M21 17.83h-5.47" />
+              </svg>
+              <span class="reading-value" aria-hidden="true"></span>
             </button>
             <button type="button" id="zoom-btn" class="icon-btn" aria-label="Zoom 100%" title="Zoom 100%">100</button>
             <button
@@ -1305,6 +1376,7 @@
       const orderMenuBtn = document.getElementById("order-menu-btn");
       const orderMenu = document.getElementById("order-menu");
       const readingModeBtn = document.getElementById("reading-mode-btn");
+      const readingModeValue = readingModeBtn.querySelector(".reading-value");
       const readingTools = document.getElementById("reading-tools");
       const readingNextBtn = document.getElementById("reading-next-btn");
       const readingPreviousBtn = document.getElementById("reading-previous-btn");
@@ -1340,6 +1412,9 @@
       const ZOOM_DRAG_SENSITIVITY = 0.01;
       const ZOOM_SNAP_RATIO = 0.035;
       const ZOOM_EPSILON = 0.0001;
+      const READING_DRAG_THRESHOLD = 6;
+      const READING_DRAG_STEP = 12;
+      const MAX_READING_PAGE_COUNT = 5;
       const PAN_MOMENTUM_FRICTION = 0.9;
       const PAN_MOMENTUM_MIN_SPEED = 0.02;
       const SWIPE_PROJECTION_TIME = 120;
@@ -1386,9 +1461,16 @@
         readingMode: false,
         readingSpread: true,
         readingOffset: false,
+        readingPageCount: 2,
+        readingFirstPageCount: 2,
+        readingDirection: "left",
         readingPage: 0,
+        readingFocusIndex: 0,
         readingOffsetOriginPage: null,
         beforeReading: null,
+        readingControl: null,
+        suppressReadingModeClick: false,
+        pointerX: null,
         pointerY: null,
         navigatorPointerId: null,
         mobileUiTimer: null,
@@ -1480,44 +1562,72 @@
         );
       }
 
+      function syncReadingSettings() {
+        state.readingSpread = state.readingPageCount > 1;
+        state.readingOffset = state.readingFirstPageCount < state.readingPageCount;
+      }
+
       function getLayoutOrientation() {
-        return state.readingMode && state.readingSpread ? "horizontal" : state.orientation;
+        return state.readingMode && state.readingPageCount > 1 ? "horizontal" : state.orientation;
+      }
+
+      function getReadingPages() {
+        const pages = [];
+        if (!state.images.length) return pages;
+        if (state.readingDirection === "right") {
+          let start = 0;
+          let count = Math.min(state.readingFirstPageCount, state.images.length);
+          while (start < state.images.length) {
+            pages.push({ start, count, focusIndex: start });
+            start += count;
+            count = Math.min(state.readingPageCount, state.images.length - start);
+          }
+          return pages;
+        }
+
+        let end = state.images.length;
+        let count = Math.min(state.readingFirstPageCount, end);
+        while (end > 0) {
+          const start = end - count;
+          pages.push({ start, count, focusIndex: end - 1 });
+          end = start;
+          count = Math.min(state.readingPageCount, end);
+        }
+        return pages;
       }
 
       function getReadingPageStarts() {
-        if (!state.images.length) return [];
-        if (!state.readingSpread) return state.images.map((_, index) => index);
-        const starts = [0];
-        for (let index = state.readingOffset ? 1 : 2; index < state.images.length; index += 2) starts.push(index);
-        return starts;
+        return getReadingPages().map((page) => page.start);
       }
 
       function normalizeReadingPage() {
-        const starts = getReadingPageStarts();
-        if (!starts.length) {
+        const pages = getReadingPages();
+        if (!pages.length) {
           state.readingPage = 0;
+          state.readingFocusIndex = 0;
           return;
         }
-        state.readingPage = starts.reduce((nearest, start) =>
-          Math.abs(start - state.readingPage) < Math.abs(nearest - state.readingPage) ? start : nearest,
+        state.readingFocusIndex = Math.max(0, Math.min(state.images.length - 1, state.readingFocusIndex));
+        const page = pages.find(
+          ({ start, count }) => state.readingFocusIndex >= start && state.readingFocusIndex < start + count,
         );
+        state.readingPage = page.start;
       }
 
       function getReadingPageIndices() {
         normalizeReadingPage();
-        if (!state.readingSpread || (state.readingOffset && state.readingPage === 0)) return [state.readingPage];
-        return [state.readingPage, state.readingPage + 1].filter((index) => index < state.images.length);
+        const page = getReadingPages().find(({ start }) => start === state.readingPage);
+        return Array.from({ length: page.count }, (_, offset) => page.start + offset);
       }
 
       function getLayoutEntries({ allImages = false } = {}) {
         if (!state.readingMode || allImages) {
           return state.images.map((image, sourceIndex) => ({ image, sourceIndex }));
         }
-        const entries = getReadingPageIndices().map((sourceIndex) => ({
+        return getReadingPageIndices().map((sourceIndex) => ({
           image: state.images[sourceIndex],
           sourceIndex,
         }));
-        return state.readingSpread ? entries.reverse() : entries;
       }
 
       function getReadingFitZoom() {
@@ -1655,7 +1765,8 @@
           return {
             maximum,
             position,
-            progress: 1 - position / maximum,
+            progress:
+              state.readingDirection === "left" ? 1 - position / maximum : position / maximum,
             widthBasis: 32 + (starts.length - 1) * NAVIGATOR_MAX_STEP_WIDTH,
             valueText: `Page ${position + 1} of ${starts.length}`,
           };
@@ -1729,8 +1840,13 @@
         navigator.style.setProperty("--navigator-width", `${width}px`);
         navigator.style.setProperty("--navigator-before-grow", String(data.progress));
         navigator.style.setProperty("--navigator-after-grow", String(1 - data.progress));
-        navigatorBeforeValue.textContent = String(state.readingMode ? data.maximum - data.position : data.position);
-        navigatorAfterValue.textContent = String(state.readingMode ? data.position : data.maximum - data.position);
+        const reverseReadingProgress = state.readingMode && state.readingDirection === "left";
+        navigatorBeforeValue.textContent = String(
+          reverseReadingProgress ? data.maximum - data.position : data.position,
+        );
+        navigatorAfterValue.textContent = String(
+          reverseReadingProgress ? data.position : data.maximum - data.position,
+        );
         navigator.setAttribute("aria-valuemax", String(data.maximum));
         navigator.setAttribute("aria-valuenow", String(data.position));
         navigator.setAttribute("aria-valuetext", data.valueText);
@@ -1753,10 +1869,14 @@
         const travel = getNavigatorTravelBounds();
         const progress = Math.max(0, Math.min(1, (clientX - travel.left) / travel.width));
         if (state.readingMode) {
-          const starts = getReadingPageStarts();
-          const position = Math.round((1 - progress) * (starts.length - 1));
-          if (starts[position] === state.readingPage) return;
-          state.readingPage = starts[position];
+          const pages = getReadingPages();
+          const position = Math.round(
+            (state.readingDirection === "left" ? 1 - progress : progress) * (pages.length - 1),
+          );
+          const page = pages[position];
+          if (page.start === state.readingPage) return;
+          state.readingPage = page.start;
+          state.readingFocusIndex = page.focusIndex;
           if (state.readingOffset) state.readingOffsetOriginPage = null;
           renderLayout({ recenter: false, animateImages: false });
           resetReadingView();
@@ -1886,11 +2006,20 @@
       }
 
       function updateReadingControls() {
+        syncReadingSettings();
         document.body.classList.toggle("is-reading", state.readingMode);
         readingModeBtn.classList.toggle("is-active", state.readingMode);
+        readingModeBtn.dataset.readingDirection = state.readingDirection;
         readingModeBtn.setAttribute("aria-pressed", String(state.readingMode));
-        readingModeBtn.setAttribute("aria-label", state.readingMode ? "Disable reading mode" : "Enable reading mode");
-        readingModeBtn.title = state.readingMode ? "Exit reading mode" : "Reading mode";
+        readingModeBtn.setAttribute(
+          "aria-label",
+          state.readingMode
+            ? `Disable ${state.readingDirection}ward reading mode`
+            : "Enable reading mode; drag left or right to choose direction",
+        );
+        readingModeBtn.title = state.readingMode
+          ? `${state.readingDirection === "left" ? "Left" : "Right"} reading · Click to exit · Drag ↔ first spread · Drag ↕ pages`
+          : "Reading mode · Drag ←/→ to choose direction";
         readingPageModeBtn.dataset.spread = String(state.readingSpread);
         readingPageModeBtn.setAttribute(
           "aria-label",
@@ -1911,7 +2040,7 @@
         const position = starts.indexOf(state.readingPage);
         readingPreviousBtn.disabled = position <= 0;
         readingNextBtn.disabled = position < 0 || position >= starts.length - 1;
-        readingTools.setAttribute("aria-hidden", String(!state.readingMode));
+        readingTools.setAttribute("aria-hidden", "true");
       }
 
       function updateControls() {
@@ -1922,9 +2051,9 @@
         mediaStrip.classList.toggle("is-visible", hasImages);
         mediaStrip.dataset.orientation = getLayoutOrientation();
         const zoomPercentage = getZoomPercentage();
-        zoomBtn.textContent = String(zoomPercentage);
-        zoomBtn.setAttribute("aria-label", `Zoom ${zoomPercentage}%`);
-        zoomBtn.title = `Zoom ${zoomPercentage}%`;
+        zoomBtn.textContent = state.fitted ? "Fit" : String(zoomPercentage);
+        zoomBtn.setAttribute("aria-label", state.fitted ? "Zoom fit to screen" : `Zoom ${zoomPercentage}%`);
+        zoomBtn.title = state.fitted ? "Fit to screen" : `Zoom ${zoomPercentage}%`;
         fitBtn.dataset.fitted = String(state.fitted);
         fitBtn.setAttribute("aria-label", state.fitted ? "Reset zoom" : "Fit to screen");
         fitBtn.title = state.fitted ? "Reset zoom" : "Fit to screen";
@@ -2070,7 +2199,7 @@
         updateControls();
       }
 
-      function setReadingMode(enabled) {
+      function setReadingMode(enabled, direction = "left") {
         if (enabled === state.readingMode || !state.images.length) return;
         stopAutoScroll();
         state.pan = null;
@@ -2086,13 +2215,15 @@
             progress: getScrollProgress(),
           };
           state.readingMode = true;
-          state.readingSpread = true;
-          state.readingOffset = false;
-          state.readingPage = 0;
+          state.readingDirection = direction;
+          syncReadingSettings();
+          const firstPage = getReadingPages()[0];
+          state.readingPage = firstPage.start;
+          state.readingFocusIndex = firstPage.focusIndex;
           state.readingOffsetOriginPage = null;
           renderLayout({ recenter: false });
           resetReadingView();
-          announce("Reading mode enabled. Right-bound full spread.");
+          announce(`Reading mode enabled. Reading ${direction}.`);
           return;
         }
 
@@ -2121,23 +2252,35 @@
 
       function moveReadingPage(delta) {
         if (!state.readingMode) return;
-        const starts = getReadingPageStarts();
-        const position = starts.indexOf(state.readingPage);
-        const nextPosition = Math.max(0, Math.min(starts.length - 1, position + delta));
+        const pages = getReadingPages();
+        const position = pages.findIndex(({ start }) => start === state.readingPage);
+        const nextPosition = Math.max(0, Math.min(pages.length - 1, position + delta));
         if (position < 0 || nextPosition === position) return;
-        state.readingPage = starts[nextPosition];
+        state.readingPage = pages[nextPosition].start;
+        state.readingFocusIndex = pages[nextPosition].focusIndex;
         if (state.readingOffset) state.readingOffsetOriginPage = null;
         renderLayout({ recenter: false, animateImages: false });
         resetReadingView();
-        const pages = getReadingPageIndices().map((index) => index + 1);
-        announce(`Page ${pages.join("–")} of ${state.images.length}.`);
+        const imageNumbers = getReadingPageIndices().map((index) => index + 1);
+        announce(`Page ${imageNumbers.join("–")} of ${state.images.length}.`);
       }
 
-      function refreshReadingLayout() {
+      function refreshReadingLayout({ preserveZoom = false } = {}) {
         if (!state.readingMode) return;
+        const wasFitted = isZoomClose(state.zoom, getReadingFitZoom());
         normalizeReadingPage();
         renderLayout({ recenter: false });
-        resetReadingView();
+        if (!preserveZoom || wasFitted) {
+          resetReadingView();
+          return;
+        }
+        const minimumZoom = getReadingFitZoom();
+        state.zoom = Math.max(state.zoom, minimumZoom);
+        state.fitted = isZoomClose(state.zoom, minimumZoom);
+        state.defaultZoom = false;
+        centerContent({ fullViewport: true });
+        applyTransform();
+        updateControls();
       }
 
       function clearImages() {
@@ -2162,9 +2305,15 @@
         state.readingMode = false;
         state.readingSpread = true;
         state.readingOffset = false;
+        state.readingPageCount = 2;
+        state.readingFirstPageCount = 2;
+        state.readingDirection = "left";
         state.readingPage = 0;
+        state.readingFocusIndex = 0;
         state.readingOffsetOriginPage = null;
         state.beforeReading = null;
+        state.readingControl = null;
+        state.suppressReadingModeClick = false;
         clearTimeout(state.mobileUiTimer);
         state.mobileUiTimer = null;
         state.mobileUiGesture = null;
@@ -2408,11 +2557,13 @@
       function reorderImages(reorder, message) {
         if (!state.layout || state.images.length < 2 || document.fullscreenElement) return;
         if (state.readingMode) {
+          const focusedImage = state.images[state.readingFocusIndex];
           reorder();
-          state.readingPage = 0;
+          state.readingFocusIndex = state.images.indexOf(focusedImage);
+          normalizeReadingPage();
           renderLayout({ recenter: false });
           resetReadingView();
-          announce(`${message}. Reading starts from page 1.`);
+          announce(`${message}.`);
           return;
         }
         const horizontal = state.orientation === "horizontal";
@@ -2491,7 +2642,11 @@
         state.readingMode = false;
         state.readingSpread = true;
         state.readingOffset = false;
+        state.readingPageCount = 2;
+        state.readingFirstPageCount = 2;
+        state.readingDirection = "left";
         state.readingPage = 0;
+        state.readingFocusIndex = 0;
         state.beforeReading = null;
         state.orientation = orientation;
         state.zoom = zoom;
@@ -3040,8 +3195,31 @@
           announce("Exit reading mode before adding images.");
           return;
         }
-        const direction = !state.images.length ? "initial" : state.orientation === "vertical" ? "bottom" : "right";
-        await addFiles(files, direction);
+        const horizontal = state.orientation === "horizontal";
+        let direction = !state.images.length ? "initial" : horizontal ? "right" : "bottom";
+        let insertIndex = null;
+        const coordinate = horizontal ? state.pointerX : state.pointerY;
+        if (state.images.length && Number.isFinite(coordinate)) {
+          let target = mediaStrip.children[mediaStrip.children.length - 1];
+          let placeAfter = true;
+          for (const image of mediaStrip.children) {
+            const rect = image.getBoundingClientRect();
+            const center = horizontal ? rect.left + rect.width / 2 : rect.top + rect.height / 2;
+            if (coordinate < center) {
+              target = image;
+              placeAfter = false;
+              break;
+            }
+          }
+          const pointerInsertIndex = Number(target.dataset.index) + (placeAfter ? 1 : 0);
+          if (pointerInsertIndex <= 0) direction = horizontal ? "left" : "top";
+          else if (pointerInsertIndex >= state.images.length) direction = horizontal ? "right" : "bottom";
+          else {
+            direction = "insert";
+            insertIndex = pointerInsertIndex;
+          }
+        }
+        await addFiles(files, direction, insertIndex);
       });
 
       zoomBtn.addEventListener("pointerdown", (event) => {
@@ -3116,24 +3294,155 @@
       }
       window.addEventListener("keydown", handleZoomShortcut, true);
 
-      readingModeBtn.addEventListener("click", () => setReadingMode(!state.readingMode));
+      function showReadingAdjustment(axis) {
+        const adjustingOffset = axis === "horizontal";
+        const value = adjustingOffset ? state.readingFirstPageCount : state.readingPageCount;
+        readingModeValue.textContent = `${adjustingOffset ? "OF" : "PG"}${value}`;
+        readingModeBtn.classList.add("is-adjusting");
+        document.body.classList.toggle("is-adjusting-reading-horizontal", adjustingOffset);
+        document.body.classList.toggle("is-adjusting-reading-vertical", !adjustingOffset);
+        readingModeBtn.setAttribute(
+          "aria-label",
+          adjustingOffset ? `First spread image count ${value}` : `Images per spread ${value}`,
+        );
+        readingModeBtn.title = adjustingOffset ? `First spread: ${value}` : `Images per spread: ${value}`;
+      }
+
+      readingModeBtn.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        readingModeBtn.classList.remove("is-direction-preview");
+        state.readingControl = {
+          pointerId: event.pointerId,
+          entering: !state.readingMode,
+          startX: event.clientX,
+          startY: event.clientY,
+          startPageCount: state.readingPageCount,
+          startFirstPageCount: state.readingFirstPageCount,
+          fullFirstPage: state.readingFirstPageCount === state.readingPageCount,
+          axis: null,
+          moved: false,
+        };
+        readingModeBtn.setPointerCapture(event.pointerId);
+      });
+
+      readingModeBtn.addEventListener("pointermove", (event) => {
+        const control = state.readingControl;
+        if (!control || control.pointerId !== event.pointerId) return;
+        const deltaX = event.clientX - control.startX;
+        const deltaY = event.clientY - control.startY;
+        if (control.entering) {
+          if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < READING_DRAG_THRESHOLD) return;
+          event.preventDefault();
+          control.moved = true;
+          control.direction = Math.abs(deltaX) >= Math.abs(deltaY) ? (deltaX < 0 ? "left" : "right") : null;
+          readingModeBtn.classList.toggle("is-direction-preview", Boolean(control.direction));
+          if (control.direction) readingModeBtn.dataset.readingDirection = control.direction;
+          document.body.classList.toggle("is-adjusting-reading-horizontal", Boolean(control.direction));
+          return;
+        }
+        if (!control.axis) {
+          if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < READING_DRAG_THRESHOLD) return;
+          control.axis = Math.abs(deltaX) >= Math.abs(deltaY) ? "horizontal" : "vertical";
+          control.moved = true;
+        }
+        event.preventDefault();
+
+        let changed = false;
+        if (control.axis === "horizontal") {
+          const step = Math.round(deltaX / READING_DRAG_STEP);
+          const nextCount = Math.max(1, Math.min(state.readingPageCount, control.startFirstPageCount + step));
+          if (nextCount !== state.readingFirstPageCount) {
+            state.readingFirstPageCount = nextCount;
+            changed = true;
+          }
+        } else {
+          const step = Math.round(-deltaY / READING_DRAG_STEP);
+          const nextCount = Math.max(1, Math.min(MAX_READING_PAGE_COUNT, control.startPageCount + step));
+          if (nextCount !== state.readingPageCount) {
+            state.readingPageCount = nextCount;
+            state.readingFirstPageCount = control.fullFirstPage
+              ? nextCount
+              : Math.min(control.startFirstPageCount, nextCount);
+            changed = true;
+          }
+        }
+        if (changed) {
+          syncReadingSettings();
+          refreshReadingLayout({ preserveZoom: true });
+        }
+        showReadingAdjustment(control.axis);
+      });
+
+      const endReadingAdjustment = (event) => {
+        const control = state.readingControl;
+        if (!control || control.pointerId !== event.pointerId) return;
+        state.readingControl = null;
+        if (readingModeBtn.hasPointerCapture(event.pointerId)) readingModeBtn.releasePointerCapture(event.pointerId);
+        readingModeBtn.classList.remove("is-adjusting");
+        readingModeBtn.classList.remove("is-direction-preview");
+        document.body.classList.remove("is-adjusting-reading-horizontal", "is-adjusting-reading-vertical");
+        if (control.entering) {
+          if (control.moved && event.type === "pointerup") {
+            state.suppressReadingModeClick = true;
+            setTimeout(() => {
+              state.suppressReadingModeClick = false;
+            }, 0);
+            if (control.direction) setReadingMode(true, control.direction);
+          }
+          updateReadingControls();
+          return;
+        }
+        if (control.moved && event.type === "pointerup") {
+          state.suppressReadingModeClick = true;
+          setTimeout(() => {
+            state.suppressReadingModeClick = false;
+          }, 0);
+          if (control.axis === "horizontal") {
+            announce(
+              `First spread set to ${state.readingFirstPageCount} image${state.readingFirstPageCount === 1 ? "" : "s"}.`,
+            );
+          } else {
+            announce(`${state.readingPageCount} image${state.readingPageCount === 1 ? "" : "s"} per spread.`);
+          }
+        }
+        updateReadingControls();
+      };
+      readingModeBtn.addEventListener("pointerup", endReadingAdjustment);
+      readingModeBtn.addEventListener("pointercancel", endReadingAdjustment);
+      readingModeBtn.addEventListener("lostpointercapture", endReadingAdjustment);
+      readingModeBtn.addEventListener("click", (event) => {
+        if (state.suppressReadingModeClick) {
+          state.suppressReadingModeClick = false;
+          event.preventDefault();
+          return;
+        }
+        if (state.readingMode) setReadingMode(false);
+        else setReadingMode(true, "left");
+      });
       readingNextBtn.addEventListener("click", () => moveReadingPage(1));
       readingPreviousBtn.addEventListener("click", () => moveReadingPage(-1));
       readingPageModeBtn.addEventListener("click", () => {
-        state.readingSpread = !state.readingSpread;
+        state.readingPageCount = state.readingPageCount === 1 ? 2 : 1;
+        state.readingFirstPageCount = state.readingPageCount;
+        syncReadingSettings();
         state.readingOffsetOriginPage = null;
         refreshReadingLayout();
       });
       readingOffsetBtn.addEventListener("click", () => {
         if (!state.readingSpread) return;
         if (state.readingOffset) {
-          state.readingOffset = false;
-          if (state.readingOffsetOriginPage !== null) state.readingPage = state.readingOffsetOriginPage;
+          state.readingFirstPageCount = state.readingPageCount;
+          if (state.readingOffsetOriginPage !== null) {
+            state.readingPage = state.readingOffsetOriginPage;
+            state.readingFocusIndex = state.readingOffsetOriginPage;
+          }
           state.readingOffsetOriginPage = null;
         } else {
-          state.readingOffsetOriginPage = state.readingPage;
-          state.readingOffset = true;
+          state.readingOffsetOriginPage = state.readingFocusIndex;
+          state.readingFirstPageCount = 1;
         }
+        syncReadingSettings();
         refreshReadingLayout();
       });
       orientationBtn.addEventListener("click", () => {
@@ -3448,7 +3757,12 @@
               ? deltaY + velocityY * SWIPE_PROJECTION_TIME
               : deltaX + velocityX * SWIPE_PROJECTION_TIME;
           if (Math.abs(mainDelta) >= 48 && Math.abs(mainDelta) > Math.abs(crossDelta) * 1.2) {
-            const forward = state.orientation === "horizontal" ? mainDelta > 0 : mainDelta < 0;
+            const forward =
+              state.orientation === "horizontal"
+                ? state.readingDirection === "left"
+                  ? mainDelta > 0
+                  : mainDelta < 0
+                : mainDelta < 0;
             moveReadingPage(forward ? 1 : -1);
           }
           return;
@@ -3458,8 +3772,15 @@
           return;
         }
         if (pan.pointerType === "touch") return;
-        if (state.orientation === "horizontal") moveReadingPage(event.clientX < window.innerWidth / 2 ? 1 : -1);
-        else moveReadingPage(event.clientY < window.innerHeight / 2 ? -1 : 1);
+        if (state.orientation === "horizontal") {
+          const forward =
+            state.readingDirection === "left"
+              ? event.clientX < window.innerWidth / 2
+              : event.clientX > window.innerWidth / 2;
+          moveReadingPage(forward ? 1 : -1);
+        } else {
+          moveReadingPage(event.clientY < window.innerHeight / 2 ? -1 : 1);
+        }
       }
 
       workspace.addEventListener("pointerup", endPan);
@@ -3785,8 +4106,10 @@
         if (state.readingMode) {
           let pageDelta = 0;
           if (state.orientation === "horizontal") {
-            if (event.key === "ArrowLeft" || key === "a") pageDelta = 1;
-            else if (event.key === "ArrowRight" || key === "d") pageDelta = -1;
+            const left = event.key === "ArrowLeft" || key === "a";
+            const right = event.key === "ArrowRight" || key === "d";
+            if (left) pageDelta = state.readingDirection === "left" ? 1 : -1;
+            else if (right) pageDelta = state.readingDirection === "right" ? 1 : -1;
           } else {
             if (event.key === "ArrowDown" || key === "s") pageDelta = 1;
             else if (event.key === "ArrowUp" || key === "w") pageDelta = -1;
@@ -3839,6 +4162,7 @@
       });
 
       window.addEventListener("pointermove", (event) => {
+        state.pointerX = event.clientX;
         state.pointerY = event.clientY;
         if (document.body.classList.contains("is-ui-auto-hidden")) {
           document.body.classList.toggle(
@@ -3859,7 +4183,7 @@
       window.addEventListener(
         "pointerdown",
         (event) => {
-          if (event.pointerType !== "touch") return;
+          if (event.pointerType !== "touch" || event.target.closest("#reading-mode-btn")) return;
           state.mobileUiGesture = {
             pointerId: event.pointerId,
             x: event.clientX,

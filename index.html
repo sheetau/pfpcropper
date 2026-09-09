@@ -1584,6 +1584,15 @@
         }
       });
 
+      window.addEventListener("paste", (event) => {
+        const file = Array.from(event.clipboardData?.items || [])
+          .find((item) => item.kind === "file" && item.type.startsWith("image/"))
+          ?.getAsFile();
+        if (!file) return;
+        event.preventDefault();
+        handleFile(file);
+      });
+
       cropperArea.addEventListener("mousedown", (e) => {
         if (!cropperArea.classList.contains("has-image")) return;
         beginDrag(e.clientX, e.clientY);
