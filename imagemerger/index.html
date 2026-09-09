@@ -1806,6 +1806,7 @@
         const desktopAutoHide =
           Boolean(state.layout) &&
           !document.fullscreenElement &&
+          !state.readingControl &&
           finePointerQuery.matches &&
           (state.zoom >= fitZoom || isZoomClose(state.zoom, fitZoom));
         const pointerInRevealZone =
@@ -1818,6 +1819,7 @@
           usesTouchInsertion() &&
           Boolean(state.layout) &&
           !document.fullscreenElement &&
+          !state.readingControl &&
           (state.readingMode || state.fitted);
         const wasMobileAutoHidden = document.body.classList.contains("is-mobile-ui-auto-hidden");
         document.body.classList.toggle("is-mobile-ui-auto-hidden", mobileAutoHide);
@@ -3403,6 +3405,7 @@
           moved: false,
         };
         readingModeBtn.setPointerCapture(event.pointerId);
+        updateUiVisibility();
       });
 
       readingModeBtn.addEventListener("pointermove", (event) => {
@@ -3458,6 +3461,7 @@
         readingModeBtn.classList.remove("is-adjusting");
         readingModeBtn.classList.remove("is-direction-preview");
         document.body.classList.remove("is-adjusting-reading-horizontal", "is-adjusting-reading-vertical");
+        updateUiVisibility();
         if (control.entering) {
           if (control.moved && event.type === "pointerup") {
             state.suppressReadingModeClick = true;
