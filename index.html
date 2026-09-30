@@ -175,6 +175,8 @@
         font-size: var(--text-base);
       }
       #links a {
+        position: relative;
+        overflow: hidden;
         padding: 0 var(--space-md);
         border: var(--border-transparent);
         background: var(--color-white-10);
@@ -183,14 +185,19 @@
         transition: var(--transition-color), var(--transition-border);
       }
       #links a:hover,
-      #links a:first-child:hover {
+      #links a:first-child:hover,
+      #links a:nth-child(2):hover {
         border: var(--border-muted);
         color: var(--color-text-soft);
       }
-      #links a:first-child {
+      #links a:first-child,
+      #links a:nth-child(2) {
         border: var(--border-soft);
         background: transparent;
         gap: var(--space-xs);
+      }
+      #links a:first-child {
+        box-shadow: 0 0 1rem color-mix(in srgb, #edecec, transparent 90%);
       }
       #links svg {
         height: var(--size-icon-xs);
@@ -674,6 +681,32 @@
         </div>
         <p id="links" class="u-flex">
           <a
+            class="u-inline-center u-radius-sm u-plain-link u-text-muted"
+            href="https://sheetau.github.io/towavue/"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="The fastest modern media viewer built in Rust for images, video, and audio."
+          >
+            <svg
+              class=""
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 27.68 27.68"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-miterlimit="10"
+              aria-hidden="true"
+            >
+              <line x1="2.17" y1="2.17" x2="9.82" y2="9.82"></line>
+              <line x1="2.17" y1="25.5" x2="10.21" y2="17.47"></line>
+              <line x1="17.47" y1="10.21" x2="25.5" y2="2.17"></line>
+              <path d="M9.82,1h-4.82c-2.21,0-4,1.79-4,4v4.82"></path>
+              <path d="M26.68,10.21v-5.21c0-2.21-1.79-4-4-4h-5.21"></path>
+              <path d="M17.47,26.68h5.21c2.21,0,4-1.79,4-4v-5.21"></path>
+              <path d="M1,17.86v4.82c0,2.21,1.79,4,4,4h4.82"></path>
+            </svg>
+            towavue</a
+          ><a
             class="u-inline-center u-radius-sm u-plain-link u-text-muted u-relative"
             href="https://sheetau.github.io/monapad/"
             target="_blank"
@@ -690,12 +723,6 @@
               ></path>
             </svg>
             Monapad</a
-          ><a
-            class="u-inline-center u-radius-sm u-plain-link u-text-muted"
-            href="https://linktr.ee/sheetau"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Sheeta</a
           ><a
             class="u-inline-center u-radius-sm u-plain-link u-text-muted"
             href="https://github.com/sheetau/pfpcropper"
