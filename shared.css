@@ -152,6 +152,48 @@
   border: var(--border-strong);
 }
 
+/* Both title icons occupy the same fixed square during the crossfade. */
+#page-title .title-copy-icons {
+  position: relative;
+  display: block;
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+  flex: 0 0 var(--size-icon-md);
+}
+
+#page-title .title-copy-icons svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 160ms ease;
+}
+
+#page-title .title-copy-feedback,
+#page-title .is-copy-feedback > svg:first-child {
+  opacity: 0;
+}
+
+#page-title .is-copy-feedback > .title-copy-feedback {
+  opacity: 1;
+}
+
+.image-copy-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #page-title .title-copy-icons svg {
+    transition: none;
+  }
+}
+
 .popup-menu {
   position: absolute;
   top: calc(100% + var(--space-2xs));

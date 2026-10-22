@@ -946,6 +946,7 @@
       </defs>
     </svg>
 
+    <script src="./image-copy.js"></script>
     <script>
       const cropperArea = document.getElementById("cropper");
       const cropperBorder = document.getElementById("cropper-border");
@@ -1785,7 +1786,7 @@
         return `${baseName}-x${cropX}-y${cropY}-s${outputResolution}${rotation}${flipX}${flipY}.${extension}`;
       }
 
-      downloadBtn.addEventListener("click", () => {
+      function createCropperExport() {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         const outputResolution = getOutputResolution();
@@ -1793,11 +1794,24 @@
         canvas.height = outputResolution;
         renderCurrentViewToCanvas(ctx, canvas.width, canvas.height);
 
-        const link = document.createElement("a");
         const isPNG = currentImage.src.startsWith("data:image/png");
         const extension = isPNG ? "png" : "jpg";
         const mimeType = isPNG ? "image/png" : "image/jpeg";
 
+        return { canvas, extension, mimeType };
+      }
+
+      setupImageCopy({
+        canCopy: () => Boolean(currentImage) && !downloadBtn.disabled,
+        createBlob: () => {
+          const { canvas, mimeType } = createCropperExport();
+          return canvasToImageBlob(canvas, mimeType);
+        },
+      });
+
+      downloadBtn.addEventListener("click", () => {
+        const { canvas, extension, mimeType } = createCropperExport();
+        const link = document.createElement("a");
         link.download = getDownloadFileName(extension);
         link.href = canvas.toDataURL(mimeType);
         link.click();
